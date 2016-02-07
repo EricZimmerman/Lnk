@@ -36,7 +36,12 @@ namespace Lnk.Test
 
                     lk.Header.Should().NotBeNull();
 
-                   // Debug.WriteLine($"{file} {lk.Header}");
+                    if ((lk.Header.DataFlags & Header.DataFlag.HasLinkInfo) == Header.DataFlag.HasLinkInfo)
+                    {
+                        lk.FullName.Should().NotBeNullOrEmpty();
+                    }
+
+                    // Debug.WriteLine($"{file} {lk.Header}");
 
 
                 }

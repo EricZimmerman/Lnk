@@ -1,35 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Lnk
 {
     public class LnkFile
     {
-        public string SourceFile { get; }
-        public Header Header { get; }
-
-        public string Name { get; }
-        public string RelativePath { get; }
-        public string WorkingDirectory { get; }
-        public string Arguments { get; }
-        public string IconLocation { get; }
-
         public enum LocationFlag
         {
-            [Description("The linked file is on a volume")]
-            VolumeIDAndLocalBasePath = 0x0001,
+            [Description("The linked file is on a volume")] VolumeIDAndLocalBasePath = 0x0001,
 
-            [Description("The linked file is on a network share")]
-            CommonNetworkRelativeLinkAndPathSuffix = 0x0002
+            [Description("The linked file is on a network share")] CommonNetworkRelativeLinkAndPathSuffix = 0x0002
         }
 
-        public LocationFlag LocationFlags { get; }
+        public string FullName;
 
         public LnkFile(byte[] rawBytes, string sourceFile)
         {
@@ -61,44 +49,69 @@ namespace Lnk
                 var locationBytes = new byte[locationItemSize];
                 Buffer.BlockCopy(rawBytes, index, locationBytes, 0, locationItemSize);
 
-                //TODO Process Location info
+                var locationInfoHeaderSize = BitConverter.ToInt32(locationBytes, 4);
 
                 LocationFlags = (LocationFlag) BitConverter.ToInt32(locationBytes, 8);
 
                 var volOffset = BitConverter.ToInt32(locationBytes, 12);
+                var vbyteSize = BitConverter.ToInt32(locationBytes, volOffset);
+                var volBytes = new byte[vbyteSize];
+                Buffer.BlockCopy(locationBytes, volOffset, volBytes, 0, vbyteSize);
+
+                if (volOffset > 0)
+                {
+                    VolumeInfo = new VolumeInfo(volBytes);
+                }
+
                 var localPathOffset = BitConverter.ToInt32(locationBytes, 16);
                 var networkShareOffset = BitConverter.ToInt32(locationBytes, 20);
 
-                if ((LocationFlags & LocationFlag.VolumeIDAndLocalBasePath) == LocationFlag.VolumeIDAndLocalBasePath)
+                if (LocationFlags == LocationFlag.VolumeIDAndLocalBasePath)
                 {
-                    var localpath = Encoding.GetEncoding(1252)
-                 .GetString(locationBytes, localPathOffset, locationBytes.Length - localPathOffset).Split('\0').First();
+                    LocalPath = Encoding.GetEncoding(1252)
+                        .GetString(locationBytes, localPathOffset, locationBytes.Length - localPathOffset)
+                        .Split('\0')
+                        .First();
                 }
-                else if ((LocationFlags & LocationFlag.CommonNetworkRelativeLinkAndPathSuffix) == LocationFlag.CommonNetworkRelativeLinkAndPathSuffix)
+                else if (LocationFlags == LocationFlag.CommonNetworkRelativeLinkAndPathSuffix)
                 {
                     var networkShareSize = BitConverter.ToInt32(locationBytes, networkShareOffset);
                     var networkBytes = new byte[networkShareSize];
-                    Buffer.BlockCopy(locationBytes,networkShareOffset,networkBytes,0,networkShareSize);
+                    Buffer.BlockCopy(locationBytes, networkShareOffset, networkBytes, 0, networkShareSize);
 
-                    var nw = new NetworkShareInfo(networkBytes);
+                    NetworkShareInfo = new NetworkShareInfo(networkBytes);
                 }
 
                 var commonPathOffset = BitConverter.ToInt32(locationBytes, 24);
 
-                var commonPath = Encoding.GetEncoding(1252)
-                    .GetString(locationBytes, commonPathOffset, locationBytes.Length - commonPathOffset).Split('\0').First();
+                CommonPath = Encoding.GetEncoding(1252)
+                    .GetString(locationBytes, commonPathOffset, locationBytes.Length - commonPathOffset)
+                    .Split('\0')
+                    .First();
 
-                if (locationBytes.Length > 28)
+                if (locationInfoHeaderSize > 28)
                 {
                     var uniLocalOffset = BitConverter.ToInt32(locationBytes, 28);
+                    throw new Exception($"Handle me. Send lnk file '{sourceFile}' to saericzimmerman@gmail.com");
                     //TODO var unicodeLocalPath = Encoding.Unicode.GetString(locationBytes, uniLocalOffset,5);
                 }
 
-                if (locationBytes.Length > 32)
+                if (locationInfoHeaderSize > 32)
                 {
                     var uniCommonOffset = BitConverter.ToInt32(locationBytes, 32);
+                    throw new Exception($"Handle me. Send lnk file '{sourceFile}' to saericzimmerman@gmail.com");
                     //TODO var unicodeCommonPath = Encoding.Unicode.GetString(locationBytes, uniCommonOffset, 5);
                 }
+
+                if (LocationFlags == LocationFlag.VolumeIDAndLocalBasePath)
+                {
+                    FullName = Path.Combine(CommonPath, LocalPath);
+                }
+                else
+                {
+                    FullName = Path.Combine(CommonPath, NetworkShareInfo.NetworkShareName);
+                }
+
 
                 //                The full filename can be determined by:
                 //                combining the local path and the common path
@@ -123,8 +136,8 @@ namespace Lnk
                 index += 2;
                 if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
                 {
-                    Name = Encoding.Unicode.GetString(rawBytes, index, nameLen * 2);
-                    index += nameLen ;
+                    Name = Encoding.Unicode.GetString(rawBytes, index, nameLen*2);
+                    index += nameLen;
                 }
                 else
                 {
@@ -139,7 +152,7 @@ namespace Lnk
                 index += 2;
                 if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
                 {
-                    RelativePath = Encoding.Unicode.GetString(rawBytes, index, relLen * 2);
+                    RelativePath = Encoding.Unicode.GetString(rawBytes, index, relLen*2);
                     index += relLen;
                 }
                 else
@@ -155,7 +168,7 @@ namespace Lnk
                 index += 2;
                 if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
                 {
-                    WorkingDirectory = Encoding.Unicode.GetString(rawBytes, index, workLen * 2);
+                    WorkingDirectory = Encoding.Unicode.GetString(rawBytes, index, workLen*2);
                     index += workLen;
                 }
                 else
@@ -171,7 +184,7 @@ namespace Lnk
                 index += 2;
                 if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
                 {
-                    Arguments = Encoding.Unicode.GetString(rawBytes, index, argLen * 2);
+                    Arguments = Encoding.Unicode.GetString(rawBytes, index, argLen*2);
                     index += argLen;
                 }
                 else
@@ -187,7 +200,7 @@ namespace Lnk
                 index += 2;
                 if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
                 {
-                    IconLocation = Encoding.Unicode.GetString(rawBytes, index, icoLen * 2);
+                    IconLocation = Encoding.Unicode.GetString(rawBytes, index, icoLen*2);
                     index += icoLen;
                 }
                 else
@@ -197,9 +210,47 @@ namespace Lnk
                 index += icoLen;
             }
 
-        
+            Debug.WriteLine($"File: {Path.GetFileName(sourceFile)} Extra blocks start at: 0x{index:X} Flags: {Header.DataFlags}");
 
+            var extraBlocks = new List<byte[]>();
+            //extra blocks
+            while (index<rawBytes.Length)
+            {
+                var extraSize = BitConverter.ToInt32(rawBytes, index);
+                if (extraSize == 0)
+                {
+                    break;
+                }
 
+                var extraBytes = new byte[extraSize];
+                Buffer.BlockCopy(rawBytes,index,extraBytes,0,extraSize);
+
+                extraBlocks.Add(extraBytes);
+
+                index += extraSize;
+            }
+
+            foreach (var extraBlock in extraBlocks)
+            {
+                
+            }
+
+            Debug.WriteLine($"\tExtra block count: {extraBlocks.Count:N0}");
         }
+
+        public string CommonPath { get; }
+        public string LocalPath { get; }
+        public VolumeInfo VolumeInfo { get; }
+        public NetworkShareInfo NetworkShareInfo { get; }
+        public string SourceFile { get; }
+        public Header Header { get; }
+
+        public string Name { get; }
+        public string RelativePath { get; }
+        public string WorkingDirectory { get; }
+        public string Arguments { get; }
+        public string IconLocation { get; }
+
+        public LocationFlag LocationFlags { get; }
     }
 }

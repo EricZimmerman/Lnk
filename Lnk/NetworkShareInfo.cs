@@ -1,27 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Lnk
 {
-   public class NetworkShareInfo
+    public class NetworkShareInfo
     {
-        public enum ShareFlag
-        {
-            [Description("If set the device name contains data")]
-            ValidDevice=0x0001,
-            [Description("If set the network provider type contains data")]
-            ValidNetType=0x0002
-        }
-
         //TODO add descriptions to these
- 
-        public enum ProviderType
-       {
 
+        public enum ProviderType
+        {
             WNNC_NET_10NET = 0x50000,
             WNNC_NET_3IN1 = 0x270000,
             WNNC_NET_9TILES = 0x90000,
@@ -86,8 +75,15 @@ namespace Lnk
             WNNC_NET_VINES = 0x40000,
             WNNC_NET_VMWARE = 0x3F0000,
             WNNC_NET_YAHOO = 0x2C0000,
-            WNNC_NET_ZENWORKS = 0x3D0000,
+            WNNC_NET_ZENWORKS = 0x3D0000
         }
+
+        public enum ShareFlag
+        {
+            [Description("If set the device name contains data")] ValidDevice = 0x0001,
+            [Description("If set the network provider type contains data")] ValidNetType = 0x0002
+        }
+
         public NetworkShareInfo(byte[] rawBytes)
         {
             Size = BitConverter.ToInt32(rawBytes, 0);
@@ -101,42 +97,31 @@ namespace Lnk
             if (NetworkShareNameOffset > 20)
             {
                 NetworkShareName = Encoding.Unicode
-              .GetString(rawBytes, NetworkShareNameOffset, (rawBytes.Length - NetworkShareNameOffset) * 2);
+                    .GetString(rawBytes, NetworkShareNameOffset, (rawBytes.Length - NetworkShareNameOffset)*2);
 
                 if (DeviceNameOffset > 0)
                 {
                     DeviceName = Encoding.Unicode
-             .GetString(rawBytes, DeviceNameOffset, (rawBytes.Length - DeviceNameOffset) * 2);
+                        .GetString(rawBytes, DeviceNameOffset, (rawBytes.Length - DeviceNameOffset)*2);
                 }
-
             }
             else
             {
                 NetworkShareName = Encoding.GetEncoding(1252)
-              .GetString(rawBytes, NetworkShareNameOffset, rawBytes.Length - NetworkShareNameOffset).Split('\0').First();
+                    .GetString(rawBytes, NetworkShareNameOffset, rawBytes.Length - NetworkShareNameOffset)
+                    .Split('\0')
+                    .First();
 
-            DeviceName = string.Empty;
-            if (DeviceNameOffset > 0)
-            {
-                DeviceName = Encoding.GetEncoding(1252)
-         .GetString(rawBytes, DeviceNameOffset, rawBytes.Length - DeviceNameOffset).Split('\0').First();
+                DeviceName = string.Empty;
+                if (DeviceNameOffset > 0)
+                {
+                    DeviceName = Encoding.GetEncoding(1252)
+                        .GetString(rawBytes, DeviceNameOffset, rawBytes.Length - DeviceNameOffset).Split('\0').First();
+                }
             }
-
-            }
-
-
-        
-        
-
-
         }
 
-       public override string ToString()
-       {
-           return $"Share flags: {ShareFlags}, NetworkOffset: {NetworkShareNameOffset}, DeviceOffset: {DeviceNameOffset}, Network Provider: {NetworkProviderType}, Share name: {NetworkShareName}, Device: {DeviceName}";
-       }
-
-       public int Size { get; }
+        public int Size { get; }
         public ShareFlag ShareFlags { get; }
 
         public int NetworkShareNameOffset { get; }
@@ -145,5 +130,11 @@ namespace Lnk
 
         public string NetworkShareName { get; }
         public string DeviceName { get; }
+
+        public override string ToString()
+        {
+            return
+                $"Share flags: {ShareFlags}, NetworkOffset: {NetworkShareNameOffset}, DeviceOffset: {DeviceNameOffset}, Network Provider: {NetworkProviderType}, Share name: {NetworkShareName}, Device: {DeviceName}";
+        }
     }
 }
