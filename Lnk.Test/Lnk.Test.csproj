@@ -1,0 +1,542 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F3B71841-D1C6-41BB-AA61-76461B36E17D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Lnk.Test</RootNamespace>
+    <AssemblyName>Lnk.Test</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FluentAssertions, Version=4.2.2.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentAssertions.4.2.2\lib\net45\FluentAssertions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FluentAssertions.Core, Version=4.2.2.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentAssertions.4.2.2\lib\net45\FluentAssertions.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.framework, Version=3.0.5813.39031, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TestMain.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="TestFiles\Win10\!!__Files from SOME COMPUTER_Files Copied.txt.lnk" />
+    <None Include="TestFiles\Win10\01 - Command Prompt.lnk" />
+    <None Include="TestFiles\Win10\01 - File Explorer.lnk" />
+    <None Include="TestFiles\Win10\01a - Windows PowerShell.lnk" />
+    <None Include="TestFiles\Win10\01D1586A9BEF1399.png.lnk" />
+    <None Include="TestFiles\Win10\02 - Command Prompt.lnk" />
+    <None Include="TestFiles\Win10\02a - Windows PowerShell.lnk" />
+    <None Include="TestFiles\Win10\03 - Computer Management.lnk" />
+    <None Include="TestFiles\Win10\03 - Documents.lnk" />
+    <None Include="TestFiles\Win10\04 - Disk Management.lnk" />
+    <None Include="TestFiles\Win10\04 - Downloads.lnk" />
+    <None Include="TestFiles\Win10\04-1 - Network Connections.lnk" />
+    <None Include="TestFiles\Win10\05 - Device Manager.lnk" />
+    <None Include="TestFiles\Win10\05 - Interface.docx.LNK" />
+    <None Include="TestFiles\Win10\05 - Music.lnk" />
+    <None Include="TestFiles\Win10\06 - Pictures.lnk" />
+    <None Include="TestFiles\Win10\06 - System.lnk" />
+    <None Include="TestFiles\Win10\07 - Event Viewer.lnk" />
+    <None Include="TestFiles\Win10\07 - Videos.lnk" />
+    <None Include="TestFiles\Win10\08 - Homegroup.lnk" />
+    <None Include="TestFiles\Win10\08 - Power Options.lnk" />
+    <None Include="TestFiles\Win10\09 - Mobility Center.lnk" />
+    <None Include="TestFiles\Win10\09 - Network.lnk" />
+    <None Include="TestFiles\Win10\1 - Desktop.lnk" />
+    <None Include="TestFiles\Win10\1 - Run.lnk" />
+    <None Include="TestFiles\Win10\1.lnk" />
+    <None Include="TestFiles\Win10\10 - Programs and Features.lnk" />
+    <None Include="TestFiles\Win10\10 - UserProfile.lnk" />
+    <None Include="TestFiles\Win10\10.lnk" />
+    <None Include="TestFiles\Win10\11.lnk" />
+    <None Include="TestFiles\Win10\2 - Search.lnk" />
+    <None Include="TestFiles\Win10\2.lnk" />
+    <None Include="TestFiles\Win10\20.lnk" />
+    <None Include="TestFiles\Win10\2016-01-28-083758-HasherResults.xlsx.lnk" />
+    <None Include="TestFiles\Win10\20160128091327_AmcachWin10Surface3e_Unassociated file entries.tsv.lnk" />
+    <None Include="TestFiles\Win10\20160128091528_AmcachWin10Surface3e_Associated file entries.tsv.lnk" />
+    <None Include="TestFiles\Win10\20160128091528_AmcachWin10Surface3e_Program entries.tsv.lnk" />
+    <None Include="TestFiles\Win10\20160128091528_AmcachWin10Surface3e_Unassociated file entries.tsv.lnk" />
+    <None Include="TestFiles\Win10\20160128091800_AmcachWin10Surface3e_Unassociated file entries.tsv.lnk" />
+    <None Include="TestFiles\Win10\20160128175507_ZOOMIT64.EXE-FA380B80.pf.json.lnk" />
+    <None Include="TestFiles\Win10\20160129083104_Jeff Ross_228089cb-ea75-4fd8-b0b6-d0e67f9174af.lnk" />
+    <None Include="TestFiles\Win10\20160129083807_BAD GUY_ba4eb5b1-5588-4bf6-9f83-b665b1cdabd7.lnk" />
+    <None Include="TestFiles\Win10\20160129083850_BAD GUY_33b236d3-7f5d-4c19-8b96-afc190c4a93e.lnk" />
+    <None Include="TestFiles\Win10\21.lnk" />
+    <None Include="TestFiles\Win10\22.lnk" />
+    <None Include="TestFiles\Win10\23.lnk" />
+    <None Include="TestFiles\Win10\24.lnk" />
+    <None Include="TestFiles\Win10\25.lnk" />
+    <None Include="TestFiles\Win10\26.lnk" />
+    <None Include="TestFiles\Win10\3 - Windows Explorer.lnk" />
+    <None Include="TestFiles\Win10\3.lnk" />
+    <None Include="TestFiles\Win10\30.lnk" />
+    <None Include="TestFiles\Win10\31.lnk" />
+    <None Include="TestFiles\Win10\4 - Control Panel.lnk" />
+    <None Include="TestFiles\Win10\4.dat.lnk" />
+    <None Include="TestFiles\Win10\4.lnk" />
+    <None Include="TestFiles\Win10\5 - Task Manager.lnk" />
+    <None Include="TestFiles\Win10\5-188.doc.LNK" />
+    <None Include="TestFiles\Win10\5.dat.lnk" />
+    <None Include="TestFiles\Win10\5.lnk" />
+    <None Include="TestFiles\Win10\6.dat.lnk" />
+    <None Include="TestFiles\Win10\6.lnk" />
+    <None Include="TestFiles\Win10\7-Zip File Manager.lnk" />
+    <None Include="TestFiles\Win10\7-Zip Help.lnk" />
+    <None Include="TestFiles\Win10\7.dat.lnk" />
+    <None Include="TestFiles\Win10\7.lnk" />
+    <None Include="TestFiles\Win10\8.dat.lnk" />
+    <None Include="TestFiles\Win10\8.lnk" />
+    <None Include="TestFiles\Win10\9.lnk" />
+    <None Include="TestFiles\Win10\a.lnk" />
+    <None Include="TestFiles\Win10\Access 2016 %281%29.lnk" />
+    <None Include="TestFiles\Win10\Access 2016.lnk" />
+    <None Include="TestFiles\Win10\Active Directory Sites and Services.lnk" />
+    <None Include="TestFiles\Win10\ADAM Install.lnk" />
+    <None Include="TestFiles\Win10\add nirsoft tool.txt.lnk" />
+    <None Include="TestFiles\Win10\ADSIEdit.lnk" />
+    <None Include="TestFiles\Win10\agency.txt.lnk" />
+    <None Include="TestFiles\Win10\AntiVirus.txt.lnk" />
+    <None Include="TestFiles\Win10\ANTS Memory Profiler 8.lnk" />
+    <None Include="TestFiles\Win10\ANTS Performance Profiler 9.lnk" />
+    <None Include="TestFiles\Win10\App %281%29.lnk" />
+    <None Include="TestFiles\Win10\App %2810%29.lnk" />
+    <None Include="TestFiles\Win10\App %2811%29.lnk" />
+    <None Include="TestFiles\Win10\App %2812%29.lnk" />
+    <None Include="TestFiles\Win10\App %2813%29.lnk" />
+    <None Include="TestFiles\Win10\App %2814%29.lnk" />
+    <None Include="TestFiles\Win10\App %2815%29.lnk" />
+    <None Include="TestFiles\Win10\App %2816%29.lnk" />
+    <None Include="TestFiles\Win10\App %2817%29.lnk" />
+    <None Include="TestFiles\Win10\App %2818%29.lnk" />
+    <None Include="TestFiles\Win10\App %282%29.lnk" />
+    <None Include="TestFiles\Win10\App %283%29.lnk" />
+    <None Include="TestFiles\Win10\App %284%29.lnk" />
+    <None Include="TestFiles\Win10\App %285%29.lnk" />
+    <None Include="TestFiles\Win10\App %286%29.lnk" />
+    <None Include="TestFiles\Win10\App %287%29.lnk" />
+    <None Include="TestFiles\Win10\App %288%29.lnk" />
+    <None Include="TestFiles\Win10\App %289%29.lnk" />
+    <None Include="TestFiles\Win10\App.lnk" />
+    <None Include="TestFiles\Win10\AppexFinance.lnk" />
+    <None Include="TestFiles\Win10\AppexNews.lnk" />
+    <None Include="TestFiles\Win10\AppexSports.lnk" />
+    <None Include="TestFiles\Win10\Application Verifier %28WOW%29.lnk" />
+    <None Include="TestFiles\Win10\Application Verifier %28X %2865%29.lnk" />
+    <None Include="TestFiles\Win10\Application Verifier Help.lnk" />
+    <None Include="TestFiles\Win10\Application.evtx.html.lnk" />
+    <None Include="TestFiles\Win10\ascii hit.png.lnk" />
+    <None Include="TestFiles\Win10\AutoPlay.lnk" />
+    <None Include="TestFiles\Win10\Beyond Compare 4 %282%29.lnk" />
+    <None Include="TestFiles\Win10\Beyond Compare 4 Help.lnk" />
+    <None Include="TestFiles\Win10\Beyond Compare 4.lnk" />
+    <None Include="TestFiles\Win10\big.tsv.lnk" />
+    <None Include="TestFiles\Win10\Blend for Visual Studio 2015.lnk" />
+    <None Include="TestFiles\Win10\Bluetooth File Transfer.LNK" />
+    <None Include="TestFiles\Win10\BMW.lnk" />
+    <None Include="TestFiles\Win10\Book2.xlsx.lnk" />
+    <None Include="TestFiles\Win10\Build Notifications.lnk" />
+    <None Include="TestFiles\Win10\c skel.dd.lnk" />
+    <None Include="TestFiles\Win10\Case Report.txt.lnk" />
+    <None Include="TestFiles\Win10\Character Map.lnk" />
+    <None Include="TestFiles\Win10\Chrome Remote Desktop.lnk" />
+    <None Include="TestFiles\Win10\CLRInsideOut.lnk" />
+    <None Include="TestFiles\Win10\Cmder.lnk" />
+    <None Include="TestFiles\Win10\Command Prompt.lnk" />
+    <None Include="TestFiles\Win10\CompanionApp.App.lnk" />
+    <None Include="TestFiles\Win10\Component Services.lnk" />
+    <None Include="TestFiles\Win10\Computer Management.lnk" />
+    <None Include="TestFiles\Win10\computer.lnk" />
+    <None Include="TestFiles\Win10\Connection Manager Administration Kit.lnk" />
+    <None Include="TestFiles\Win10\Control Panel.lnk" />
+    <None Include="TestFiles\Win10\CortanaUI.lnk" />
+    <None Include="TestFiles\Win10\csv.png.lnk" />
+    <None Include="TestFiles\Win10\DataStore.edb.lnk" />
+    <None Include="TestFiles\Win10\DataStore.lnk" />
+    <None Include="TestFiles\Win10\DBStore.lnk" />
+    <None Include="TestFiles\Win10\Debug.lnk" />
+    <None Include="TestFiles\Win10\Debuggable Package Manager.lnk" />
+    <None Include="TestFiles\Win10\Default Apps.lnk" />
+    <None Include="TestFiles\Win10\Default Programs.lnk" />
+    <None Include="TestFiles\Win10\Desktop %282%29.LNK" />
+    <None Include="TestFiles\Win10\Desktop %283%29.lnk" />
+    <None Include="TestFiles\Win10\Desktop.lnk" />
+    <None Include="TestFiles\Win10\Developer Command Prompt for VS2015.lnk" />
+    <None Include="TestFiles\Win10\Devices Flow.lnk" />
+    <None Include="TestFiles\Win10\Devices.lnk" />
+    <None Include="TestFiles\Win10\dfrgui.lnk" />
+    <None Include="TestFiles\Win10\Directory Opus %282%29.lnk" />
+    <None Include="TestFiles\Win10\Directory Opus %28Startup%29.lnk" />
+    <None Include="TestFiles\Win10\Directory Opus.lnk" />
+    <None Include="TestFiles\Win10\Disk Cleanup.lnk" />
+    <None Include="TestFiles\Win10\Documentation for Desktop Apps.lnk" />
+    <None Include="TestFiles\Win10\Documentation for Windows Store Apps.lnk" />
+    <None Include="TestFiles\Win10\Downloads.lnk" />
+    <None Include="TestFiles\Win10\DRIVESCRUBBER.EXE-8419297C.pf.lnk" />
+    <None Include="TestFiles\Win10\Dropbox %282%29.lnk" />
+    <None Include="TestFiles\Win10\Dropbox %283%29.lnk" />
+    <None Include="TestFiles\Win10\Dropbox.lnk" />
+    <None Include="TestFiles\Win10\EditPad Pro 7 %282%29.lnk" />
+    <None Include="TestFiles\Win10\EditPad Pro 7 %283%29.lnk" />
+    <None Include="TestFiles\Win10\EditPad Pro 7.lnk" />
+    <None Include="TestFiles\Win10\Encryption.lnk" />
+    <None Include="TestFiles\Win10\Encryption.txt.lnk" />
+    <None Include="TestFiles\Win10\ESE.lnk" />
+    <None Include="TestFiles\Win10\ESE.sln.lnk" />
+    <None Include="TestFiles\Win10\ESENT Workbench 2.0.lnk" />
+    <None Include="TestFiles\Win10\Event Viewer.lnk" />
+    <None Include="TestFiles\Win10\Excel 2016 %281%29.lnk" />
+    <None Include="TestFiles\Win10\Excel 2016.lnk" />
+    <None Include="TestFiles\Win10\exFAT Image.e01.lnk" />
+    <None Include="TestFiles\Win10\Expense Report.xlsx %281%29.lnk" />
+    <None Include="TestFiles\Win10\Expense Report.xlsx.LNK" />
+    <None Include="TestFiles\Win10\Export.html.lnk" />
+    <None Include="TestFiles\Win10\Export.txt.lnk" />
+    <None Include="TestFiles\Win10\Export0.html.lnk" />
+    <None Include="TestFiles\Win10\Export1.html.lnk" />
+    <None Include="TestFiles\Win10\Expression Blend SDK Documentation.lnk" />
+    <None Include="TestFiles\Win10\Fax Recipient %281%29.lnk" />
+    <None Include="TestFiles\Win10\Fax Recipient.lnk" />
+    <None Include="TestFiles\Win10\Fences.lnk" />
+    <None Include="TestFiles\Win10\File Explorer.lnk" />
+    <None Include="TestFiles\Win10\File Type Categories.txt.lnk" />
+    <None Include="TestFiles\Win10\File Type Signatures Check Only.txt %281%29.lnk" />
+    <None Include="TestFiles\Win10\File Type Signatures Check Only.txt.LNK" />
+    <None Include="TestFiles\Win10\File Type Signatures Search.txt %281%29.lnk" />
+    <None Include="TestFiles\Win10\File Type Signatures Search.txt.LNK" />
+    <None Include="TestFiles\Win10\foo.csv %281%29.lnk" />
+    <None Include="TestFiles\Win10\foo.csv.LNK" />
+    <None Include="TestFiles\Win10\foolocal.csv.lnk" />
+    <None Include="TestFiles\Win10\foolocal2.csv.lnk" />
+    <None Include="TestFiles\Win10\fooutc2.csv.lnk" />
+    <None Include="TestFiles\Win10\GeForce Experience.lnk" />
+    <None Include="TestFiles\Win10\Generate Passwords %281%29.lnk" />
+    <None Include="TestFiles\Win10\Generate Passwords.lnk" />
+    <None Include="TestFiles\Win10\GFDGFDGFDGFD.lnk" />
+    <None Include="TestFiles\Win10\Google Chrome %282%29.lnk" />
+    <None Include="TestFiles\Win10\Google Chrome %283%29.lnk" />
+    <None Include="TestFiles\Win10\Google Chrome %284%29.lnk" />
+    <None Include="TestFiles\Win10\Google Chrome.lnk" />
+    <None Include="TestFiles\Win10\Google Play Music.lnk" />
+    <None Include="TestFiles\Win10\Hello.doc %281%29.lnk" />
+    <None Include="TestFiles\Win10\Hello.doc.LNK" />
+    <None Include="TestFiles\Win10\Hello.xls %281%29.lnk" />
+    <None Include="TestFiles\Win10\Hello.xls.LNK" />
+    <None Include="TestFiles\Win10\hit list.png.lnk" />
+    <None Include="TestFiles\Win10\Hotkey.lnk" />
+    <None Include="TestFiles\Win10\http--go.microsoft.com-fwlink-LinkID=219472&amp;clcid=0x409.lnk" />
+    <None Include="TestFiles\Win10\Hyper-V Manager.lnk" />
+    <None Include="TestFiles\Win10\idmwelcome.html.lnk" />
+    <None Include="TestFiles\Win10\IIS Client Manager.lnk" />
+    <None Include="TestFiles\Win10\IIS6 Manager.lnk" />
+    <None Include="TestFiles\Win10\Immersive Control Panel.lnk" />
+    <None Include="TestFiles\Win10\index.html.lnk" />
+    <None Include="TestFiles\Win10\Indexed DB.lnk" />
+    <None Include="TestFiles\Win10\IndexedDB.edb.lnk" />
+    <None Include="TestFiles\Win10\info files.hsh.lnk" />
+    <None Include="TestFiles\Win10\Intel%28R%29 Rapid Storage Technology.lnk" />
+    <None Include="TestFiles\Win10\Internet Explorer.lnk" />
+    <None Include="TestFiles\Win10\InteropSignatureToolkitSetup.lnk" />
+    <None Include="TestFiles\Win10\iSCSI Initiator.lnk" />
+    <None Include="TestFiles\Win10\Jan 16, 2016.lnk" />
+    <None Include="TestFiles\Win10\Jan 30 2016.lnk" />
+    <None Include="TestFiles\Win10\Jan 30Expense Report.xlsx %281%29.lnk" />
+    <None Include="TestFiles\Win10\Jan 30Expense Report.xlsx.LNK" />
+    <None Include="TestFiles\Win10\JetBrains dotPeek 10.0.2.lnk" />
+    <None Include="TestFiles\Win10\JetBrains dotTrace 10.0.2.lnk" />
+    <None Include="TestFiles\Win10\Killer Diagnostics.lnk" />
+    <None Include="TestFiles\Win10\Killer Network Manager %281%29.lnk" />
+    <None Include="TestFiles\Win10\Killer Network Manager %284%29.lnk" />
+    <None Include="TestFiles\Win10\Killer Network Manager.lnk" />
+    <None Include="TestFiles\Win10\Labs.lnk" />
+    <None Include="TestFiles\Win10\latest.png.lnk" />
+    <None Include="TestFiles\Win10\M3_F80_01402960759_1503_en-us_BA_1503_f80_print_en-us.pdf.lnk" />
+    <None Include="TestFiles\Win10\Magnify.lnk" />
+    <None Include="TestFiles\Win10\manual.pdf.lnk" />
+    <None Include="TestFiles\Win10\Math Input Panel.lnk" />
+    <None Include="TestFiles\Win10\Memory Diagnostics Tool.lnk" />
+    <None Include="TestFiles\Win10\Microsoft.MicrosoftOfficeHub.lnk" />
+    <None Include="TestFiles\Win10\microsoft.onenoteim.lnk" />
+    <None Include="TestFiles\Win10\Microsoft.Sway.lnk" />
+    <None Include="TestFiles\Win10\microsoft.windows.immersivecontrolpanel.lnk" />
+    <None Include="TestFiles\Win10\microsoft.windowslive.calendar.lnk" />
+    <None Include="TestFiles\Win10\microsoft.windowslive.mail.lnk" />
+    <None Include="TestFiles\Win10\Microsoft.XboxApp.lnk" />
+    <None Include="TestFiles\Win10\Microsoft.ZuneMusic.lnk" />
+    <None Include="TestFiles\Win10\Microsoft.ZuneVideo.lnk" />
+    <None Include="TestFiles\Win10\MicrosoftEdge.lnk" />
+    <None Include="TestFiles\Win10\Microsoft® Windows® Operating System.lnk" />
+    <None Include="TestFiles\Win10\MiracastView.lnk" />
+    <None Include="TestFiles\Win10\monte_usrClass.dat.lnk" />
+    <None Include="TestFiles\Win10\Mouse %282%29.lnk" />
+    <None Include="TestFiles\Win10\ms-compress-library.sln.lnk" />
+    <None Include="TestFiles\Win10\ms-compress-master.lnk" />
+    <None Include="TestFiles\Win10\ms-settingsnetwork-wifi.lnk" />
+    <None Include="TestFiles\Win10\MSBuild Command Prompt for VS2015.lnk" />
+    <None Include="TestFiles\Win10\msglog.txt.lnk" />
+    <None Include="TestFiles\Win10\MultiPoint Log Collector.lnk" />
+    <None Include="TestFiles\Win10\Narrator.lnk" />
+    <None Include="TestFiles\Win10\New Version Check %281%29.lnk" />
+    <None Include="TestFiles\Win10\New Version Check.lnk" />
+    <None Include="TestFiles\Win10\NLog.config.lnk" />
+    <None Include="TestFiles\Win10\Notepad.lnk" />
+    <None Include="TestFiles\Win10\NTFS Image clean.e01.lnk" />
+    <None Include="TestFiles\Win10\NTFS Image.e01.lnk" />
+    <None Include="TestFiles\Win10\NTUSER.DAT.lnk" />
+    <None Include="TestFiles\Win10\NTUSER_Loveall.DAT.lnk" />
+    <None Include="TestFiles\Win10\NTUSER_Win2008.DAT.lnk" />
+    <None Include="TestFiles\Win10\ODBC Data Sources %2832-bit%29.lnk" />
+    <None Include="TestFiles\Win10\ODBC Data Sources %2864-bit%29.lnk" />
+    <None Include="TestFiles\Win10\Office 2016 Language Preferences %281%29.lnk" />
+    <None Include="TestFiles\Win10\Office 2016 Language Preferences.lnk" />
+    <None Include="TestFiles\Win10\Office 2016 Upload Center %281%29.lnk" />
+    <None Include="TestFiles\Win10\Office 2016 Upload Center.lnk" />
+    <None Include="TestFiles\Win10\On-Screen Keyboard.lnk" />
+    <None Include="TestFiles\Win10\OneDrive.lnk" />
+    <None Include="TestFiles\Win10\OneNote 2016 %281%29.lnk" />
+    <None Include="TestFiles\Win10\OneNote 2016.lnk" />
+    <None Include="TestFiles\Win10\opt.png.lnk" />
+    <None Include="TestFiles\Win10\options.png.lnk" />
+    <None Include="TestFiles\Win10\Opus 11 Help.lnk" />
+    <None Include="TestFiles\Win10\osTriage plugin help.pdf.lnk" />
+    <None Include="TestFiles\Win10\osTriage2NonLE.lnk" />
+    <None Include="TestFiles\Win10\osTriageManual.pdf.lnk" />
+    <None Include="TestFiles\Win10\out.tsv.lnk" />
+    <None Include="TestFiles\Win10\Outlook 2016 %281%29.lnk" />
+    <None Include="TestFiles\Win10\Outlook 2016.lnk" />
+    <None Include="TestFiles\Win10\outoutout.txt.lnk" />
+    <None Include="TestFiles\Win10\p.txt.lnk" />
+    <None Include="TestFiles\Win10\page.lnk" />
+    <None Include="TestFiles\Win10\Paint.lnk" />
+    <None Include="TestFiles\Win10\PECmd and Prefetch Changes and TODO.txt.lnk" />
+    <None Include="TestFiles\Win10\Performance Monitor.lnk" />
+    <None Include="TestFiles\Win10\PInvoke Signature Toolkit %281%29.lnk" />
+    <None Include="TestFiles\Win10\PInvoke Signature Toolkit.lnk" />
+    <None Include="TestFiles\Win10\plistreport.txt.lnk" />
+    <None Include="TestFiles\Win10\Plumbing the depths ShellBags.pptx %281%29.lnk" />
+    <None Include="TestFiles\Win10\Plumbing the depths ShellBags.pptx.LNK" />
+    <None Include="TestFiles\Win10\Postbox %282%29.lnk" />
+    <None Include="TestFiles\Win10\Postbox %283%29.lnk" />
+    <None Include="TestFiles\Win10\Postbox %28Safe Mode%29.lnk" />
+    <None Include="TestFiles\Win10\PostBox 4.0.8 %28en-US%29 - 2016-01-24.pcv.lnk" />
+    <None Include="TestFiles\Win10\Postbox.lnk" />
+    <None Include="TestFiles\Win10\Postman.lnk" />
+    <None Include="TestFiles\Win10\PowerPoint 2016 %281%29.lnk" />
+    <None Include="TestFiles\Win10\PowerPoint 2016.lnk" />
+    <None Include="TestFiles\Win10\prefetch.csv.lnk" />
+    <None Include="TestFiles\Win10\Prefetch.lnk" />
+    <None Include="TestFiles\Win10\Prefetch.sln.lnk" />
+    <None Include="TestFiles\Win10\prefetchLocal.csv.lnk" />
+    <None Include="TestFiles\Win10\Print Management.lnk" />
+    <None Include="TestFiles\Win10\PrintDialog.lnk" />
+    <None Include="TestFiles\Win10\Prod num 6689505.txt.lnk" />
+    <None Include="TestFiles\Win10\Project Converter 15.2.lnk" />
+    <None Include="TestFiles\Win10\Publisher 2016 %281%29.lnk" />
+    <None Include="TestFiles\Win10\Publisher 2016.lnk" />
+    <None Include="TestFiles\Win10\ReadyBoot.etl.lnk" />
+    <None Include="TestFiles\Win10\ReadyBoot.lnk" />
+    <None Include="TestFiles\Win10\Registry Explorer loaded hives 20160128080736.pdf.lnk" />
+    <None Include="TestFiles\Win10\Registry Explorer loaded hives 20160128080839.xlsx.lnk" />
+    <None Include="TestFiles\Win10\Registry Report.html.lnk" />
+    <None Include="TestFiles\Win10\Registry Report1.html.lnk" />
+    <None Include="TestFiles\Win10\RegistryExplorerManual.pdf.lnk" />
+    <None Include="TestFiles\Win10\RegistryHives.lnk" />
+    <None Include="TestFiles\Win10\Release.lnk" />
+    <None Include="TestFiles\Win10\Remote Debugger Folder.lnk" />
+    <None Include="TestFiles\Win10\Remote Desktop Connection.lnk" />
+    <None Include="TestFiles\Win10\report.css.lnk" />
+    <None Include="TestFiles\Win10\Report.html.lnk" />
+    <None Include="TestFiles\Win10\ReportFiles.lnk" />
+    <None Include="TestFiles\Win10\Resource Monitor.lnk" />
+    <None Include="TestFiles\Win10\RoboForm Editor %281%29.lnk" />
+    <None Include="TestFiles\Win10\RoboForm Editor.lnk" />
+    <None Include="TestFiles\Win10\RoboForm Start Page.lnk" />
+    <None Include="TestFiles\Win10\Run.lnk" />
+    <None Include="TestFiles\Win10\RunningProcesses.lnk" />
+    <None Include="TestFiles\Win10\Samples for Desktop Apps.lnk" />
+    <None Include="TestFiles\Win10\Samples for Windows Store Apps.lnk" />
+    <None Include="TestFiles\Win10\Samsung Magician.lnk" />
+    <None Include="TestFiles\Win10\SanDisk Extreme.e01.lnk" />
+    <None Include="TestFiles\Win10\SanDisk Extreme.txt.lnk" />
+    <None Include="TestFiles\Win10\Scan Management.lnk" />
+    <None Include="TestFiles\Win10\Search Box %281%29.lnk" />
+    <None Include="TestFiles\Win10\Search Box.lnk" />
+    <None Include="TestFiles\Win10\Search Files %281%29.lnk" />
+    <None Include="TestFiles\Win10\Search Files.lnk" />
+    <None Include="TestFiles\Win10\Search.lnk" />
+    <None Include="TestFiles\Win10\Security Configuration Management.lnk" />
+    <None Include="TestFiles\Win10\Services For Network File System.lnk" />
+    <None Include="TestFiles\Win10\services.lnk" />
+    <None Include="TestFiles\Win10\ShellBagsExplorerManual.pdf.lnk" />
+    <None Include="TestFiles\Win10\SHL-2950-WR4_usrclass.dat.lnk" />
+    <None Include="TestFiles\Win10\Shows Desktop.lnk" />
+    <None Include="TestFiles\Win10\siggen.chm.lnk" />
+    <None Include="TestFiles\Win10\Skype %282%29.lnk" />
+    <None Include="TestFiles\Win10\Skype %283%29.lnk" />
+    <None Include="TestFiles\Win10\Skype.lnk" />
+    <None Include="TestFiles\Win10\Slack Space.lnk" />
+    <None Include="TestFiles\Win10\Snagit 12 %281%29.lnk" />
+    <None Include="TestFiles\Win10\Snagit 12 Editor.lnk" />
+    <None Include="TestFiles\Win10\Snagit 12.lnk" />
+    <None Include="TestFiles\Win10\Snipping Tool.lnk" />
+    <None Include="TestFiles\Win10\SO123456.xfc.lnk" />
+    <None Include="TestFiles\Win10\spartan.edb.lnk" />
+    <None Include="TestFiles\Win10\Speech Recognition.lnk" />
+    <None Include="TestFiles\Win10\src.lnk" />
+    <None Include="TestFiles\Win10\Start10.lnk" />
+    <None Include="TestFiles\Win10\Steps Recorder.lnk" />
+    <None Include="TestFiles\Win10\Sticky Notes.lnk" />
+    <None Include="TestFiles\Win10\SumatraPDF.lnk" />
+    <None Include="TestFiles\Win10\System Configuration.lnk" />
+    <None Include="TestFiles\Win10\System Information.lnk" />
+    <None Include="TestFiles\Win10\System.lnk" />
+    <None Include="TestFiles\Win10\Task Manager.lnk" />
+    <None Include="TestFiles\Win10\Task Scheduler.lnk" />
+    <None Include="TestFiles\Win10\TaskBar Icon %281%29.lnk" />
+    <None Include="TestFiles\Win10\TaskBar Icon.lnk" />
+    <None Include="TestFiles\Win10\TeamViewer 11 %282%29.lnk" />
+    <None Include="TestFiles\Win10\TeamViewer 11.lnk" />
+    <None Include="TestFiles\Win10\TeamViewer.lnk" />
+    <None Include="TestFiles\Win10\Temp %282%29.lnk" />
+    <None Include="TestFiles\Win10\Temp.lnk" />
+    <None Include="TestFiles\Win10\Templates.LNK" />
+    <None Include="TestFiles\Win10\Text.txt.lnk" />
+    <None Include="TestFiles\Win10\Thunderbolt%28TM%29 Software.lnk" />
+    <None Include="TestFiles\Win10\Tools for Desktop Apps.lnk" />
+    <None Include="TestFiles\Win10\Tools for Windows Store Apps.lnk" />
+    <None Include="TestFiles\Win10\UltraEdit %282%29.lnk" />
+    <None Include="TestFiles\Win10\UltraEdit %283%29.lnk" />
+    <None Include="TestFiles\Win10\UltraEdit.lnk" />
+    <None Include="TestFiles\Win10\unicode hit.png.lnk" />
+    <None Include="TestFiles\Win10\Uninstall Beyond Compare 4.lnk" />
+    <None Include="TestFiles\Win10\Uninstall Samsung Magician.lnk" />
+    <None Include="TestFiles\Win10\Uninstall UltraEdit.lnk" />
+    <None Include="TestFiles\Win10\Uninstall.lnk" />
+    <None Include="TestFiles\Win10\UsrClass account rename.dat.lnk" />
+    <None Include="TestFiles\Win10\UsrClass CDburn UNC fat filesystem .dat.lnk" />
+    <None Include="TestFiles\Win10\UsrClass FTP.dat.lnk" />
+    <None Include="TestFiles\Win10\UsrClass program assoc Bitlocker.dat.lnk" />
+    <None Include="TestFiles\Win10\UsrClass unknown stuff lee history vault websites.dat.lnk" />
+    <None Include="TestFiles\Win10\UsrClass zip file network stuff.dat.lnk" />
+    <None Include="TestFiles\Win10\UsrClassDeletedBags.dat.lnk" />
+    <None Include="TestFiles\Win10\Visual Studio 2015 %282%29.lnk" />
+    <None Include="TestFiles\Win10\Visual Studio 2015.lnk" />
+    <None Include="TestFiles\Win10\VS2015 x64 ARM Cross Tools Command Prompt.lnk" />
+    <None Include="TestFiles\Win10\VS2015 x64 Native Tools Command Prompt.lnk" />
+    <None Include="TestFiles\Win10\VS2015 x64 x86 Cross Tools Command Prompt.lnk" />
+    <None Include="TestFiles\Win10\VS2015 x86 ARM Cross Tools Command Prompt.lnk" />
+    <None Include="TestFiles\Win10\VS2015 x86 Native Tools Command Prompt.lnk" />
+    <None Include="TestFiles\Win10\VS2015 x86 x64 Cross Tools Command Prompt.lnk" />
+    <None Include="TestFiles\Win10\webcachev01.dat.lnk" />
+    <None Include="TestFiles\Win10\welcome.lnk" />
+    <None Include="TestFiles\Win10\white.txt.lnk" />
+    <None Include="TestFiles\Win10\Window Switcher.lnk" />
+    <None Include="TestFiles\Win10\Windows 10 Menu.lnk" />
+    <None Include="TestFiles\Win10\Windows App Cert Kit.lnk" />
+    <None Include="TestFiles\Win10\Windows Defender.lnk" />
+    <None Include="TestFiles\Win10\Windows Fax and Scan.lnk" />
+    <None Include="TestFiles\Win10\Windows Firewall with Advanced Security.lnk" />
+    <None Include="TestFiles\Win10\Windows Firewall.lnk" />
+    <None Include="TestFiles\Win10\Windows Journal.lnk" />
+    <None Include="TestFiles\Win10\Windows Media Player.lnk" />
+    <None Include="TestFiles\Win10\Windows Performance Analyzer.lnk" />
+    <None Include="TestFiles\Win10\Windows Performance Recorder.lnk" />
+    <None Include="TestFiles\Win10\Windows PowerShell %28x %2887%29.lnk" />
+    <None Include="TestFiles\Win10\Windows PowerShell ISE %28x %2887%29.lnk" />
+    <None Include="TestFiles\Win10\Windows PowerShell ISE.lnk" />
+    <None Include="TestFiles\Win10\Windows PowerShell.lnk" />
+    <None Include="TestFiles\Win10\Windows Software Development Kit.lnk" />
+    <None Include="TestFiles\Win10\Windows10_SAGEREZ_AppCompatCache.tsv.lnk" />
+    <None Include="TestFiles\Win10\WinHex.lnk" />
+    <None Include="TestFiles\Win10\winhex.zip.lnk" />
+    <None Include="TestFiles\Win10\with.png.lnk" />
+    <None Include="TestFiles\Win10\without.png.lnk" />
+    <None Include="TestFiles\Win10\Word 2016 %281%29.lnk" />
+    <None Include="TestFiles\Win10\Word 2016.lnk" />
+    <None Include="TestFiles\Win10\wordlist.txt.lnk" />
+    <None Include="TestFiles\Win10\Wordpad.lnk" />
+    <None Include="TestFiles\Win10\WUAUCLT.EXE-830BCC14.pf.lnk" />
+    <None Include="TestFiles\Win10\X-Ways Forensics 18.7 32-bit.lnk" />
+    <None Include="TestFiles\Win10\X-Ways Forensics 18.7 64-bit.lnk" />
+    <None Include="TestFiles\Win10\X-Ways Forensics Manual.lnk" />
+    <None Include="TestFiles\Win10\x27e26f40ye031y48a6yb130yd1f20388991ax.lnk" />
+    <None Include="TestFiles\Win10\x4c7a3b7dy2188y46d4ya362y19ac5a5805e5x.lnk" />
+    <None Include="TestFiles\Win10\xpress_huff_decompress.cpp.lnk" />
+    <None Include="TestFiles\Win10\XPS Viewer.lnk" />
+    <None Include="TestFiles\Win10\xw report.lnk" />
+    <None Include="TestFiles\Win10\xwf.lnk" />
+    <None Include="TestFiles\Win10\XWFIM.lnk" />
+    <None Include="TestFiles\Win10\_Files from SOME COMPUTER.lnk" />
+    <None Include="TestFiles\WinXP\remote.directory.xp.lnk" />
+    <None Include="TestFiles\WinXP\remote.file.xp.lnk" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TestFiles\Win2012R2\" />
+    <Folder Include="TestFiles\Win2012\" />
+    <Folder Include="TestFiles\Win2k0\" />
+    <Folder Include="TestFiles\Win2k3\" />
+    <Folder Include="TestFiles\Win2k8R2\" />
+    <Folder Include="TestFiles\Win2k8\" />
+    <Folder Include="TestFiles\Win7\" />
+    <Folder Include="TestFiles\Win8.0\" />
+    <Folder Include="TestFiles\Win8.1\" />
+    <Folder Include="TestFiles\Win95\" />
+    <Folder Include="TestFiles\Win98\" />
+    <Folder Include="TestFiles\WinMe\" />
+    <Folder Include="TestFiles\WinNT4\" />
+    <Folder Include="TestFiles\WinVista\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Lnk\Lnk.csproj">
+      <Project>{a7459c49-ac20-45b3-a405-b2154b5d66c8}</Project>
+      <Name>Lnk</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
