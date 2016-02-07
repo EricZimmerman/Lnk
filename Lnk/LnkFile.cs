@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Lnk.ExtraData;
 
 namespace Lnk
 {
@@ -112,21 +113,6 @@ namespace Lnk
                     FullName = Path.Combine(CommonPath, NetworkShareInfo.NetworkShareName);
                 }
 
-
-                //                The full filename can be determined by:
-                //                combining the local path and the common path
-                //                combining the network share name(in the network share information) with the common path
-
-                //VolumeIDAndLocalBasePath
-                //
-                //The linked file is on a volume
-                //If set the volume information and the local path contain data
-                //
-                //CommonNetworkRelativeLinkAndPathSuffix
-                //
-                //The linked file is on a network share
-                //If set the network share information and common path contain data
-
                 index += locationItemSize;
             }
 
@@ -212,7 +198,7 @@ namespace Lnk
 
             Debug.WriteLine($"File: {Path.GetFileName(sourceFile)} Extra blocks start at: 0x{index:X} Flags: {Header.DataFlags}");
 
-            var extraBlocks = new List<byte[]>();
+            var extraByteBlocks = new List<byte[]>();
             //extra blocks
             while (index<rawBytes.Length)
             {
@@ -225,17 +211,31 @@ namespace Lnk
                 var extraBytes = new byte[extraSize];
                 Buffer.BlockCopy(rawBytes,index,extraBytes,0,extraSize);
 
-                extraBlocks.Add(extraBytes);
+                extraByteBlocks.Add(extraBytes);
 
                 index += extraSize;
             }
 
-            foreach (var extraBlock in extraBlocks)
+            var extraBlocks = new List<ExtraDataBase>();
+
+            foreach (var extraBlock in extraByteBlocks)
             {
-                
+                var sig = (ExtraDataTypes) BitConverter.ToInt32(extraBlock, 4);
+
+                switch (sig)
+                {
+                    case ExtraDataTypes.TrackerDataBlock:
+                        var tb = new TrackerDataBaseBlock(extraBlock);
+                        extraBlocks.Add(tb);
+                        break;
+                    default:
+                        Debug.WriteLine(sig);
+                        break;
+                }
+
             }
 
-            Debug.WriteLine($"\tExtra block count: {extraBlocks.Count:N0}");
+            //Debug.WriteLine($"\tExtra block count: {extraByteBlocks.Count:N0}");
         }
 
         public string CommonPath { get; }
