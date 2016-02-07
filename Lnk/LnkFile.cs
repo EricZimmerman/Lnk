@@ -20,7 +20,6 @@ namespace Lnk
         public string Arguments { get; }
         public string IconLocation { get; }
 
-        
         public enum LocationFlag
         {
             [Description("The linked file is on a volume")]
