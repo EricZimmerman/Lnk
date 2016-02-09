@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExtraData\ConsoleDataBlock.cs" />
     <Compile Include="ExtraData\ExtraDataBase.cs" />
     <Compile Include="ExtraData\TrackerDataBaseBlock.cs" />
     <Compile Include="Header.cs" />

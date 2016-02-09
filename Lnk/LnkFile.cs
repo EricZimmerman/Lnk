@@ -236,6 +236,8 @@ namespace Lnk
                         extraBlocks.Add(tb);
                         break;
                     case ExtraDataTypes.ConsoleDataBlock:
+                        var cdb = new ConsoleDataBlock(extraBlock);
+                        extraBlocks.Add(cdb);
                         break;
                     case ExtraDataTypes.ConsoleFEDataBlock:
                         break;

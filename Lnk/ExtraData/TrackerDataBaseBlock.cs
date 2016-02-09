@@ -6,7 +6,7 @@ namespace Lnk.ExtraData
 {
     public class TrackerDataBaseBlock : ExtraDataBase
     {
-        public ExtraDataTypes Signature;
+        public ExtraDataTypes Signature { get; }
 
         public TrackerDataBaseBlock(byte[] rawBytes)
         {

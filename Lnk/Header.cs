@@ -104,11 +104,20 @@ namespace Lnk
             [Description("Undocumented according to wine project.")] SW_NORMALNA = 0xcc
         }
 
+        private readonly Guid _goodSignature = new Guid("{00021401-0000-0000-c000-000000000046}");
+        public Guid Signature { get; }
+
         public Header(byte[] rawBytes)
         {
-            //TODO The LNK class identifier
+            var sigBytes = new byte[16];
+            Buffer.BlockCopy(rawBytes,4,sigBytes,0,16);
+            Signature = new Guid(sigBytes);
 
-
+            if (Signature != _goodSignature)
+            {
+                throw new Exception("Invalid Signature! ");
+            }
+            
             DataFlags = (DataFlag) BitConverter.ToInt32(rawBytes, 20);
             FileAttributes = (FileAttribute) BitConverter.ToInt32(rawBytes, 24);
 
@@ -124,7 +133,7 @@ namespace Lnk
 
             Reserved0 = BitConverter.ToInt16(rawBytes, 66);
             Reserved1 = BitConverter.ToInt32(rawBytes, 68);
-            Reserved1 = BitConverter.ToInt32(rawBytes, 72);
+            Reserved2 = BitConverter.ToInt32(rawBytes, 72);
         }
 
         public DataFlag DataFlags { get; }
