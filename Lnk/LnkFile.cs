@@ -42,6 +42,9 @@ namespace Lnk
                 Buffer.BlockCopy(rawBytes, index, shellItemBytes, 0, shellItemSize);
 
                 //TODO process shell items
+                
+
+                //TODO tie back extra block for SpecialFolderDataBlock and KnownFolderDataBlock
 
                 index += shellItemSize;
             }
@@ -55,12 +58,7 @@ namespace Lnk
                 var locationInfoHeaderSize = BitConverter.ToInt32(locationBytes, 4);
 
                 LocationFlags = (LocationFlag) BitConverter.ToInt32(locationBytes, 8);
-
-                if (BitConverter.ToInt32(locationBytes, 8) == 3)
-                {
-                    Debug.WriteLine(1);
-                }
-
+                
                 var volOffset = BitConverter.ToInt32(locationBytes, 12);
                 var vbyteSize = BitConverter.ToInt32(locationBytes, volOffset);
                 var volBytes = new byte[vbyteSize];
@@ -203,7 +201,7 @@ namespace Lnk
                 index += icoLen;
             }
 
-            Debug.WriteLine($"File: {Path.GetFileName(sourceFile)} Extra blocks start at: 0x{index:X} Flags: {Header.DataFlags}");
+           
 
             var extraByteBlocks = new List<byte[]>();
             //extra blocks
@@ -260,12 +258,24 @@ namespace Lnk
                         extraBlocks.Add(kf);
                         break;
                     case ExtraDataTypes.PropertyStoreDataBlock:
+                        var ps = new PropertyStoreDataBlock(extraBlock);
+
+                        Debug.WriteLine($"File: {Path.GetFileName(sourceFile)} Extra blocks start at: 0x{index:X} Flags: {Header.DataFlags}");
+                        Debug.WriteLine(ps);
+
+                        extraBlocks.Add(ps);
                         break;
                     case ExtraDataTypes.ShimDataBlock:
+                        var sd = new KnownFolderDataBlock(extraBlock);
+                        extraBlocks.Add(sd);
                         break;
                     case ExtraDataTypes.SpecialFolderDataBlock:
+                        var sf = new SpecialFolderDataBlock(extraBlock); 
+                        extraBlocks.Add(sf);
                         break;
                     case ExtraDataTypes.VistaAndAboveIDListDataBlock:
+                        var vid = new VistaAndAboveIDListDataBlock(extraBlock);
+                        extraBlocks.Add(vid);
                         break;
                     default:
                         throw new Exception($"Unknown extra data block signature: 0x{sig:X}. Please send lnk file to saericzimmerman@gmail.com so support can be added");

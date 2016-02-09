@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ExtensionBlocks">
+      <HintPath>..\..\ExtensionBlocks\ExtensionBlocks\bin\Release\ExtensionBlocks.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,7 +51,11 @@
     <Compile Include="ExtraData\ExtraDataBase.cs" />
     <Compile Include="ExtraData\IconEnvironmentDataBlock.cs" />
     <Compile Include="ExtraData\KnownFolderDataBlock.cs" />
+    <Compile Include="ExtraData\PropertyStoreDataBlock.cs" />
+    <Compile Include="ExtraData\ShimDataBlock.cs" />
+    <Compile Include="ExtraData\SpecialFolderDataBlock.cs" />
     <Compile Include="ExtraData\TrackerDataBaseBlock.cs" />
+    <Compile Include="ExtraData\VistaAndAboveIDListDataBlock.cs" />
     <Compile Include="Header.cs" />
     <Compile Include="Lnk.cs" />
     <Compile Include="LnkFile.cs" />
