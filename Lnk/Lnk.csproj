@@ -33,7 +33,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -45,6 +44,7 @@
     <Compile Include="ExtraData\ConsoleDataBlock.cs" />
     <Compile Include="ExtraData\ConsoleFEDataBlock.cs" />
     <Compile Include="ExtraData\DarwinDataBlock.cs" />
+    <Compile Include="ExtraData\EnvironmentVariableDataBlock.cs" />
     <Compile Include="ExtraData\ExtraDataBase.cs" />
     <Compile Include="ExtraData\TrackerDataBaseBlock.cs" />
     <Compile Include="Header.cs" />

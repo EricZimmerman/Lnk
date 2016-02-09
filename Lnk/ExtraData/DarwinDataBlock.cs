@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
+
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,8 +28,6 @@ namespace Lnk.ExtraData
       {
           return $"Size: {Size}, AppIdAscii: {ApplicationIdentifierAscii}, AppIdUnicode: {ApplicationIdentifierUnicode}";
       }
-
-
 
     }
 }

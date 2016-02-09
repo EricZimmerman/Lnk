@@ -248,6 +248,8 @@ namespace Lnk
                         extraBlocks.Add(db);
                         break;
                     case ExtraDataTypes.EnvironmentVariableDataBlock:
+                        var eb = new EnvironmentVariableDataBlock(extraBlock);
+                        extraBlocks.Add(eb);
                         break;
                     case ExtraDataTypes.IconEnvironmentDataBlock:
                         break;
