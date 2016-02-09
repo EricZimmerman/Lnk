@@ -16,10 +16,12 @@ namespace Lnk.Test
         public static string BasePath = @"..\..\TestFiles";
         public static string Win10Path = Path.Combine(BasePath,"Win10");
         public static string WinXpPath = Path.Combine(BasePath,"WinXP");
+        public static string MiscPath = Path.Combine(BasePath,"Misc");
 
         private readonly List<string> _allPaths = new List<string>
         {
-            WinXpPath,
+            MiscPath,
+            //WinXpPath,
             Win10Path
         };
 
@@ -28,7 +30,7 @@ namespace Lnk.Test
         {
             foreach (var allPath in _allPaths)
             {
-                foreach (var file in Directory.GetFiles(allPath, "*.lnk"))
+                foreach (var file in Directory.GetFiles(allPath, "*.test"))
                 {
                     var lk = Lnk.LoadFile(file);
 
@@ -38,7 +40,7 @@ namespace Lnk.Test
 
                     if ((lk.Header.DataFlags & Header.DataFlag.HasLinkInfo) == Header.DataFlag.HasLinkInfo)
                     {
-                        lk.FullName.Should().NotBeNullOrEmpty();
+                        
                     }
 
                     // Debug.WriteLine($"{file} {lk.Header}");

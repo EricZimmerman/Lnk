@@ -11,6 +11,7 @@ namespace Lnk
 {
     public class LnkFile
     {
+        [Flags]
         public enum LocationFlag
         {
             [Description("The linked file is on a volume")] VolumeIDAndLocalBasePath = 0x0001,
@@ -18,7 +19,8 @@ namespace Lnk
             [Description("The linked file is on a network share")] CommonNetworkRelativeLinkAndPathSuffix = 0x0002
         }
 
-        public string FullName;
+        //TODO Include this at all?
+        //public string FullName;
 
         public LnkFile(byte[] rawBytes, string sourceFile)
         {
@@ -54,6 +56,11 @@ namespace Lnk
 
                 LocationFlags = (LocationFlag) BitConverter.ToInt32(locationBytes, 8);
 
+                if (BitConverter.ToInt32(locationBytes, 8) == 3)
+                {
+                    Debug.WriteLine(1);
+                }
+
                 var volOffset = BitConverter.ToInt32(locationBytes, 12);
                 var vbyteSize = BitConverter.ToInt32(locationBytes, volOffset);
                 var volBytes = new byte[vbyteSize];
@@ -67,14 +74,14 @@ namespace Lnk
                 var localPathOffset = BitConverter.ToInt32(locationBytes, 16);
                 var networkShareOffset = BitConverter.ToInt32(locationBytes, 20);
 
-                if (LocationFlags == LocationFlag.VolumeIDAndLocalBasePath)
+                if ((LocationFlags & LocationFlag.VolumeIDAndLocalBasePath) == LocationFlag.VolumeIDAndLocalBasePath)
                 {
                     LocalPath = Encoding.GetEncoding(1252)
                         .GetString(locationBytes, localPathOffset, locationBytes.Length - localPathOffset)
                         .Split('\0')
                         .First();
                 }
-                else if (LocationFlags == LocationFlag.CommonNetworkRelativeLinkAndPathSuffix)
+                if ((LocationFlags & LocationFlag.CommonNetworkRelativeLinkAndPathSuffix) == LocationFlag.CommonNetworkRelativeLinkAndPathSuffix)
                 {
                     var networkShareSize = BitConverter.ToInt32(locationBytes, networkShareOffset);
                     var networkBytes = new byte[networkShareSize];
@@ -93,25 +100,25 @@ namespace Lnk
                 if (locationInfoHeaderSize > 28)
                 {
                     var uniLocalOffset = BitConverter.ToInt32(locationBytes, 28);
-                    throw new Exception($"Handle me. Send lnk file '{sourceFile}' to saericzimmerman@gmail.com");
+                    throw new Exception($"Unsupported data found. Email lnk file '{sourceFile}' to saericzimmerman@gmail.com");
                     //TODO var unicodeLocalPath = Encoding.Unicode.GetString(locationBytes, uniLocalOffset,5);
                 }
 
                 if (locationInfoHeaderSize > 32)
                 {
                     var uniCommonOffset = BitConverter.ToInt32(locationBytes, 32);
-                    throw new Exception($"Handle me. Send lnk file '{sourceFile}' to saericzimmerman@gmail.com");
+                    throw new Exception($"Unsupported data found. Email lnk file '{sourceFile}' to saericzimmerman@gmail.com");
                     //TODO var unicodeCommonPath = Encoding.Unicode.GetString(locationBytes, uniCommonOffset, 5);
                 }
 
-                if (LocationFlags == LocationFlag.VolumeIDAndLocalBasePath)
-                {
-                    FullName = Path.Combine(CommonPath, LocalPath);
-                }
-                else
-                {
-                    FullName = Path.Combine(CommonPath, NetworkShareInfo.NetworkShareName);
-                }
+                //                if (LocationFlags == LocationFlag.VolumeIDAndLocalBasePath)
+//                {
+//                    FullName = Path.Combine(CommonPath, LocalPath);
+//                }
+//                else
+//                {
+//                    FullName = Path.Combine(CommonPath, NetworkShareInfo.NetworkShareName);
+//                }
 
                 index += locationItemSize;
             }
@@ -228,14 +235,33 @@ namespace Lnk
                         var tb = new TrackerDataBaseBlock(extraBlock);
                         extraBlocks.Add(tb);
                         break;
-                    default:
-                        Debug.WriteLine(sig);
+                    case ExtraDataTypes.ConsoleDataBlock:
                         break;
+                    case ExtraDataTypes.ConsoleFEDataBlock:
+                        break;
+                    case ExtraDataTypes.DarwinDataBlock:
+                        break;
+                    case ExtraDataTypes.EnvironmentVariableDataBlock:
+                        break;
+                    case ExtraDataTypes.IconEnvironmentDataBlock:
+                        break;
+                    case ExtraDataTypes.KnownFolderDataBlock:
+                        break;
+                    case ExtraDataTypes.PropertyStoreDataBlock:
+                        break;
+                    case ExtraDataTypes.ShimDataBlock:
+                        break;
+                    case ExtraDataTypes.SpecialFolderDataBlock:
+                        break;
+                    case ExtraDataTypes.VistaAndAboveIDListDataBlock:
+                        break;
+                    default:
+                        throw new Exception($"Unknown extra data block signature: 0x{sig:X}. Please send lnk file to saericzimmerman@gmail.com so support can be added");
+                     
                 }
 
             }
 
-            //Debug.WriteLine($"\tExtra block count: {extraByteBlocks.Count:N0}");
         }
 
         public string CommonPath { get; }

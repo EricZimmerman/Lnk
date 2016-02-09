@@ -8,7 +8,6 @@ namespace Lnk.ExtraData
 {
     public enum ExtraDataTypes:uint
     {
-        UnknownDataBlock = 0,
         ConsoleDataBlock = 0xA0000002,
         ConsoleFEDataBlock = 0xA0000004,
         DarwinDataBlock = 0xA0000006,
