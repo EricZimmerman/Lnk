@@ -240,8 +240,12 @@ namespace Lnk
                         extraBlocks.Add(cdb);
                         break;
                     case ExtraDataTypes.ConsoleFEDataBlock:
+                        var cfeb = new ConsoleFEDataBlock(extraBlock);
+                        extraBlocks.Add(cfeb);
                         break;
                     case ExtraDataTypes.DarwinDataBlock:
+                        var db = new DarwinDataBlock(extraBlock);
+                        extraBlocks.Add(db);
                         break;
                     case ExtraDataTypes.EnvironmentVariableDataBlock:
                         break;
@@ -259,11 +263,8 @@ namespace Lnk
                         break;
                     default:
                         throw new Exception($"Unknown extra data block signature: 0x{sig:X}. Please send lnk file to saericzimmerman@gmail.com so support can be added");
-                     
                 }
-
             }
-
         }
 
         public string CommonPath { get; }

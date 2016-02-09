@@ -23,6 +23,7 @@ namespace Lnk.ExtraData
 
    public abstract class ExtraDataBase
    {
-       private ExtraDataTypes Signature;
+        protected ExtraDataTypes Signature { get; set; }
+        protected uint Size { get; set; }
    }
 }

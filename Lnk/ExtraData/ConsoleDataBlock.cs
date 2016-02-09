@@ -46,9 +46,7 @@ namespace Lnk.ExtraData
                    $"IsQuickEdit: {IsQuickEdit}, IsInsertMode: {IsInsertMode}, IsAutoPositioned: {IsAutoPositioned}, HistoryBufferSize: {HistoryBufferSize}, HistoryBufferCount: {HistoryBufferCount}, HistoryDupesAllowed: {HistoryDuplicatesAllowed}";
         }
 
-        public ExtraDataTypes Signature { get; }
-
-        public uint Size { get; }
+ 
 
         public FillAttribute FillAttributes { get; }
         public FillAttribute PopupFillAttributes { get; }

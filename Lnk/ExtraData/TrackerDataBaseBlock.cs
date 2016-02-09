@@ -6,10 +6,11 @@ namespace Lnk.ExtraData
 {
     public class TrackerDataBaseBlock : ExtraDataBase
     {
-        public ExtraDataTypes Signature { get; }
 
         public TrackerDataBaseBlock(byte[] rawBytes)
         {
+            Size = BitConverter.ToUInt32(rawBytes, 0);
+
             Signature = ExtraDataTypes.TrackerDataBlock;
             Version = BitConverter.ToInt32(rawBytes, 8);
             MachineId = Encoding.GetEncoding(1252).GetString(rawBytes, 16, 16).Split('\0').First();
