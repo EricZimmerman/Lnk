@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Lnk.ExtraData;
+using Lnk.ShellItems;
 
 namespace Lnk
 {
@@ -31,7 +32,7 @@ namespace Lnk
             Header = new Header(headerBytes);
 
             var index = 76;
-
+            
             if ((Header.DataFlags & Header.DataFlag.HasTargetIDList) == Header.DataFlag.HasTargetIDList)
             {
                 //process shell items
@@ -41,8 +42,100 @@ namespace Lnk
                 var shellItemBytes = new byte[shellItemSize];
                 Buffer.BlockCopy(rawBytes, index, shellItemBytes, 0, shellItemSize);
 
-                //TODO process shell items
+                if (sourceFile.Contains("Debuggable Package Manager.lnk.test"))
+                {
+                    Debug.WriteLine(1);
+                }
                 
+                var shellItemsRaw = new List<byte[]>();
+                var shellItemIndex = 0;
+
+                while (shellItemIndex<shellItemBytes.Length)
+                {
+                    var shellSize = BitConverter.ToUInt16(shellItemBytes, shellItemIndex);
+
+                    if (shellSize == 0)
+                    {
+                        break;
+                    }
+                    var itemBytes = new byte[shellSize];
+                    Buffer.BlockCopy(shellItemBytes, shellItemIndex, itemBytes,0,(int)shellSize);
+
+                    shellItemsRaw.Add(itemBytes);
+                    shellItemIndex += (int) shellSize;
+                }
+
+                var Items = new List<ShellBag>();
+
+                foreach (var bytese in shellItemsRaw)
+                {
+                    //TODO process shell items    
+                    switch (bytese[2])
+                    {
+                        case 0x1f:
+                            var f = new ShellBag0x1f(-1, -1, bytese, "");
+                            Items.Add(f);
+                            break;
+
+                        case 0x2f:
+                            var ff = new ShellBag0X2F(-1, -1, bytese, "");
+                            Items.Add(ff);
+                            break;
+                        case 0x2e:
+                            var ee = new ShellBag0x2e(-1, -1, bytese, "");
+                            Items.Add(ee);
+                            break;
+                        case 0xb1:
+                        case 0x31:
+                        case 0x35:
+                            var d = new ShellBag0X31(-1, -1, bytese, "");
+                            Items.Add(d);
+                            break;
+                        case 0x32:
+                            var d2 = new ShellBag0X32(-1, -1, bytese, "");
+                            Items.Add(d2);
+                            break;
+                        case 0x00:
+                            var v0 = new ShellBag0x00(-1, -1, bytese, "");
+                            Items.Add(v0);
+                            break;
+                        case 0x01:
+                            var one = new ShellBag0X01(-1, -1, bytese, "");
+                            Items.Add(one);
+                            break;
+                        case 0x71:
+                            var sevenone = new ShellBag0x71(-1, -1, bytese, "");
+                            Items.Add(sevenone);
+                            break;
+                        case 0x61:
+                            var sixone = new ShellBag0X61(-1, -1, bytese, "");
+                            Items.Add(sixone);
+                            break;
+
+                        case 0xC3:
+                            var c3 = new ShellBag0Xc3(-1, -1, bytese, "");
+                            Items.Add(c3);
+                            break;
+
+                        case 0x74:
+                        case 0x77:
+                            var sev = new ShellBag0x74(-1, -1, bytese, "");
+                            Items.Add(sev);
+                            break;
+
+                        case 0x41:
+                        case 0x42:
+                        case 0x43:
+                        case 0x46:
+                        case 0x47:
+                            var forty = new ShellBag0x40(-1, -1, bytese, "");
+                            Items.Add(forty);
+                            break;
+                        default:
+                            throw new Exception($"Unknown item ID: 0x{bytese[2]:X}");
+                    }
+                    
+                }
 
                 //TODO tie back extra block for SpecialFolderDataBlock and KnownFolderDataBlock
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Lnk.ExtraData
 {
@@ -28,6 +29,11 @@ namespace Lnk.ExtraData
             FileDroid = new Guid(guidRaw1);
             VolumeDroidBirth = new Guid(guidRaw2);
             FileDroidBirth = new Guid(guidRaw3);
+
+            var tempMac = FileDroid.ToString().Split('-').Last();
+
+            MacAddress= Regex.Replace(tempMac, ".{2}", "$0:");
+            MacAddress = MacAddress.Substring(0, MacAddress.Length - 1);
         }
 
         public int Version { get; }
@@ -37,10 +43,12 @@ namespace Lnk.ExtraData
         public Guid VolumeDroidBirth { get; }
         public Guid FileDroidBirth { get; }
 
+        public string MacAddress { get; }
+
         public override string ToString()
         {
             return
-                $"Sig: {Signature}, Ver: {Version}, MachineId: {MachineId}, Vol Droid: {VolumeDroid}, File droid: {FileDroid}, Vol Droid Birth: {VolumeDroidBirth}, File Droid birth: {FileDroidBirth}";
+                $"Sig: {Signature}, Ver: {Version}, MachineId: {MachineId}, Vol Droid: {VolumeDroid}, File droid: {FileDroid}, Vol Droid Birth: {VolumeDroidBirth}, File Droid birth: {FileDroidBirth}, Mac Address: {MacAddress}";
         }
     }
 }
