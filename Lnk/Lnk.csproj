@@ -46,6 +46,8 @@
     <Compile Include="ExtraData\DarwinDataBlock.cs" />
     <Compile Include="ExtraData\EnvironmentVariableDataBlock.cs" />
     <Compile Include="ExtraData\ExtraDataBase.cs" />
+    <Compile Include="ExtraData\IconEnvironmentDataBlock.cs" />
+    <Compile Include="ExtraData\KnownFolderDataBlock.cs" />
     <Compile Include="ExtraData\TrackerDataBaseBlock.cs" />
     <Compile Include="Header.cs" />
     <Compile Include="Lnk.cs" />
