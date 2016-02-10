@@ -57,6 +57,7 @@
     <Compile Include="ExtraData\TrackerDataBaseBlock.cs" />
     <Compile Include="ExtraData\VistaAndAboveIDListDataBlock.cs" />
     <Compile Include="Header.cs" />
+    <Compile Include="Helpers.cs" />
     <Compile Include="Lnk.cs" />
     <Compile Include="LnkFile.cs" />
     <Compile Include="NetworkShareInfo.cs" />

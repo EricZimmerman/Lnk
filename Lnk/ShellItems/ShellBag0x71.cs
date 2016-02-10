@@ -10,8 +10,6 @@ namespace Lnk.ShellItems
 {
     internal class ShellBag0x71 : ShellBag
     {
-        public PropertyStore PropertyStore { get; private set; }
-
         public ShellBag0x71(int slot, int mruPosition, byte[] rawBytes, string bagPath)
         {
             Slot = slot;
@@ -34,13 +32,13 @@ namespace Lnk.ShellItems
 
             BagPath = bagPath;
 
-            int index = 2;
+            var index = 2;
 
             index += 2; // move past index and a single unknown value
 
             index += 10; //10 zeros
 
-             uint dataSig = BitConverter.ToUInt32(rawBytes, 6);
+            var dataSig = BitConverter.ToUInt32(rawBytes, 6);
 
             if (dataSig == 0xbeebee00)
             {
@@ -69,19 +67,17 @@ namespace Lnk.ShellItems
 
             //     SiAuto.Main.LogArray("rawguid1", rawguid1);
 
-            string rawguid = Utils.ExtractGuidFromShellItem(rawguid1);
+            var rawguid = Utils.ExtractGuidFromShellItem(rawguid1);
 
             //  SiAuto.Main.LogMessage("preguid71 after ExtractGUIDFromShellItem: {0}", rawguid);
 
-            string foldername = Utils.GetFolderNameFromGuid(rawguid);
+            var foldername = Utils.GetFolderNameFromGuid(rawguid);
 
             //     SiAuto.Main.LogMessage("foldername after GetFolderNameFromGUID: {0}", foldername);
 
             if (foldername.Contains(rawguid))
             {
-              //  SiAuto.Main.LogWarning("GUID did not map to name! {0}", rawguid);
-
-            
+                //  SiAuto.Main.LogWarning("GUID did not map to name! {0}", rawguid);
             }
 
             Value = foldername;
@@ -97,22 +93,23 @@ namespace Lnk.ShellItems
                 var block1 = Utils.GetExtensionBlockFromBytes(signature1, rawBytes.Skip(index).ToArray());
 
                 ExtensionBlocks.Add(block1);
-
             }
         }
+
+        public PropertyStore PropertyStore { get; private set; }
 
         private void ProcessPropertyViewDefault(byte[] rawBytes)
         {
             FriendlyName = "Variable: Users property view";
-            int index = 10;
+            var index = 10;
 
-            short shellPropertySheetListSize = BitConverter.ToInt16(rawBytes, index);
+            var shellPropertySheetListSize = BitConverter.ToInt16(rawBytes, index);
 
             //       SiAuto.Main.LogMessage("shellPropertySheetListSize: {0}", shellPropertySheetListSize);
 
             index += 2;
 
-            short identifiersize = BitConverter.ToInt16(rawBytes, index);
+            var identifiersize = BitConverter.ToInt16(rawBytes, index);
 
             //    SiAuto.Main.LogMessage("identifiersize: {0}", identifiersize);
 
@@ -153,7 +150,7 @@ namespace Lnk.ShellItems
 
                         foreach (var extOffset in extOffsets)
                         {
-                            var binaryOffset = extOffset / 3 - 4;
+                            var binaryOffset = extOffset/3 - 4;
                             var exSize = BitConverter.ToInt16(propBytes, binaryOffset);
 
                             var exBytes = propBytes.Skip(binaryOffset).Take(exSize).ToArray();
@@ -181,7 +178,8 @@ namespace Lnk.ShellItems
                 //   Debug.Write("Oh no! No property sheets!");
                 // SiAuto.Main.LogWarning("Oh no! No property sheets!");
 
-                if (rawBytes[0x28] == 0x2f || (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
+                if (rawBytes[0x28] == 0x2f ||
+                    (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
                 {
                     //we have a good date
 
@@ -193,18 +191,13 @@ namespace Lnk.ShellItems
 
                     return;
                 }
-                else
-                {
-                    Debug.Write("Oh no! No property sheets!");
-                   
-                }
+                Debug.Write("Oh no! No property sheets!");
             }
 
             index += shellPropertySheetListSize;
 
             index += 2; //move past end of property sheet terminator
 
-          
 
             var rawguid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
             //var rawguid = ShellBagUtils.ExtractGuidFromShellItem(bin.ReadBytes(16));
@@ -217,7 +210,7 @@ namespace Lnk.ShellItems
 
             Value = name;
 
-            short extBlockSize = BitConverter.ToInt16(rawBytes, index);
+            var extBlockSize = BitConverter.ToInt16(rawBytes, index);
 
             if (extBlockSize > 0)
             {
@@ -248,17 +241,17 @@ namespace Lnk.ShellItems
                 throw new Exception($"Expected terminator of 0, but got {terminator}");
             }
 
-            string valuestring = (from propertySheet in PropertyStore.Sheets
-                                  from propertyName in propertySheet.PropertyNames
-                                  where propertyName.Key == "10"
-                                  select propertyName.Value).FirstOrDefault();
+            var valuestring = (from propertySheet in PropertyStore.Sheets
+                from propertyName in propertySheet.PropertyNames
+                where propertyName.Key == "10"
+                select propertyName.Value).FirstOrDefault();
 
             if (valuestring == null)
             {
-                List<string> namesList =
+                var namesList =
                     (from propertySheet in PropertyStore.Sheets
-                     from propertyName in propertySheet.PropertyNames
-                     select propertyName.Value)
+                        from propertyName in propertySheet.PropertyNames
+                        select propertyName.Value)
                         .ToList();
 
                 valuestring = string.Join("::", namesList.ToArray());

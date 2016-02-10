@@ -25,19 +25,20 @@ namespace Lnk.ShellItems
 
             BagPath = bagPath;
 
-            int index = 2;
+            var index = 2;
 
             index += 2; // move past type  and an unknown
 
-            ushort size = BitConverter.ToUInt16(rawBytes, index);
+            var size = BitConverter.ToUInt16(rawBytes, index);
 
             index += 2;
 
-            string sig74 = Encoding.ASCII.GetString(rawBytes, index, 4);
+            var sig74 = Encoding.GetEncoding(1252).GetString(rawBytes, index, 4);
 
             if (sig74 == "CF\0\0")
             {
-                if (rawBytes[0x28] == 0x2f || (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
+                if (rawBytes[0x28] == 0x2f ||
+                    (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
                 {
                     //we have a good date
 
@@ -58,19 +59,19 @@ namespace Lnk.ShellItems
 
             index += 4;
 
-            ushort subShellSize = BitConverter.ToUInt16(rawBytes, index);
+            var subShellSize = BitConverter.ToUInt16(rawBytes, index);
             index += 2;
 
-            byte subClasstype = rawBytes[index];
+            var subClasstype = rawBytes[index];
             index += 1;
 
             index += 1; // skip unknown
 
-            uint filesize = BitConverter.ToUInt32(rawBytes, index);
+            var filesize = BitConverter.ToUInt32(rawBytes, index);
 
             index += 4;
 
-            FileSize = (int)filesize;
+            FileSize = (int) filesize;
 
             var tempBytes = new byte[4];
             Array.Copy(rawBytes, index, tempBytes, 0, 4);
@@ -81,7 +82,7 @@ namespace Lnk.ShellItems
 
             index += 2; //skip file attribute flag
 
-            int len = 0;
+            var len = 0;
 
             //       SiAuto.Main.LogMessage("Walking out 0s to find end of name");
             while (rawBytes[index + len] != 0x0)
@@ -94,7 +95,7 @@ namespace Lnk.ShellItems
 
             index += len;
 
-            string primaryName = Encoding.ASCII.GetString(tempBytes);
+            var primaryName = Encoding.GetEncoding(1252).GetString(tempBytes);
 
             //   SiAuto.Main.LogMessage("shortName: {0}", primaryName);
 
@@ -110,7 +111,7 @@ namespace Lnk.ShellItems
 
             //     SiAuto.Main.LogArray("delegateGuid", delegateGuidRaw);
 
-            string delegateGuid = Utils.ExtractGuidFromShellItem((delegateGuidRaw));
+            var delegateGuid = Utils.ExtractGuidFromShellItem(delegateGuidRaw);
 
             //      SiAuto.Main.LogMessage("delegateGuid after ExtractGUIDFromShellItem: {0}", delegateGuid);
 
@@ -127,9 +128,9 @@ namespace Lnk.ShellItems
             var itemIdentifierGuidRaw = new byte[16];
             Array.Copy(rawBytes, index, itemIdentifierGuidRaw, 0, 16);
 
-            string itemIdentifierGuid = Utils.ExtractGuidFromShellItem((itemIdentifierGuidRaw));
+            var itemIdentifierGuid = Utils.ExtractGuidFromShellItem(itemIdentifierGuidRaw);
 
-            string itemName = Utils.GetFolderNameFromGuid(itemIdentifierGuid);
+            var itemName = Utils.GetFolderNameFromGuid(itemIdentifierGuid);
             index += 16;
 
             //0xbeef0004 section
@@ -140,7 +141,7 @@ namespace Lnk.ShellItems
 
             while (index < rawBytes.Length)
             {
-                short subshellitemdatasize = BitConverter.ToInt16(rawBytes, index);
+                var subshellitemdatasize = BitConverter.ToInt16(rawBytes, index);
 
                 if (subshellitemdatasize == 0)
                 {
@@ -163,7 +164,7 @@ namespace Lnk.ShellItems
             {
                 index = 0;
 
-                short extsize = BitConverter.ToInt16(bytes, index);
+                var extsize = BitConverter.ToInt16(bytes, index);
 
                 var signature = BitConverter.ToUInt32(bytes, 0x04);
 
@@ -182,7 +183,7 @@ namespace Lnk.ShellItems
             }
         }
 
-        public int FileSize { get; private set; }
+        public int FileSize { get; }
 
         /// <summary>
         ///     last modified time of BagPath
@@ -209,7 +210,6 @@ namespace Lnk.ShellItems
         ///// </summary>
         //public int? MFTSequenceNumber { get; set; }
 
-        
 
         public override string ToString()
         {

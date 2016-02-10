@@ -80,8 +80,8 @@ namespace Lnk
 
         public enum ShareFlag
         {
-            [Description("If set the device name contains data")] ValidDevice = 0x0001,
-            [Description("If set the network provider type contains data")] ValidNetType = 0x0002
+            [Description("If set, the device name contains data")] ValidDevice = 0x0001,
+            [Description("If set, the network provider type contains data")] ValidNetType = 0x0002
         }
 
         public NetworkShareInfo(byte[] rawBytes)

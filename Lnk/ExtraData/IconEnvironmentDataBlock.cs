@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Lnk.ExtraData
 {
-   public class IconEnvironmentDataBlock:ExtraDataBase
+    public class IconEnvironmentDataBlock : ExtraDataBase
     {
-        public string IconPathAscii { get; }
-        public string IconPathUni { get; }
-
         public IconEnvironmentDataBlock(byte[] rawBytes)
         {
             Signature = ExtraDataTypes.IconEnvironmentDataBlock;
@@ -21,10 +16,14 @@ namespace Lnk.ExtraData
             IconPathUni = Encoding.Unicode.GetString(rawBytes, 268, 520).Split('\0').First();
         }
 
+        public string IconPathAscii { get; }
+        public string IconPathUni { get; }
+
 
         public override string ToString()
         {
-            return $"Size: {Size}, Icon path Ascii: {IconPathAscii}, Icon path Unicode: {IconPathUni}";
+            return $"Icon environment data block" +
+                   $"\r\nIcon path: {IconPathAscii}";
         }
     }
 }

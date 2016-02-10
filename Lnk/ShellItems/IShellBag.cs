@@ -37,16 +37,17 @@ namespace Lnk.ShellItems
         int Slot { get; }
 
         /// <summary>
-        /// True if the ShellBag is from a deleted Registry key
+        ///     True if the ShellBag is from a deleted Registry key
         /// </summary>
         bool IsDeleted { get; set; }
+
         /// <summary>
         ///     The position this ShellBag item was opened
         /// </summary>
         int MruPosition { get; }
 
         /// <summary>
-        /// Gets the node slot.
+        ///     Gets the node slot.
         /// </summary>
         /// <value>The node slot.</value>
         int NodeSlot { get; set; }

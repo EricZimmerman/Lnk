@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Lnk.ExtraData
 {
-    public class EnvironmentVariableDataBlock:ExtraDataBase
+    public class EnvironmentVariableDataBlock : ExtraDataBase
     {
-        public string EnvironmentVariablesAscii { get; }
-        public string EnvironmentVariablesUnicode { get; }
-
         public EnvironmentVariableDataBlock(byte[] rawBytes)
         {
             Signature = ExtraDataTypes.EnvironmentVariableDataBlock;
@@ -21,10 +16,14 @@ namespace Lnk.ExtraData
             EnvironmentVariablesUnicode = Encoding.Unicode.GetString(rawBytes, 268, 520).Split('\0').First();
         }
 
+        public string EnvironmentVariablesAscii { get; }
+        public string EnvironmentVariablesUnicode { get; }
+
 
         public override string ToString()
         {
-            return $"Size: {Size}, EnvVarsAscii: {EnvironmentVariablesAscii}, EnvVarsdUnicode: {EnvironmentVariablesUnicode}";
+            return $"Environment variable data block" +
+                   $"\r\nEnvironment variables: {EnvironmentVariablesAscii}";
         }
     }
 }

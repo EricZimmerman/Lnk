@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Lnk.ExtraData
+﻿namespace Lnk.ExtraData
 {
-    public enum ExtraDataTypes:uint
+    public enum ExtraDataTypes : uint
     {
         ConsoleDataBlock = 0xA0000002,
         ConsoleFEDataBlock = 0xA0000004,
@@ -18,12 +12,12 @@ namespace Lnk.ExtraData
         ShimDataBlock = 0xA0000008,
         SpecialFolderDataBlock = 0xA0000005,
         TrackerDataBlock = 0xA0000003,
-        VistaAndAboveIDListDataBlock = 0xA000000C,
+        VistaAndAboveIDListDataBlock = 0xA000000C
     }
 
-   public abstract class ExtraDataBase
-   {
+    public abstract class ExtraDataBase
+    {
         protected ExtraDataTypes Signature { get; set; }
         protected uint Size { get; set; }
-   }
+    }
 }

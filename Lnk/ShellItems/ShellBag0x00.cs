@@ -12,9 +12,9 @@ namespace Lnk.ShellItems
     {
         private string _ClassID;
         private string _FileSystemName;
-        private Object _MTPType1GuidName;
-        private string _StorageIDName;
         private List<string> _guids;
+        private object _MTPType1GuidName;
+        private string _StorageIDName;
 
 
         public ShellBag0x00(int slot, int mruPosition, byte[] rawBytes, string bagPath)
@@ -46,11 +46,11 @@ namespace Lnk.ShellItems
             BagPath = bagPath;
 
             // There are a few special cases for 0x00 items, so pull a special sig and see if we have one of those
-            uint specialDataSig = BitConverter.ToUInt32(rawBytes, 4);
+            var specialDataSig = BitConverter.ToUInt32(rawBytes, 4);
 
             switch (specialDataSig)
             {
-                case 0xc001b000:  //00-B0-01-C0-
+                case 0xc001b000: //00-B0-01-C0-
                     ProcessURLContainer(rawBytes);
 
                     return;
@@ -60,41 +60,40 @@ namespace Lnk.ShellItems
 
                     return;
 
-              
 
                 case 0xffffff38: // Control panel CPL file shell item
 
                     throw new Exception("Send this hive to saericzimmerman@gmail.com so support can be added!");
 
-                  //  return;
+                //  return;
             }
 
             //if we are here this should be a users property view
 
-            int index = 0;
+            var index = 0;
 
-            ushort shellItemSize = BitConverter.ToUInt16(rawBytes, index);
+            var shellItemSize = BitConverter.ToUInt16(rawBytes, index);
             index += 2;
 
             index += 1; // move past signature
             index += 1; // move past unknown
 
-            ushort dataSize = BitConverter.ToUInt16(rawBytes, index);
+            var dataSize = BitConverter.ToUInt16(rawBytes, index);
             index += 2;
             //   SiAuto.Main.LogMessage("dataSize: {0}", dataSize);
 
-            uint dataSig = BitConverter.ToUInt32(rawBytes, index);
+            var dataSig = BitConverter.ToUInt32(rawBytes, index);
             index += 4;
             //   SiAuto.Main.LogMessage("dataSig: {0:X}", dataSig);
 
-            ushort identifierSize = BitConverter.ToUInt16(rawBytes, index);
+            var identifierSize = BitConverter.ToUInt16(rawBytes, index);
             index += 2;
             //    SiAuto.Main.LogMessage("identifierSize: {0}", identifierSize);
 
             switch (dataSig)
             {
-                    case 0x00030005:
-                    case 0x00000005:
+                case 0x00030005:
+                case 0x00000005:
 
                     ProcessFTPSubItem(rawBytes);
 
@@ -138,87 +137,6 @@ namespace Lnk.ShellItems
             }
         }
 
-        private void ProcessURLContainer(byte[] rawBytes)
-        {
-            FriendlyName = "Variable: HTTP URI";
-
-            int index = 0x14;
-
-            var size = BitConverter.ToUInt32(rawBytes, index);
-            index += 4;
-
-            var url = Encoding.Unicode.GetString(rawBytes, index, (int) size);
-            index += (int)size;
-
-
-            Value = Uri.UnescapeDataString(url.Replace("\0", ""));
-
-            index += 16;
-
-            size = BitConverter.ToUInt32(rawBytes, index);
-            index += 4;
-
-             url = Encoding.Unicode.GetString(rawBytes, index, (int)size);
-            index += (int)size;
-
-            FullUrl = url.Replace("\0", "");
-
-        }
-
-        private void ProcessFTPSubItem(byte[] rawBytes)
-        {
-            FriendlyName = "Variable: FTP URI";
-            
-            int index = 0x16;
-
-            var ft1 = DateTimeOffset.FromFileTime((long)BitConverter.ToUInt64(rawBytes, index));
-
-            index += 8;
-
-           var fileTime1 = ft1.ToUniversalTime();
-
-            if (fileTime1.Year > 1601)
-            {
-                FTPFolderTime = fileTime1;
-            }
-
-            index += 8;
-
-            var len1 = 0;
-
-            while (rawBytes[index + len1] != 0x00)
-            {
-                len1 += 1;
-            }
-
-           var s1 = Encoding.ASCII.GetString(rawBytes, index, len1);
-
-            ShortName = s1;
-           
-            index += len1;
-
-            while (rawBytes[index] == 0)
-            {
-                index += 1;
-            }
-
-           
-
-            len1 = 0;
-
-            while (rawBytes[index + len1] != 0x00 || rawBytes[index + len1 + 1] != 0x00)
-            {
-                len1 += 1;
-            }
-
-             s1 = Encoding.Unicode.GetString(rawBytes, index, len1 + 1);
-
-
-            index += len1 + 1;
-
-            Value = s1;
-        }
-
         public PropertyStore PropertyStore { get; private set; }
 
         /// <summary>
@@ -254,15 +172,95 @@ namespace Lnk.ShellItems
 
         public string FullUrl { get; set; }
 
-    
+        public string ShortName { get; private set; }
+
+        private void ProcessURLContainer(byte[] rawBytes)
+        {
+            FriendlyName = "Variable: HTTP URI";
+
+            var index = 0x14;
+
+            var size = BitConverter.ToUInt32(rawBytes, index);
+            index += 4;
+
+            var url = Encoding.Unicode.GetString(rawBytes, index, (int) size);
+            index += (int) size;
+
+
+            Value = Uri.UnescapeDataString(url.Replace("\0", ""));
+
+            index += 16;
+
+            size = BitConverter.ToUInt32(rawBytes, index);
+            index += 4;
+
+            url = Encoding.Unicode.GetString(rawBytes, index, (int) size);
+            index += (int) size;
+
+            FullUrl = url.Replace("\0", "");
+        }
+
+        private void ProcessFTPSubItem(byte[] rawBytes)
+        {
+            FriendlyName = "Variable: FTP URI";
+
+            var index = 0x16;
+
+            var ft1 = DateTimeOffset.FromFileTime((long) BitConverter.ToUInt64(rawBytes, index));
+
+            index += 8;
+
+            var fileTime1 = ft1.ToUniversalTime();
+
+            if (fileTime1.Year > 1601)
+            {
+                FTPFolderTime = fileTime1;
+            }
+
+            index += 8;
+
+            var len1 = 0;
+
+            while (rawBytes[index + len1] != 0x00)
+            {
+                len1 += 1;
+            }
+
+            var s1 = Encoding.GetEncoding(1252).GetString(rawBytes, index, len1);
+
+            ShortName = s1;
+
+            index += len1;
+
+            while (rawBytes[index] == 0)
+            {
+                index += 1;
+            }
+
+
+            len1 = 0;
+
+            while (rawBytes[index + len1] != 0x00 || rawBytes[index + len1 + 1] != 0x00)
+            {
+                len1 += 1;
+            }
+
+            s1 = Encoding.Unicode.GetString(rawBytes, index, len1 + 1);
+
+
+            index += len1 + 1;
+
+            Value = s1;
+        }
+
 
         private void ProcessMTPType2(byte[] rawBytes)
         {
             FriendlyName = "Variable: MTP type 2";
 
-            int index = 4;
+            var index = 4;
 
-            ushort dataSize = BitConverter.ToUInt16(rawBytes, index);
+            var dataSize = BitConverter.ToUInt16(rawBytes, index);
             index += 2;
 
             index += 4; //skip signature
@@ -279,15 +277,15 @@ namespace Lnk.ShellItems
 
             index += 4; //skip unknown size
 
-            int storageStringNameLen = BitConverter.ToInt32(rawBytes, index);
+            var storageStringNameLen = BitConverter.ToInt32(rawBytes, index);
 
             index += 4;
 
-            int storageIDStringLen = BitConverter.ToInt32(rawBytes, index);
+            var storageIDStringLen = BitConverter.ToInt32(rawBytes, index);
 
             index += 4;
 
-            int fileSystemNameLen = BitConverter.ToInt32(rawBytes, index);
+            var fileSystemNameLen = BitConverter.ToInt32(rawBytes, index);
 
             index += 4;
 
@@ -295,27 +293,27 @@ namespace Lnk.ShellItems
 
             index += 4; // skip unknown
 
-            string storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen * 2 - 2);
+            var storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen*2 - 2);
 
-            index += storageStringNameLen * 2;
+            index += storageStringNameLen*2;
 
-            _StorageIDName = Encoding.Unicode.GetString(rawBytes, index, storageIDStringLen * 2 - 2);
+            _StorageIDName = Encoding.Unicode.GetString(rawBytes, index, storageIDStringLen*2 - 2);
 
-            index += storageIDStringLen * 2;
+            index += storageIDStringLen*2;
 
-            _FileSystemName = Encoding.Unicode.GetString(rawBytes, index, fileSystemNameLen * 2 - 2);
+            _FileSystemName = Encoding.Unicode.GetString(rawBytes, index, fileSystemNameLen*2 - 2);
 
-            index += fileSystemNameLen * 2;
+            index += fileSystemNameLen*2;
 
             //index += 6; //get to beginning of GUIDs
 
 
             _guids = new List<string>();
-            for (int i = 0; i < numGUIDs; i++)
+            for (var i = 0; i < numGUIDs; i++)
             {
                 var rawGUID = rawBytes.Skip(index).Take(78).ToArray();
                 index += 78;
-                var guid = Encoding.Unicode.GetString(rawGUID).Replace("\0","");
+                var guid = Encoding.Unicode.GetString(rawGUID).Replace("\0", "");
                 _guids.Add(guid);
             }
 
@@ -346,15 +344,15 @@ namespace Lnk.ShellItems
             //    Debug.WriteLine("Pausing for documented info from http://nicoleibrahim.com/part-5-usb-device-research-directory-traversal-artifacts-shell-bagmru-entries/");
             //}
 
-            int index = 0x1a;
+            var index = 0x1a;
 
-            DateTimeOffset modified = DateTimeOffset.FromFileTime((long)BitConverter.ToUInt64(rawBytes, index));
+            var modified = DateTimeOffset.FromFileTime((long) BitConverter.ToUInt64(rawBytes, index));
 
             LastModificationTime = modified.ToUniversalTime();
 
             index += 8;
 
-            DateTimeOffset created = DateTimeOffset.FromFileTime((long)BitConverter.ToUInt64(rawBytes, index));
+            var created = DateTimeOffset.FromFileTime((long) BitConverter.ToUInt64(rawBytes, index));
 
             CreatedOnTime = created.ToUniversalTime();
 
@@ -366,29 +364,29 @@ namespace Lnk.ShellItems
 
             index = 0x3e;
 
-            int storageStringNameLen = BitConverter.ToInt32(rawBytes, index);
+            var storageStringNameLen = BitConverter.ToInt32(rawBytes, index);
 
             index += 4;
 
-            int storageIDStringLen = BitConverter.ToInt32(rawBytes, index);
+            var storageIDStringLen = BitConverter.ToInt32(rawBytes, index);
 
             index += 4;
 
-            int fileSystemNameLen = BitConverter.ToInt32(rawBytes, index);
+            var fileSystemNameLen = BitConverter.ToInt32(rawBytes, index);
 
             index += 4;
 
-            string storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen * 2 - 2);
+            var storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen*2 - 2);
 
-            index += storageStringNameLen * 2;
+            index += storageStringNameLen*2;
 
-            _StorageIDName = Encoding.Unicode.GetString(rawBytes, index, storageIDStringLen * 2 - 2);
+            _StorageIDName = Encoding.Unicode.GetString(rawBytes, index, storageIDStringLen*2 - 2);
 
-            index += storageIDStringLen * 2;
+            index += storageIDStringLen*2;
 
-            _FileSystemName = Encoding.Unicode.GetString(rawBytes, index, fileSystemNameLen * 2 - 2);
+            _FileSystemName = Encoding.Unicode.GetString(rawBytes, index, fileSystemNameLen*2 - 2);
 
-            index += fileSystemNameLen * 2;
+            index += fileSystemNameLen*2;
 
             //TODO pull out modified time/created for OLE?
 
@@ -402,7 +400,6 @@ namespace Lnk.ShellItems
                 {
                     Value = $"{storageName} ({_StorageIDName})";
                 }
-                    
             }
             else
             {
@@ -414,7 +411,8 @@ namespace Lnk.ShellItems
         {
             FriendlyName = "Variable: Zip file contents";
 
-            if ((rawBytes[0x28] == 0x2f || (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41)) || (rawBytes[0x1c] == 0x2f || (rawBytes[0x18] == 0x4e && rawBytes[0x1a] == 0x2f && rawBytes[0x1c] == 0x41)))
+            if (rawBytes[0x28] == 0x2f || (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41) ||
+                rawBytes[0x1c] == 0x2f || (rawBytes[0x18] == 0x4e && rawBytes[0x1a] == 0x2f && rawBytes[0x1c] == 0x41))
             {
                 //we have a good date
 
@@ -433,15 +431,15 @@ namespace Lnk.ShellItems
         private void ProcessPropertyViewDefault(byte[] rawBytes)
         {
             FriendlyName = "Variable: Users property view";
-            int index = 10;
+            var index = 10;
 
-            short shellPropertySheetListSize = BitConverter.ToInt16(rawBytes, index);
+            var shellPropertySheetListSize = BitConverter.ToInt16(rawBytes, index);
 
             //       SiAuto.Main.LogMessage("shellPropertySheetListSize: {0}", shellPropertySheetListSize);
 
             index += 2;
 
-            short identifiersize = BitConverter.ToInt16(rawBytes, index);
+            var identifiersize = BitConverter.ToInt16(rawBytes, index);
 
             //    SiAuto.Main.LogMessage("identifiersize: {0}", identifiersize);
 
@@ -462,7 +460,7 @@ namespace Lnk.ShellItems
 
                 PropertyStore = propStore;
 
-              var p =  propStore.Sheets.Where(t => t.PropertyNames.ContainsKey("32"));
+                var p = propStore.Sheets.Where(t => t.PropertyNames.ContainsKey("32"));
 
                 if (p.Any())
                 {
@@ -495,7 +493,6 @@ namespace Lnk.ShellItems
 
                             ExtensionBlocks.Add(block1);
                         }
-                    
                     }
                     catch (ArgumentException ex)
                     {
@@ -503,16 +500,16 @@ namespace Lnk.ShellItems
                         // Syntax error in the regular expression
                     }
 
-               //     Debug.WriteLine("Found 32 key");
+                    //     Debug.WriteLine("Found 32 key");
                 }
-
             }
             else
             {
                 //   Debug.Write("Oh no! No property sheets!");
                 // SiAuto.Main.LogWarning("Oh no! No property sheets!");
 
-                if (rawBytes[0x28] == 0x2f || (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
+                if (rawBytes[0x28] == 0x2f ||
+                    (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
                 {
                     //we have a good date
 
@@ -524,13 +521,10 @@ namespace Lnk.ShellItems
 
                     return;
                 }
-                else
-                {
-                    Debug.Write("Oh no! No property sheets!");
-                    
+                Debug.Write("Oh no! No property sheets!");
 
-                    Value = "!!! Unable to determine Value !!!";
-                }
+
+                Value = "!!! Unable to determine Value !!!";
             }
 
             index += shellPropertySheetListSize;
@@ -539,54 +533,50 @@ namespace Lnk.ShellItems
 
             if (index < rawBytes.Length)
             {
-                
-            
+                var extBlockSize = BitConverter.ToInt16(rawBytes, index);
 
-            short extBlockSize = BitConverter.ToInt16(rawBytes, index);
-
-            if (extBlockSize > 0)
-            {
-                //process extension blocks
-
-                while (extBlockSize > 0)
+                if (extBlockSize > 0)
                 {
-                    var extBytes = rawBytes.Skip(index).Take(extBlockSize).ToArray();
+                    //process extension blocks
 
-                    index += extBlockSize;
+                    while (extBlockSize > 0)
+                    {
+                        var extBytes = rawBytes.Skip(index).Take(extBlockSize).ToArray();
 
-                    var signature1 = BitConverter.ToUInt32(extBytes, 4);
+                        index += extBlockSize;
 
-                    //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
+                        var signature1 = BitConverter.ToUInt32(extBytes, 4);
 
-                    var block1 = Utils.GetExtensionBlockFromBytes(signature1, extBytes);
+                        //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
 
-                    ExtensionBlocks.Add(block1);
+                        var block1 = Utils.GetExtensionBlockFromBytes(signature1, extBytes);
+
+                        ExtensionBlocks.Add(block1);
 
 
-                    extBlockSize = BitConverter.ToInt16(rawBytes, index);
+                        extBlockSize = BitConverter.ToInt16(rawBytes, index);
+                    }
+                }
+
+                int terminator = BitConverter.ToInt16(rawBytes, index);
+
+                if (terminator > 0)
+                {
+                    throw new Exception($"Expected terminator of 0, but got {terminator}");
                 }
             }
 
-            int terminator = BitConverter.ToInt16(rawBytes, index);
-
-            if (terminator > 0)
-            {
-                throw new Exception($"Expected terminator of 0, but got {terminator}");
-            }
-
-            }
-
-            string valuestring = (from propertySheet in PropertyStore.Sheets
-                                  from propertyName in propertySheet.PropertyNames
-                                  where propertyName.Key == "10"
-                                  select propertyName.Value).FirstOrDefault();
+            var valuestring = (from propertySheet in PropertyStore.Sheets
+                from propertyName in propertySheet.PropertyNames
+                where propertyName.Key == "10"
+                select propertyName.Value).FirstOrDefault();
 
             if (valuestring == null)
             {
-                List<string> namesList =
+                var namesList =
                     (from propertySheet in PropertyStore.Sheets
-                     from propertyName in propertySheet.PropertyNames
-                     select propertyName.Value)
+                        from propertyName in propertySheet.PropertyNames
+                        select propertyName.Value)
                         .ToList();
 
                 valuestring = string.Join("::", namesList.ToArray());
@@ -604,19 +594,19 @@ namespace Lnk.ShellItems
         {
             // this is a guid
 
-            int index = 4;
+            var index = 4;
 
-            ushort dataSize = BitConverter.ToUInt16(rawBytes, index);
+            var dataSize = BitConverter.ToUInt16(rawBytes, index);
             index += 2;
 
             index += 4; // move past signature
 
-            ushort propertyStoreSize = BitConverter.ToUInt16(rawBytes, index);
+            var propertyStoreSize = BitConverter.ToUInt16(rawBytes, index);
             index += 2;
 
             Trace.Assert(propertyStoreSize == 0, "propertyStoreSize size > 0!");
 
-            ushort identifierSize = BitConverter.ToUInt16(rawBytes, index);
+            var identifierSize = BitConverter.ToUInt16(rawBytes, index);
             index += 2;
 
             if (identifierSize > 0)
@@ -627,11 +617,11 @@ namespace Lnk.ShellItems
 
                 //    SiAuto.Main.LogArray("Raw00guid", raw00guid);
 
-                string preguid = Utils.ExtractGuidFromShellItem(raw00guid);
+                var preguid = Utils.ExtractGuidFromShellItem(raw00guid);
 
                 //   SiAuto.Main.LogMessage("preguid after ExtractGUIDFromShellItem: {0}", preguid);
 
-                string tempString = Utils.GetFolderNameFromGuid(preguid);
+                var tempString = Utils.GetFolderNameFromGuid(preguid);
 
                 //  SiAuto.Main.LogMessage("tempString after GetFolderNameFromGUID: {0}", tempString);
 
@@ -655,7 +645,7 @@ namespace Lnk.ShellItems
                 return;
             }
 
-            short extBlockSize = BitConverter.ToInt16(rawBytes, index);
+            var extBlockSize = BitConverter.ToInt16(rawBytes, index);
 
             if (extBlockSize > 0)
             {
@@ -687,8 +677,6 @@ namespace Lnk.ShellItems
                 throw new Exception($"Expected terminator of 0, but got {terminator}");
             }
         }
-
-        public string ShortName { get; private set; }
 
         private void ProcessGameFolderShellItem(byte[] rawBytes)
         {
@@ -715,11 +703,11 @@ namespace Lnk.ShellItems
                 sb.AppendLine($"Full URL: {FullUrl}");
             }
 
-                //TODO denote custom properties vs standard ones
-                if (CreatedOnTime.HasValue)
-                {
-                    sb.AppendLine($"Created On: {CreatedOnTime.Value}");
-                }
+            //TODO denote custom properties vs standard ones
+            if (CreatedOnTime.HasValue)
+            {
+                sb.AppendLine($"Created On: {CreatedOnTime.Value}");
+            }
 
             //TODO denote custom properties vs standard ones
             if (LastModificationTime.HasValue)
@@ -740,41 +728,38 @@ namespace Lnk.ShellItems
                 sb.AppendLine(PropertyStore.ToString());
                 sb.AppendLine();
             }
-      
-                if (_guids.Count > 0)
-                {
-                    sb.AppendLine("MTP GUIDs");
 
-                    foreach (var guid in _guids)
-                    {
-                        sb.AppendLine(guid);
-                    }
+            if (_guids.Count > 0)
+            {
+                sb.AppendLine("MTP GUIDs");
 
-                 
+                foreach (var guid in _guids)
+                {
+                    sb.AppendLine(guid);
                 }
-                sb.AppendLine();
+            }
+            sb.AppendLine();
 
-                if (_FileSystemName != null)
-                {
-                    sb.AppendLine($"File system name: {_FileSystemName}");
-                }
-                if (_StorageIDName != null)
-                {
-                    sb.AppendLine($"Storage ID name: {_StorageIDName}");
-                }
-                if (_ClassID != null)
-                {
-                    sb.AppendLine($"Class ID: {_ClassID}");
-                }
-                if (_MTPType1GuidName != null)
-                {
-                    sb.AppendLine($"GUID: {_MTPType1GuidName}");
-                }
+            if (_FileSystemName != null)
+            {
+                sb.AppendLine($"File system name: {_FileSystemName}");
+            }
+            if (_StorageIDName != null)
+            {
+                sb.AppendLine($"Storage ID name: {_StorageIDName}");
+            }
+            if (_ClassID != null)
+            {
+                sb.AppendLine($"Class ID: {_ClassID}");
+            }
+            if (_MTPType1GuidName != null)
+            {
+                sb.AppendLine($"GUID: {_MTPType1GuidName}");
+            }
 
-            
-           
-                sb.AppendLine();
-                sb.AppendLine(base.ToString());
+
+            sb.AppendLine();
+            sb.AppendLine(base.ToString());
 
 
             return sb.ToString();

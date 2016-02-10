@@ -25,7 +25,7 @@ namespace Lnk.ShellItems
 
             BagPath = bagPath;
 
-            var driveLetter = Encoding.ASCII.GetString(rawBytes, 3, 2);
+            var driveLetter = Encoding.GetEncoding(1252).GetString(rawBytes, 3, 2);
 
             Value = driveLetter;
 
@@ -40,7 +40,6 @@ namespace Lnk.ShellItems
                 var block1 = Utils.GetExtensionBlockFromBytes(signature1, rawBytes.Skip(index).ToArray());
 
                 ExtensionBlocks.Add(block1);
-
             }
 
 //                if (bagPath.Contains(@"BagMRU\2") && slot == 0x11)

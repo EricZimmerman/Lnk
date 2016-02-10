@@ -7,6 +7,8 @@ namespace Lnk.ShellItems
 {
     internal class ShellBag0x40 : ShellBag
     {
+        private string _desc;
+
         public ShellBag0x40(int slot, int mruPosition, byte[] rawBytes, string bagPath)
         {
             Slot = slot;
@@ -33,7 +35,7 @@ namespace Lnk.ShellItems
                 case 0x41:
                     FriendlyName = "Domain/Workgroup name";
                     break;
-             
+
                 case 0x42:
                     FriendlyName = "Server UNC path";
                     break;
@@ -47,21 +49,18 @@ namespace Lnk.ShellItems
                     break;
             }
 
-            
 
-            var temp = Encoding.ASCII.GetString(rawBytes, 5, rawBytes.Length - 5).Split('\0');
+            var temp = Encoding.GetEncoding(1252).GetString(rawBytes, 5, rawBytes.Length - 5).Split('\0');
 
             _desc = temp[1];
 
             Value = temp[0];
         }
 
-        private string _desc;
-
         public override string ToString()
         {
             var sb = new StringBuilder();
-            
+
             sb.AppendLine(base.ToString());
 
             return sb.ToString();

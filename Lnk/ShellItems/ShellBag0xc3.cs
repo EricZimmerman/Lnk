@@ -48,7 +48,7 @@ namespace Lnk.ShellItems
 //                SiAuto.Main.LogWarning("Different flag found! {0}", flags);
 //            }
 
-            int len = 0;
+            var len = 0;
 
             //SiAuto.Main.LogMessage("Walking out 0s");
             while (rawBytes[index + len] != 0x0)
@@ -61,7 +61,7 @@ namespace Lnk.ShellItems
 
             index += len;
 
-            var location = Encoding.ASCII.GetString(tempBytes);
+            var location = Encoding.GetEncoding(1252).GetString(tempBytes);
 
             //    SiAuto.Main.LogMessage("location: {0}", location);
 

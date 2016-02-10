@@ -30,7 +30,7 @@ namespace Lnk.ShellItems
 
             BagPath = bagPath;
 
-            int index = 0;
+            var index = 0;
 
             var postSig = BitConverter.ToInt64(rawBytes, rawBytes.Length - 8);
 
@@ -52,7 +52,7 @@ namespace Lnk.ShellItems
             }
 
             //this needs to change to be the default
-            if (rawBytes[0] == 20 || rawBytes[0] == 50|| rawBytes[0] == 0x3a)
+            if (rawBytes[0] == 20 || rawBytes[0] == 50 || rawBytes[0] == 0x3a)
             {
                 ProcessGuid(rawBytes);
                 return;
@@ -79,7 +79,6 @@ namespace Lnk.ShellItems
                 return;
             }
 
-           
 
             try
             {
@@ -97,25 +96,25 @@ namespace Lnk.ShellItems
 
             index = 0x1e;
 
-            int storageStringNameLen = BitConverter.ToInt32(rawBytes, index);
+            var storageStringNameLen = BitConverter.ToInt32(rawBytes, index);
 
             index += 4;
 
-            int storageIDStringLen = BitConverter.ToInt32(rawBytes, index);
+            var storageIDStringLen = BitConverter.ToInt32(rawBytes, index);
 
             index += 4;
 
-            int fileSystemNameLen = BitConverter.ToInt32(rawBytes, index);
+            var fileSystemNameLen = BitConverter.ToInt32(rawBytes, index);
 
             index = 0x28;
 
-            string storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen * 2 - 2);
+            var storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen*2 - 2);
 
-            index += storageStringNameLen * 2;
+            index += storageStringNameLen*2;
 
-            string storageIDName = Encoding.Unicode.GetString(rawBytes, index, storageIDStringLen * 2 - 2);
+            var storageIDName = Encoding.Unicode.GetString(rawBytes, index, storageIDStringLen*2 - 2);
 
-            index += storageIDStringLen * 2;
+            index += storageIDStringLen*2;
 
             Value = storageName;
         }
@@ -130,15 +129,15 @@ namespace Lnk.ShellItems
         private void ProcessPropertyViewDefault(byte[] rawBytes)
         {
             FriendlyName = "Variable: Users property view";
-            int index = 10;
+            var index = 10;
 
-            short shellPropertySheetListSize = BitConverter.ToInt16(rawBytes, index);
+            var shellPropertySheetListSize = BitConverter.ToInt16(rawBytes, index);
 
             //       SiAuto.Main.LogMessage("shellPropertySheetListSize: {0}", shellPropertySheetListSize);
 
             index += 2;
 
-            short identifiersize = BitConverter.ToInt16(rawBytes, index);
+            var identifiersize = BitConverter.ToInt16(rawBytes, index);
 
             //    SiAuto.Main.LogMessage("identifiersize: {0}", identifiersize);
 
@@ -179,7 +178,7 @@ namespace Lnk.ShellItems
 
                         foreach (var extOffset in extOffsets)
                         {
-                            var binaryOffset = extOffset / 3 - 4;
+                            var binaryOffset = extOffset/3 - 4;
                             var exSize = BitConverter.ToInt16(propBytes, binaryOffset);
 
                             var exBytes = propBytes.Skip(binaryOffset).Take(exSize).ToArray();
@@ -207,7 +206,8 @@ namespace Lnk.ShellItems
                 //   Debug.Write("Oh no! No property sheets!");
                 // SiAuto.Main.LogWarning("Oh no! No property sheets!");
 
-                if (rawBytes[0x28] == 0x2f || (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
+                if (rawBytes[0x28] == 0x2f ||
+                    (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
                 {
                     //we have a good date
 
@@ -219,10 +219,7 @@ namespace Lnk.ShellItems
 
                     return;
                 }
-                else
-                {
-                    Debug.Write("Oh no! No property sheets!");
-                }
+                Debug.Write("Oh no! No property sheets!");
             }
 
             index += shellPropertySheetListSize;
@@ -240,7 +237,7 @@ namespace Lnk.ShellItems
 
             Value = name;
 
-            short extBlockSize = BitConverter.ToInt16(rawBytes, index);
+            var extBlockSize = BitConverter.ToInt16(rawBytes, index);
 
             if (extBlockSize > 0)
             {
@@ -278,7 +275,7 @@ namespace Lnk.ShellItems
 
             //TODO split this out or at least use a different icon?
 
-            int index = 2;
+            var index = 2;
 
             index += 2; // move past index and a single unknown value
 
@@ -286,9 +283,9 @@ namespace Lnk.ShellItems
 
             Array.Copy(rawBytes, index, rawguid1, 0, 16);
 
-            string rawguid = Utils.ExtractGuidFromShellItem(rawguid1);
+            var rawguid = Utils.ExtractGuidFromShellItem(rawguid1);
 
-            string foldername = Utils.GetFolderNameFromGuid(rawguid);
+            var foldername = Utils.GetFolderNameFromGuid(rawguid);
 
             index += 16;
 
@@ -299,7 +296,7 @@ namespace Lnk.ShellItems
             }
 
             var size = BitConverter.ToInt16(rawBytes, index);
-            if (size == 0 )
+            if (size == 0)
             {
                 index += 2;
             }
@@ -331,11 +328,11 @@ namespace Lnk.ShellItems
         {
             FriendlyName = "Root folder: GUID";
 
-            string delegateGUID = Utils.ExtractGuidFromShellItem(rawBytes.Skip(20).Take(16).ToArray());
+            var delegateGUID = Utils.ExtractGuidFromShellItem(rawBytes.Skip(20).Take(16).ToArray());
 
-            string folderGUID = Utils.ExtractGuidFromShellItem(rawBytes.Skip(36).Take(16).ToArray());
+            var folderGUID = Utils.ExtractGuidFromShellItem(rawBytes.Skip(36).Take(16).ToArray());
 
-            string foldername = Utils.GetFolderNameFromGuid(folderGUID);
+            var foldername = Utils.GetFolderNameFromGuid(folderGUID);
 
             Value = foldername;
         }

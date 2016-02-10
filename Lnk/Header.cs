@@ -53,6 +53,7 @@ namespace Lnk
             KeepLocalIDListForUNCTarget = 0x04000000
         }
 
+        [Flags]
         public enum FileAttribute
         {
             [Description("Is read-only")] FILE_ATTRIBUTE_READONLY = 0x00000001,
@@ -105,19 +106,18 @@ namespace Lnk
         }
 
         private readonly Guid _goodSignature = new Guid("{00021401-0000-0000-c000-000000000046}");
-        public Guid Signature { get; }
 
         public Header(byte[] rawBytes)
         {
             var sigBytes = new byte[16];
-            Buffer.BlockCopy(rawBytes,4,sigBytes,0,16);
+            Buffer.BlockCopy(rawBytes, 4, sigBytes, 0, 16);
             Signature = new Guid(sigBytes);
 
             if (Signature != _goodSignature)
             {
                 throw new Exception("Invalid Signature! ");
             }
-            
+
             DataFlags = (DataFlag) BitConverter.ToInt32(rawBytes, 20);
             FileAttributes = (FileAttribute) BitConverter.ToInt32(rawBytes, 24);
 
@@ -135,6 +135,8 @@ namespace Lnk
             Reserved1 = BitConverter.ToInt32(rawBytes, 68);
             Reserved2 = BitConverter.ToInt32(rawBytes, 72);
         }
+
+        public Guid Signature { get; }
 
         public DataFlag DataFlags { get; }
         public FileAttribute FileAttributes { get; }

@@ -12,6 +12,131 @@ namespace Lnk
 {
     public class LnkFile
     {
+        public List<ShellBag> TargetIDs { get; }
+        public List<ExtraDataBase> ExtraBlocks { get; }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"Source file: {SourceFile}");
+            sb.AppendLine($"Source created: {SourceCreated}");
+            sb.AppendLine($"Source modified: {SourceModified}");
+            sb.AppendLine($"Source accessed: {SourceAccessed}");
+            sb.AppendLine();
+            sb.AppendLine("--- Header ---");
+            sb.AppendLine($"  File size: {Header.FileSize:N0}");
+            sb.AppendLine($"  Flags: {Header.DataFlags}");
+            sb.AppendLine($"  File attributes: {Header.FileAttributes}");
+
+            if (Header.HotKey.Length > 0)
+            {
+                sb.AppendLine($"  Hot key: {Header.HotKey}");
+            }
+            
+            sb.AppendLine($"  Icon index: {Header.IconIndex}");
+            sb.AppendLine($"  Show window: {Header.ShowWindow} ({Helpers.GetDescriptionFromEnumValue(Header.ShowWindow)})");
+            sb.AppendLine($"  Target created: {Header.TargetCreationDate}");
+            sb.AppendLine($"  Target modified: {Header.TargetLastAccessedDate}");
+            sb.AppendLine($"  Target accessed: {Header.TargetModificationDate}");
+            
+
+            if (TargetIDs.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("--- Target ID information ---");
+                foreach (var shellBag in TargetIDs)
+                {
+                    sb.Append($">>{shellBag}");
+                }
+            }
+
+            if ((Header.DataFlags & Header.DataFlag.HasLinkInfo) == Header.DataFlag.HasLinkInfo)
+            {
+                sb.AppendLine();
+                sb.AppendLine("--- Link information ---");
+                sb.AppendLine($"Location flags: {LocationFlags}");
+
+                if (VolumeInfo != null)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine("Volume information");
+                    sb.AppendLine($"Drive type: {VolumeInfo.DriveType}");
+                    sb.AppendLine($"Serial number: {VolumeInfo.DriveSerialNumber}");
+
+                    var label = VolumeInfo.VolumeLabel.Length > 0 ? VolumeInfo.VolumeLabel : "(No label)";
+
+                    sb.AppendLine($"Label: {label}");
+                }
+
+                if (LocalPath?.Length > 0)
+                {
+                    sb.AppendLine($"Local path: {LocalPath}");
+                }
+
+                if (NetworkShareInfo != null)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine("Network share information");
+
+                    if (NetworkShareInfo.DeviceName.Length > 0)
+                    {
+                        sb.AppendLine($"Device name: {NetworkShareInfo.DeviceName}");
+                    }
+                    
+                    sb.AppendLine($"Share name: {NetworkShareInfo.NetworkShareName}");
+
+                    sb.AppendLine($"Provider type: {NetworkShareInfo.NetworkProviderType}");
+                    sb.AppendLine($"Share flags: {NetworkShareInfo.ShareFlags}");
+
+                }
+
+                if (CommonPath.Length > 0)
+                {
+                    sb.AppendLine($"Common path: {CommonPath}");
+                }
+           }
+
+            if ((Header.DataFlags & Header.DataFlag.HasName) == Header.DataFlag.HasName)
+            {
+                sb.AppendLine($"Name: {Name}");
+            }
+
+            if ((Header.DataFlags & Header.DataFlag.HasRelativePath) == Header.DataFlag.HasRelativePath)
+            {
+                sb.AppendLine($"Relative Path: {RelativePath}");
+            }
+
+            if ((Header.DataFlags & Header.DataFlag.HasWorkingDir) == Header.DataFlag.HasWorkingDir)
+            {
+                sb.AppendLine($"Working Directory: {WorkingDirectory}");
+            }
+
+            if ((Header.DataFlags & Header.DataFlag.HasArguments) == Header.DataFlag.HasArguments)
+            {
+                sb.AppendLine($"Arguments: {Arguments}");
+            }
+
+            if ((Header.DataFlags & Header.DataFlag.HasIconLocation) == Header.DataFlag.HasIconLocation)
+            {
+                sb.AppendLine($"Icon Location: {IconLocation}");
+            }
+
+            if (ExtraBlocks.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("--- Extra blocks information ---");
+                foreach (var extraDataBase in ExtraBlocks)
+                {
+                    sb.AppendLine($">>{extraDataBase}");
+                    sb.AppendLine();
+                }
+            }
+            
+
+            return sb.ToString();
+        }
+
         [Flags]
         public enum LocationFlag
         {
@@ -23,16 +148,28 @@ namespace Lnk
         //TODO Include this at all?
         //public string FullName;
 
+            public DateTimeOffset SourceCreated { get; }
+            public DateTimeOffset SourceModified { get; }
+            public DateTimeOffset SourceAccessed { get; }
+
         public LnkFile(byte[] rawBytes, string sourceFile)
         {
-            SourceFile = sourceFile;
+            SourceFile = Path.GetFullPath(sourceFile);
             var headerBytes = new byte[76];
             Buffer.BlockCopy(rawBytes, 0, headerBytes, 0, 76);
 
             Header = new Header(headerBytes);
 
+
+            var fi = new FileInfo(sourceFile);
+            SourceCreated = new DateTimeOffset(fi.CreationTimeUtc);
+            SourceModified = new DateTimeOffset(fi.LastWriteTimeUtc);
+            SourceAccessed = new DateTimeOffset(fi.LastAccessTimeUtc);
+
             var index = 76;
-            
+
+            TargetIDs = new List<ShellBag>();
+
             if ((Header.DataFlags & Header.DataFlag.HasTargetIDList) == Header.DataFlag.HasTargetIDList)
             {
                 //process shell items
@@ -42,15 +179,10 @@ namespace Lnk
                 var shellItemBytes = new byte[shellItemSize];
                 Buffer.BlockCopy(rawBytes, index, shellItemBytes, 0, shellItemSize);
 
-                if (sourceFile.Contains("Debuggable Package Manager.lnk.test"))
-                {
-                    Debug.WriteLine(1);
-                }
-                
                 var shellItemsRaw = new List<byte[]>();
                 var shellItemIndex = 0;
 
-                while (shellItemIndex<shellItemBytes.Length)
+                while (shellItemIndex < shellItemBytes.Length)
                 {
                     var shellSize = BitConverter.ToUInt16(shellItemBytes, shellItemIndex);
 
@@ -59,68 +191,65 @@ namespace Lnk
                         break;
                     }
                     var itemBytes = new byte[shellSize];
-                    Buffer.BlockCopy(shellItemBytes, shellItemIndex, itemBytes,0,(int)shellSize);
+                    Buffer.BlockCopy(shellItemBytes, shellItemIndex, itemBytes, 0, shellSize);
 
                     shellItemsRaw.Add(itemBytes);
-                    shellItemIndex += (int) shellSize;
+                    shellItemIndex += shellSize;
                 }
 
-                var Items = new List<ShellBag>();
-
-                foreach (var bytese in shellItemsRaw)
+                foreach (var shellItem in shellItemsRaw)
                 {
-                    //TODO process shell items    
-                    switch (bytese[2])
+                    switch (shellItem[2])
                     {
                         case 0x1f:
-                            var f = new ShellBag0x1f(-1, -1, bytese, "");
-                            Items.Add(f);
+                            var f = new ShellBag0x1f(-1, -1, shellItem, "");
+                            TargetIDs.Add(f);
                             break;
 
                         case 0x2f:
-                            var ff = new ShellBag0X2F(-1, -1, bytese, "");
-                            Items.Add(ff);
+                            var ff = new ShellBag0X2F(-1, -1, shellItem, "");
+                            TargetIDs.Add(ff);
                             break;
                         case 0x2e:
-                            var ee = new ShellBag0x2e(-1, -1, bytese, "");
-                            Items.Add(ee);
+                            var ee = new ShellBag0x2e(-1, -1, shellItem, "");
+                            TargetIDs.Add(ee);
                             break;
                         case 0xb1:
                         case 0x31:
                         case 0x35:
-                            var d = new ShellBag0X31(-1, -1, bytese, "");
-                            Items.Add(d);
+                            var d = new ShellBag0X31(-1, -1, shellItem, "");
+                            TargetIDs.Add(d);
                             break;
                         case 0x32:
-                            var d2 = new ShellBag0X32(-1, -1, bytese, "");
-                            Items.Add(d2);
+                            var d2 = new ShellBag0X32(-1, -1, shellItem, "");
+                            TargetIDs.Add(d2);
                             break;
                         case 0x00:
-                            var v0 = new ShellBag0x00(-1, -1, bytese, "");
-                            Items.Add(v0);
+                            var v0 = new ShellBag0x00(-1, -1, shellItem, "");
+                            TargetIDs.Add(v0);
                             break;
                         case 0x01:
-                            var one = new ShellBag0X01(-1, -1, bytese, "");
-                            Items.Add(one);
+                            var one = new ShellBag0X01(-1, -1, shellItem, "");
+                            TargetIDs.Add(one);
                             break;
                         case 0x71:
-                            var sevenone = new ShellBag0x71(-1, -1, bytese, "");
-                            Items.Add(sevenone);
+                            var sevenone = new ShellBag0x71(-1, -1, shellItem, "");
+                            TargetIDs.Add(sevenone);
                             break;
                         case 0x61:
-                            var sixone = new ShellBag0X61(-1, -1, bytese, "");
-                            Items.Add(sixone);
+                            var sixone = new ShellBag0X61(-1, -1, shellItem, "");
+                            TargetIDs.Add(sixone);
                             break;
 
                         case 0xC3:
-                            var c3 = new ShellBag0Xc3(-1, -1, bytese, "");
-                            Items.Add(c3);
+                            var c3 = new ShellBag0Xc3(-1, -1, shellItem, "");
+                            TargetIDs.Add(c3);
                             break;
 
                         case 0x74:
                         case 0x77:
-                            var sev = new ShellBag0x74(-1, -1, bytese, "");
-                            Items.Add(sev);
+                            var sev = new ShellBag0x74(-1, -1, shellItem, "");
+                            TargetIDs.Add(sev);
                             break;
 
                         case 0x41:
@@ -128,13 +257,12 @@ namespace Lnk
                         case 0x43:
                         case 0x46:
                         case 0x47:
-                            var forty = new ShellBag0x40(-1, -1, bytese, "");
-                            Items.Add(forty);
+                            var forty = new ShellBag0x40(-1, -1, shellItem, "");
+                            TargetIDs.Add(forty);
                             break;
                         default:
-                            throw new Exception($"Unknown item ID: 0x{bytese[2]:X}");
+                            throw new Exception($"Unknown item ID: 0x{shellItem[2]:X}");
                     }
-                    
                 }
 
                 //TODO tie back extra block for SpecialFolderDataBlock and KnownFolderDataBlock
@@ -151,7 +279,7 @@ namespace Lnk
                 var locationInfoHeaderSize = BitConverter.ToInt32(locationBytes, 4);
 
                 LocationFlags = (LocationFlag) BitConverter.ToInt32(locationBytes, 8);
-                
+
                 var volOffset = BitConverter.ToInt32(locationBytes, 12);
                 var vbyteSize = BitConverter.ToInt32(locationBytes, volOffset);
                 var volBytes = new byte[vbyteSize];
@@ -172,7 +300,8 @@ namespace Lnk
                         .Split('\0')
                         .First();
                 }
-                if ((LocationFlags & LocationFlag.CommonNetworkRelativeLinkAndPathSuffix) == LocationFlag.CommonNetworkRelativeLinkAndPathSuffix)
+                if ((LocationFlags & LocationFlag.CommonNetworkRelativeLinkAndPathSuffix) ==
+                    LocationFlag.CommonNetworkRelativeLinkAndPathSuffix)
                 {
                     var networkShareSize = BitConverter.ToInt32(locationBytes, networkShareOffset);
                     var networkBytes = new byte[networkShareSize];
@@ -191,14 +320,16 @@ namespace Lnk
                 if (locationInfoHeaderSize > 28)
                 {
                     var uniLocalOffset = BitConverter.ToInt32(locationBytes, 28);
-                    throw new Exception($"Unsupported data found. Email lnk file '{sourceFile}' to saericzimmerman@gmail.com");
+                    throw new Exception(
+                        $"Unsupported data found. Email lnk file '{sourceFile}' to saericzimmerman@gmail.com");
                     //TODO var unicodeLocalPath = Encoding.Unicode.GetString(locationBytes, uniLocalOffset,5);
                 }
 
                 if (locationInfoHeaderSize > 32)
                 {
                     var uniCommonOffset = BitConverter.ToInt32(locationBytes, 32);
-                    throw new Exception($"Unsupported data found. Email lnk file '{sourceFile}' to saericzimmerman@gmail.com");
+                    throw new Exception(
+                        $"Unsupported data found. Email lnk file '{sourceFile}' to saericzimmerman@gmail.com");
                     //TODO var unicodeCommonPath = Encoding.Unicode.GetString(locationBytes, uniCommonOffset, 5);
                 }
 
@@ -294,11 +425,10 @@ namespace Lnk
                 index += icoLen;
             }
 
-           
 
             var extraByteBlocks = new List<byte[]>();
             //extra blocks
-            while (index<rawBytes.Length)
+            while (index < rawBytes.Length)
             {
                 var extraSize = BitConverter.ToInt32(rawBytes, index);
                 if (extraSize == 0)
@@ -307,14 +437,14 @@ namespace Lnk
                 }
 
                 var extraBytes = new byte[extraSize];
-                Buffer.BlockCopy(rawBytes,index,extraBytes,0,extraSize);
+                Buffer.BlockCopy(rawBytes, index, extraBytes, 0, extraSize);
 
                 extraByteBlocks.Add(extraBytes);
 
                 index += extraSize;
             }
 
-            var extraBlocks = new List<ExtraDataBase>();
+            ExtraBlocks = new List<ExtraDataBase>();
 
             foreach (var extraBlock in extraByteBlocks)
             {
@@ -324,54 +454,56 @@ namespace Lnk
                 {
                     case ExtraDataTypes.TrackerDataBlock:
                         var tb = new TrackerDataBaseBlock(extraBlock);
-                        extraBlocks.Add(tb);
+                        ExtraBlocks.Add(tb);
                         break;
                     case ExtraDataTypes.ConsoleDataBlock:
                         var cdb = new ConsoleDataBlock(extraBlock);
-                        extraBlocks.Add(cdb);
+                        ExtraBlocks.Add(cdb);
                         break;
                     case ExtraDataTypes.ConsoleFEDataBlock:
                         var cfeb = new ConsoleFEDataBlock(extraBlock);
-                        extraBlocks.Add(cfeb);
+                        ExtraBlocks.Add(cfeb);
                         break;
                     case ExtraDataTypes.DarwinDataBlock:
                         var db = new DarwinDataBlock(extraBlock);
-                        extraBlocks.Add(db);
+                        ExtraBlocks.Add(db);
                         break;
                     case ExtraDataTypes.EnvironmentVariableDataBlock:
                         var eb = new EnvironmentVariableDataBlock(extraBlock);
-                        extraBlocks.Add(eb);
+                        ExtraBlocks.Add(eb);
                         break;
                     case ExtraDataTypes.IconEnvironmentDataBlock:
                         var ib = new EnvironmentVariableDataBlock(extraBlock);
-                        extraBlocks.Add(ib);
+                        ExtraBlocks.Add(ib);
                         break;
                     case ExtraDataTypes.KnownFolderDataBlock:
                         var kf = new KnownFolderDataBlock(extraBlock);
-                        extraBlocks.Add(kf);
+                        ExtraBlocks.Add(kf);
                         break;
                     case ExtraDataTypes.PropertyStoreDataBlock:
                         var ps = new PropertyStoreDataBlock(extraBlock);
 
-                        Debug.WriteLine($"File: {Path.GetFileName(sourceFile)} Extra blocks start at: 0x{index:X} Flags: {Header.DataFlags}");
-                        Debug.WriteLine(ps);
+//                        Debug.WriteLine(
+//                            $"File: {Path.GetFileName(sourceFile)} Extra blocks start at: 0x{index:X} Flags: {Header.DataFlags}");
+//                        Debug.WriteLine(ps);
 
-                        extraBlocks.Add(ps);
+                        ExtraBlocks.Add(ps);
                         break;
                     case ExtraDataTypes.ShimDataBlock:
                         var sd = new KnownFolderDataBlock(extraBlock);
-                        extraBlocks.Add(sd);
+                        ExtraBlocks.Add(sd);
                         break;
                     case ExtraDataTypes.SpecialFolderDataBlock:
-                        var sf = new SpecialFolderDataBlock(extraBlock); 
-                        extraBlocks.Add(sf);
+                        var sf = new SpecialFolderDataBlock(extraBlock);
+                        ExtraBlocks.Add(sf);
                         break;
                     case ExtraDataTypes.VistaAndAboveIDListDataBlock:
                         var vid = new VistaAndAboveIDListDataBlock(extraBlock);
-                        extraBlocks.Add(vid);
+                        ExtraBlocks.Add(vid);
                         break;
                     default:
-                        throw new Exception($"Unknown extra data block signature: 0x{sig:X}. Please send lnk file to saericzimmerman@gmail.com so support can be added");
+                        throw new Exception(
+                            $"Unknown extra data block signature: 0x{sig:X}. Please send lnk file to saericzimmerman@gmail.com so support can be added");
                 }
             }
         }

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -14,9 +10,9 @@ namespace Lnk.Test
     public class TestMain
     {
         public static string BasePath = @"..\..\TestFiles";
-        public static string Win10Path = Path.Combine(BasePath,"Win10");
-        public static string WinXpPath = Path.Combine(BasePath,"WinXP");
-        public static string MiscPath = Path.Combine(BasePath,"Misc");
+        public static string Win10Path = Path.Combine(BasePath, "Win10");
+        public static string WinXpPath = Path.Combine(BasePath, "WinXP");
+        public static string MiscPath = Path.Combine(BasePath, "Misc");
 
         private readonly List<string> _allPaths = new List<string>
         {
@@ -40,15 +36,13 @@ namespace Lnk.Test
 
                     if ((lk.Header.DataFlags & Header.DataFlag.HasLinkInfo) == Header.DataFlag.HasLinkInfo)
                     {
-                        
                     }
 
-                    // Debug.WriteLine($"{file} {lk.Header}");
 
 
+                    Debug.WriteLine($"{lk}----------------------------END OF FILE----------------------------\r\n");
                 }
             }
         }
-
     }
 }

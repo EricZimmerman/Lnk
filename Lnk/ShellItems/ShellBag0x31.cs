@@ -36,8 +36,9 @@ namespace Lnk.ShellItems
 
             BagPath = bagPath;
 
-            int index = 2;
-            if ((rawBytes[0x27] == 0x00 && rawBytes[0x28] == 0x2f && rawBytes[0x29] == 0x00) || (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
+            var index = 2;
+            if ((rawBytes[0x27] == 0x00 && rawBytes[0x28] == 0x2f && rawBytes[0x29] == 0x00) ||
+                (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
             {
                 //we have a good date
 
@@ -76,11 +77,11 @@ namespace Lnk.ShellItems
 
             index += 2;
 
-            int len = 0;
+            var len = 0;
 
             //SiAuto.Main.LogMessage("Walking out 0s");
 
-            var beefPos = BitConverter.ToString(rawBytes).IndexOf("04-00-EF-BE", StringComparison.InvariantCulture) / 3;
+            var beefPos = BitConverter.ToString(rawBytes).IndexOf("04-00-EF-BE", StringComparison.InvariantCulture)/3;
             beefPos = beefPos - 4; //add header back for beef
 
             var strLen = beefPos - index;
@@ -95,11 +96,10 @@ namespace Lnk.ShellItems
             }
             else
             {
-             
-            while (rawBytes[index + len] != 0x0)
-            {
-                len += 1;
-            }   
+                while (rawBytes[index + len] != 0x0)
+                {
+                    len += 1;
+                }
             }
 
 
@@ -108,7 +108,7 @@ namespace Lnk.ShellItems
 
             index += len;
 
-            string shortName = "";
+            var shortName = "";
 
             if (rawBytes[2] == 0x35)
             {
@@ -116,9 +116,9 @@ namespace Lnk.ShellItems
             }
             else
             {
-                shortName = Encoding.ASCII.GetString(tempBytes);
+                shortName = Encoding.GetEncoding(1252).GetString(tempBytes);
             }
-            
+
             ShortName = shortName;
 
             Value = shortName;
@@ -136,7 +136,7 @@ namespace Lnk.ShellItems
 
             while (index < rawBytes.Length)
             {
-                short subshellitemdatasize = BitConverter.ToInt16(rawBytes, index);
+                var subshellitemdatasize = BitConverter.ToInt16(rawBytes, index);
 
                 if (subshellitemdatasize == 0)
                 {
@@ -159,7 +159,7 @@ namespace Lnk.ShellItems
             {
                 index = 0;
 
-                short extsize = BitConverter.ToInt16(bytes, index);
+                var extsize = BitConverter.ToInt16(bytes, index);
 
                 var signature = BitConverter.ToUInt32(bytes, 0x04);
 
@@ -168,14 +168,9 @@ namespace Lnk.ShellItems
 
                 if (block.Signature.ToString("X").StartsWith("BEEF00"))
                 {
-                    ExtensionBlocks.Add(block);    
-                }
-                else
-                {
-                    //SiAuto.Main.LogWarning("In 0x31, found a signature for extension block not containing beef. {0}",block.Signature.ToString("X"));
+                    ExtensionBlocks.Add(block);
                 }
 
-                
 
                 var beef0004 = block as Beef0004;
                 if (beef0004 != null)
@@ -193,8 +188,6 @@ namespace Lnk.ShellItems
 //
 //
 //                    }
-
-                   
                 }
 
                 index += extsize;
@@ -226,13 +219,14 @@ namespace Lnk.ShellItems
         ///// </summary>
         //public int? MFTSequenceNumber { get; set; }
 
-        public string ShortName { get; private set; }
+        public string ShortName { get; }
 
-    
 
         public override string ToString()
         {
             var sb = new StringBuilder();
+
+            sb.AppendLine(base.ToString());
 
             if (ShortName.Length > 0)
             {
@@ -250,7 +244,6 @@ namespace Lnk.ShellItems
             }
 
             sb.AppendLine();
-            sb.AppendLine(base.ToString());
 
             return sb.ToString();
         }

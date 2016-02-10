@@ -30,105 +30,102 @@ namespace Lnk.ShellItems
             ExtensionBlocks = new List<IExtensionBlock>();
 
             BagPath = bagPath;
-            
+
 
             // another special case when dealing with at least Hyper-V browsing
             if (rawBytes[8] == 0x3A && rawBytes[9] == 0x00)
             {
-
                 FriendlyName = "Hyper-V storage volume";
 
-                DriveLetter = Encoding.Unicode.GetString(rawBytes, 0x6, 4).Replace("\0", String.Empty);
+                DriveLetter = Encoding.Unicode.GetString(rawBytes, 0x6, 4).Replace("\0", string.Empty);
 
-                Value = Encoding.Unicode.GetString(rawBytes, 0x32, rawBytes.Length - 0x32).Replace("\0", String.Empty);
+                Value = Encoding.Unicode.GetString(rawBytes, 0x32, rawBytes.Length - 0x32).Replace("\0", string.Empty);
 
                 return;
             }
 
-            uint specialDataSig = BitConverter.ToUInt32(rawBytes, 4);
+            var specialDataSig = BitConverter.ToUInt32(rawBytes, 4);
 
             if (specialDataSig != 0x39de2184)
             {
-                Value = Encoding.Unicode.GetString(rawBytes, 14, rawBytes.Length - 14).Replace("\0", String.Empty);
+                Value = Encoding.Unicode.GetString(rawBytes, 14, rawBytes.Length - 14).Replace("\0", string.Empty);
                 return;
-
             }
 
 
+            //this is the general case, for actual control panel categories
 
-                //this is the general case, for actual control panel categories
+            //The key value is in offset 8
+            switch (rawBytes[8])
+            {
+                case 0x00:
+                    Value = "All Control Panel Items";
 
-                //The key value is in offset 8
-                switch (rawBytes[8])
-                {
-                    case 0x00:
-                        Value = "All Control Panel Items";
+                    break;
 
-                        break;
+                case 0x01:
+                    Value = "Appearance and Personalization";
 
-                    case 0x01:
-                        Value = "Appearance and Personalization";
+                    break;
 
-                        break;
+                case 0x02:
+                    Value = "Hardware and Sound";
 
-                    case 0x02:
-                        Value = "Hardware and Sound";
+                    break;
 
-                        break;
+                case 0x03:
+                    Value = "Network and Internet";
 
-                    case 0x03:
-                        Value = "Network and Internet";
+                    break;
 
-                        break;
+                case 0x04:
+                    Value = "Sound, Speech and Audio Devices";
 
-                    case 0x04:
-                        Value = "Sound, Speech and Audio Devices";
+                    break;
 
-                        break;
+                case 0x05:
+                    Value = "System and Security";
 
-                    case 0x05:
-                        Value = "System and Security";
+                    break;
 
-                        break;
+                case 0x06:
+                    Value = "Clock, Language, and Region";
 
-                    case 0x06:
-                        Value = "Clock, Language, and Region";
+                    break;
 
-                        break;
+                case 0x07:
+                    Value = "Ease of Access";
 
-                    case 0x07:
-                        Value = "Ease of Access";
+                    break;
 
-                        break;
+                case 0x08:
+                    Value = "Programs";
 
-                    case 0x08:
-                        Value = "Programs";
+                    break;
 
-                        break;
+                case 0x09:
+                    Value = "User Accounts";
 
-                    case 0x09:
-                        Value = "User Accounts";
+                    break;
 
-                        break;
+                case 0x10:
+                    Value = "Security Center";
 
-                    case 0x10:
-                        Value = "Security Center";
+                    break;
 
-                        break;
+                case 0x11:
+                    Value = "Mobile PC";
 
-                    case 0x11:
-                        Value = "Mobile PC";
+                    break;
 
-                        break;
+                default:
+                    Value = $"Unknown category! Category ID: {rawBytes[8]}";
 
-                    default:
-                        Value = $"Unknown category! Category ID: {rawBytes[8]}";
-
-                        break;
-                }
+                    break;
+            }
         }
 
-        public string DriveLetter { get; private set; }
+        public string DriveLetter { get; }
 
         public override string ToString()
         {
@@ -140,7 +137,7 @@ namespace Lnk.ShellItems
                 sb.AppendLine();
             }
 
-                sb.AppendLine(base.ToString());
+            sb.AppendLine(base.ToString());
 
             return sb.ToString();
         }

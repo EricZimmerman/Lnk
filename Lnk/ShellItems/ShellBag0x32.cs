@@ -32,7 +32,7 @@ namespace Lnk.ShellItems
             //    Debug.WriteLine(1);
             //}
 
-            int index = 2;
+            var index = 2;
 
             if (rawBytes[0x28] == 0x2f || (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
             {
@@ -58,17 +58,17 @@ namespace Lnk.ShellItems
             //skip unknown byte
             index += 1;
 
-            uint fileSize = BitConverter.ToUInt32(rawBytes, index);
+            var fileSize = BitConverter.ToUInt32(rawBytes, index);
 
             //   SiAuto.Main.LogMessage("fileSize: {0}", fileSize);
 
-            FileSize = (int)fileSize;
+            FileSize = (int) fileSize;
 
             index += 4; // skip file size since always 0 for directory
 
             var tempBytes = new byte[4];
             Array.Copy(rawBytes, index, tempBytes, 0, 4);
-            byte[] lastmodifiedUtcRaw = tempBytes;
+            var lastmodifiedUtcRaw = tempBytes;
 
             LastModificationTime = Utils.ExtractDateTimeOffsetFromBytes(lastmodifiedUtcRaw);
 
@@ -82,7 +82,7 @@ namespace Lnk.ShellItems
 
             index += 2;
 
-            int len = 0;
+            var len = 0;
 
             //SiAuto.Main.LogMessage("Walking out 0s");
             while (rawBytes[index + len] != 0x0)
@@ -95,7 +95,7 @@ namespace Lnk.ShellItems
 
             index += len;
 
-            string shortName = Encoding.ASCII.GetString(tempBytes);
+            var shortName = Encoding.GetEncoding(1252).GetString(tempBytes);
 
             ShortName = shortName;
 
@@ -113,7 +113,7 @@ namespace Lnk.ShellItems
 
             while (index < rawBytes.Length)
             {
-                short subshellitemdatasize = BitConverter.ToInt16(rawBytes, index);
+                var subshellitemdatasize = BitConverter.ToInt16(rawBytes, index);
 
                 if (subshellitemdatasize == 0)
                 {
@@ -136,7 +136,7 @@ namespace Lnk.ShellItems
             {
                 index = 0;
 
-                short extsize = BitConverter.ToInt16(bytes, index);
+                var extsize = BitConverter.ToInt16(bytes, index);
 
                 var signature = BitConverter.ToUInt32(bytes, 0x04);
 
@@ -155,7 +155,7 @@ namespace Lnk.ShellItems
             }
         }
 
-        public int FileSize { get; private set; }
+        public int FileSize { get; }
 
         /// <summary>
         ///     last modified time of BagPath
@@ -182,9 +182,8 @@ namespace Lnk.ShellItems
         ///// </summary>
         //public int? MFTSequenceNumber { get; set; }
 
-        public string ShortName { get; private set; }
+        public string ShortName { get; }
 
-      
 
         public override string ToString()
         {

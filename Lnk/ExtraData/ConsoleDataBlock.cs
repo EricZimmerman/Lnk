@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Lnk.ExtraData
 {
@@ -19,7 +18,7 @@ namespace Lnk.ExtraData
         BackgroundIntensity = 0x00080
     }
 
-    
+
     public enum FontFamily
     {
         Dontcare = 0x00,
@@ -37,53 +36,8 @@ namespace Lnk.ExtraData
         Large = 3
     }
 
-    public   class ConsoleDataBlock:ExtraDataBase
+    public class ConsoleDataBlock : ExtraDataBase
     {
-        public override string ToString()
-        {
-            return $"Size: {Size}, Fill Attr: {FillAttributes}, Popup Attr: {PopupFillAttributes}, WidthBufferSize: {ScreenWidthBufferSize}, HeightBufferSize: {ScreenHeightBufferSize}, Window Width: {WindowWidth}, " +
-                   $"Window height: {WindowHeight}, OriginX: {WindowOriginX}, OriginY: {WindowOriginY}, FontSize: {FontSize}, IsBold: {IsBold}, FaceName: {FaceName}, CursorSize: {CursorSize}, IsFullScreen: {IsFullScreen}," +
-                   $"IsQuickEdit: {IsQuickEdit}, IsInsertMode: {IsInsertMode}, IsAutoPositioned: {IsAutoPositioned}, HistoryBufferSize: {HistoryBufferSize}, HistoryBufferCount: {HistoryBufferCount}, HistoryDupesAllowed: {HistoryDuplicatesAllowed}";
-        }
-
- 
-
-        public FillAttribute FillAttributes { get; }
-        public FillAttribute PopupFillAttributes { get; }
-
-        public short ScreenWidthBufferSize { get; }
-        public short ScreenHeightBufferSize { get; }
-        public short WindowWidth { get; }
-        public short WindowHeight { get; }
-        public short WindowOriginX { get; }
-        public short WindowOriginY { get; }
-
-        public int Reserved0 { get; }
-        public int Reserved1 { get; }
-        public uint FontSize { get; }
-        public FontFamily FontFamily { get; }
-
-        /// <summary>
-        /// If false, font is regular weight
-        /// </summary>
-        public bool IsBold { get; }
-
-        public string FaceName { get; }
-
-        public CursorWeight CursorSize { get; }
-
-        public bool IsFullScreen { get; }
-        public bool IsQuickEdit { get; }
-        public bool IsInsertMode { get; }
-        public bool IsAutoPositioned { get; }
-
-        public uint HistoryBufferSize { get; }
-        public uint HistoryBufferCount { get; }
-
-        public bool HistoryDuplicatesAllowed { get; }
-
-        public List<uint> ColorTable { get; } 
-
         public ConsoleDataBlock(byte[] rawBytes)
         {
             Signature = ExtraDataTypes.ConsoleDataBlock;
@@ -109,7 +63,7 @@ namespace Lnk.ExtraData
             var fontWeight = BitConverter.ToUInt16(rawBytes, 40);
             IsBold = fontWeight >= 700;
 
-            FaceName = Encoding.Unicode.GetString(rawBytes, 44,64).Split('\0').First();
+            FaceName = Encoding.Unicode.GetString(rawBytes, 44, 64).Split('\0').First();
 
             var curSize = BitConverter.ToUInt32(rawBytes, 108);
 
@@ -117,7 +71,7 @@ namespace Lnk.ExtraData
             {
                 CursorSize = CursorWeight.Small;
             }
-            else if (curSize> 26 && curSize<=50)
+            else if (curSize > 26 && curSize <= 50)
             {
                 CursorSize = CursorWeight.Normal;
             }
@@ -138,11 +92,67 @@ namespace Lnk.ExtraData
 
             for (var i = 0; i < 8; i++)
             {
-                ColorTable.Add(BitConverter.ToUInt32(rawBytes,140 + (i*8)));
+                ColorTable.Add(BitConverter.ToUInt32(rawBytes, 140 + i*8));
             }
+        }
 
 
+        public FillAttribute FillAttributes { get; }
+        public FillAttribute PopupFillAttributes { get; }
 
+        public short ScreenWidthBufferSize { get; }
+        public short ScreenHeightBufferSize { get; }
+        public short WindowWidth { get; }
+        public short WindowHeight { get; }
+        public short WindowOriginX { get; }
+        public short WindowOriginY { get; }
+
+        public int Reserved0 { get; }
+        public int Reserved1 { get; }
+        public uint FontSize { get; }
+        public FontFamily FontFamily { get; }
+
+        /// <summary>
+        ///     If false, font is regular weight
+        /// </summary>
+        public bool IsBold { get; }
+
+        public string FaceName { get; }
+
+        public CursorWeight CursorSize { get; }
+
+        public bool IsFullScreen { get; }
+        public bool IsQuickEdit { get; }
+        public bool IsInsertMode { get; }
+        public bool IsAutoPositioned { get; }
+
+        public uint HistoryBufferSize { get; }
+        public uint HistoryBufferCount { get; }
+
+        public bool HistoryDuplicatesAllowed { get; }
+
+        public List<uint> ColorTable { get; }
+
+        public override string ToString()
+        {
+            return
+                $"Console data block" +
+                $"\r\nFill Attributes: {FillAttributes}" +
+                $"\r\nPopup Attributes: {PopupFillAttributes}" +
+                $"\r\nBuffer Size (Width x Height): {ScreenWidthBufferSize} x {ScreenHeightBufferSize}" +
+                $"\r\nWindow Size (Width x Height): {WindowWidth} x {WindowHeight}" +
+                $"\r\nOrigin (X/Y): {WindowOriginX}/{WindowOriginY}" +
+                $"\r\nFont Size: {FontSize}" +
+                $"\r\nIs Bold: {IsBold}" +
+                $"\r\nFace Name: {FaceName}" +
+                $"\r\nCursor Size: {CursorSize}" +
+                $"\r\nIs Full Screen: {IsFullScreen}" +
+                $"\r\nIs Quick Edit: {IsQuickEdit}" +
+                $"\r\nIs Insert Mode: {IsInsertMode}" +
+                $"\r\nIs Auto Positioned: {IsAutoPositioned}" +
+                $"\r\nHistory Buffer Size: {HistoryBufferSize}" +
+                $"\r\nHistory Buffer Count: {HistoryBufferCount}" +
+                $"\r\nHistory Duplicates Allowed: {HistoryDuplicatesAllowed}";
         }
     }
 }

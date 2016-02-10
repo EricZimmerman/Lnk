@@ -20,7 +20,7 @@ namespace Lnk.ShellItems
         public int Slot { get; set; }
 
         public bool IsDeleted { get; set; }
-        
+
         public int MruPosition { get; set; }
         public int NodeSlot { get; set; }
 
@@ -35,33 +35,15 @@ namespace Lnk.ShellItems
         public DateTimeOffset? LastExplored { get; set; }
 
 
-
-
         public List<IExtensionBlock> ExtensionBlocks { get; set; }
 
         public override string ToString()
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"Value: {Value}");
-            sb.AppendLine($"Shell Type: {FriendlyName}");
+            sb.AppendLine($"Type: {FriendlyName}, Value: {Value}");
 
-            sb.AppendLine();
-
-            sb.AppendLine($"Bag Path: {BagPath}, Slot #: {Slot}, MRU Position: {MruPosition}, Node Slot: {NodeSlot}");
-            sb.AppendLine($"Absolute Path: {AbsolutePath}");
-
-            sb.AppendLine();
-
-            if (IsDeleted)
-            {
-                sb.AppendLine("Deleted: True");
-                sb.AppendLine();
-            }
-
-                sb.AppendLine($"# Child Bags: {ChildShellBags.Count}");
-
-          if (FirstExplored.HasValue)
+            if (FirstExplored.HasValue)
             {
                 sb.AppendLine();
                 sb.AppendLine(
@@ -89,7 +71,7 @@ namespace Lnk.ShellItems
                         continue;
                     }
 
-                        sb.AppendLine($"---------------------- Block {extensionNumber:N0} ----------------------");
+                    sb.AppendLine($"---------------------- Block {extensionNumber:N0} ----------------------");
 
                     sb.AppendLine(extensionBlock.ToString());
 
@@ -106,9 +88,6 @@ namespace Lnk.ShellItems
                     $"Last Write Time: {LastWriteTime.Value.ToString(Utils.GetDateTimeFormatWithMilliseconds())}");
             }
 
-            sb.AppendLine();
-
-            sb.AppendLine($"Hex Value: {BitConverter.ToString(HexValue)}");
 
             return sb.ToString();
         }
