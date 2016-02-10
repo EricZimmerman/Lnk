@@ -25,17 +25,32 @@ namespace Lnk.ExtraData
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine("Property store data block");
-
-            foreach (var prop in PropertyStore.Sheets)
+            if (PropertyStore.Sheets.Count > 0)
             {
-                foreach (var propertyName in prop.PropertyNames)
+                sb.AppendLine("Property store data block (Format: GUID\\ID Description ==> Value)");
+
+                var propCount = 0;
+
+                foreach (var prop in PropertyStore.Sheets)
                 {
-                    sb.AppendLine(
-                        $"{prop.GUID}\\{propertyName.Key} {Utils.GetDescriptionFromGuidAndKey(prop.GUID, int.Parse(propertyName.Key))} ==> {propertyName.Value}");
+                    foreach (var propertyName in prop.PropertyNames)
+                    {
+                        propCount += 1;
+                           var prefix = $"{prop.GUID}\\{propertyName.Key}".PadRight(45);
+                        var suffix = $"{Utils.GetDescriptionFromGuidAndKey(prop.GUID, int.Parse(propertyName.Key))}".PadRight(50);
+
+                        sb.AppendLine(
+                            $"{prefix} {suffix} ==> {propertyName.Value}");
+                    }
                 }
 
+                if (propCount == 0)
+                {
+                    sb.AppendLine("(Property store is empty)");
+                }
             }
+
+            
 
             return sb.ToString();
         }
