@@ -18,7 +18,6 @@ namespace Lnk.ExtraData
         BackgroundIntensity = 0x00080
     }
 
-
     public enum FontFamily
     {
         Dontcare = 0x00,

@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="TestFiles\Bad\%24I2GXWHL.lnk" />
     <None Include="TestFiles\Misc\local.directory.seven.test" />
     <None Include="TestFiles\Misc\local.directory.xp.test" />
     <None Include="TestFiles\Misc\local.file.darwin.test" />
