@@ -115,7 +115,7 @@ namespace Lnk
 
             if (Signature != _goodSignature)
             {
-                throw new Exception("Invalid Signature! ");
+                throw new Exception("Invalid Signature!");
             }
 
             DataFlags = (DataFlag) BitConverter.ToInt32(rawBytes, 20);

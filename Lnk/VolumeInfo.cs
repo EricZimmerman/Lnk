@@ -13,9 +13,9 @@ namespace Lnk
 
             [Description("No root directory")] DRIVE_NO_ROOT_DIR = 1,
 
-            [Description("Removable storage media (floppy, usb)")] DRIVE_REMOVABLE = 2,
+            [Description("Removable storage media (Floppy, USB)")] DRIVE_REMOVABLE = 2,
 
-            [Description("Fixed storage media (harddisk)")] DRIVE_FIXED = 3,
+            [Description("Fixed storage media (Hard drive)")] DRIVE_FIXED = 3,
 
             [Description("Remote storage")] DRIVE_REMOTE = 4,
 
