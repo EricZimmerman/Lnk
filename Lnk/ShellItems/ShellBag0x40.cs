@@ -5,7 +5,7 @@ using ExtensionBlocks;
 
 namespace Lnk.ShellItems
 {
-    internal class ShellBag0x40 : ShellBag
+    public class ShellBag0x40 : ShellBag
     {
         private string _desc;
 

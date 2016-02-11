@@ -423,7 +423,7 @@ namespace Lnk.ShellItems
 
             if (valuestring == "")
             {
-                valuestring = "No Property sheets found";
+                valuestring = "No Property sheet value found";
             }
 
             Value = valuestring;

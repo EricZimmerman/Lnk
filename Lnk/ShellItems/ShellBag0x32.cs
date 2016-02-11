@@ -6,7 +6,7 @@ using ExtensionBlocks;
 
 namespace Lnk.ShellItems
 {
-    internal class ShellBag0X32 : ShellBag
+    public class ShellBag0X32 : ShellBag
     {
         public ShellBag0X32(int slot, int mruPosition, byte[] rawBytes, string bagPath)
         {

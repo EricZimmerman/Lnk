@@ -6,7 +6,7 @@ using ExtensionBlocks;
 
 namespace Lnk.ShellItems
 {
-    internal class ShellBagZipContents : ShellBag
+    public class ShellBagZipContents : ShellBag
     {
         public ShellBagZipContents(int slot, int mruPosition, byte[] rawBytes, string bagPath)
         {

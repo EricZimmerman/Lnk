@@ -473,7 +473,7 @@ namespace Lnk
                         ExtraBlocks.Add(eb);
                         break;
                     case ExtraDataTypes.IconEnvironmentDataBlock:
-                        var ib = new EnvironmentVariableDataBlock(extraBlock);
+                        var ib = new IconEnvironmentDataBlock(extraBlock);
                         ExtraBlocks.Add(ib);
                         break;
                     case ExtraDataTypes.KnownFolderDataBlock:

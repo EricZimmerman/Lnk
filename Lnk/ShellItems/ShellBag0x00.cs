@@ -8,7 +8,7 @@ using ExtensionBlocks;
 
 namespace Lnk.ShellItems
 {
-    internal class ShellBag0x00 : ShellBag
+    public class ShellBag0x00 : ShellBag
     {
         private string _ClassID;
         private string _FileSystemName;
@@ -584,7 +584,7 @@ namespace Lnk.ShellItems
 
             if (valuestring == "")
             {
-                valuestring = "No Property sheets found";
+                valuestring = "No Property sheet value found";
             }
 
             Value = valuestring;
