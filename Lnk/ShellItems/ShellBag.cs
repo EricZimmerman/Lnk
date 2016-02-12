@@ -7,32 +7,12 @@ namespace Lnk.ShellItems
 {
     public abstract class ShellBag : IShellBag
     {
-        public string InternalId { get; set; }
+        
 
         public string FriendlyName { get; set; }
 
-        public byte[] HexValue { get; set; }
-
-        public string BagPath { get; set; }
-
-        public string AbsolutePath { get; set; }
-
-        public int Slot { get; set; }
-
-        public bool IsDeleted { get; set; }
-
-        public int MruPosition { get; set; }
-        public int NodeSlot { get; set; }
-
-        public List<IShellBag> ChildShellBags { get; set; }
 
         public string Value { get; set; }
-
-        public DateTimeOffset? LastWriteTime { get; set; }
-
-        public DateTimeOffset? FirstExplored { get; set; }
-
-        public DateTimeOffset? LastExplored { get; set; }
 
 
         public List<IExtensionBlock> ExtensionBlocks { get; set; }
@@ -56,8 +36,9 @@ namespace Lnk.ShellItems
                     {
                         continue;
                     }
-                                        
-                    sb.AppendLine($"---------------------- Block {extensionNumber:N0} ({extensionBlock.GetType().Name})----------------------");
+
+                    sb.AppendLine(
+                        $"---------------------- Block {extensionNumber:N0} ({extensionBlock.GetType().Name})----------------------");
 
                     if (extensionBlock is Beef0004)
                     {
@@ -70,19 +51,20 @@ namespace Lnk.ShellItems
                         {
                             b4Sb.AppendLine($"Localized name: {b4.LocalisedName}");
                         }
-                        
+
                         b4Sb.AppendLine($"Created: {b4.CreatedOnTime}");
                         b4Sb.AppendLine($"Last access: {b4.LastAccessTime}");
                         if (b4.MFTInformation.MFTEntryNumber > 0)
                         {
-                            b4Sb.AppendLine($"MFT entry/sequence #: {b4.MFTInformation.MFTEntryNumber}/{b4.MFTInformation.MFTSequenceNumber} (0x{b4.MFTInformation.MFTEntryNumber:X}/0x{b4.MFTInformation.MFTSequenceNumber:X})");
+                            b4Sb.AppendLine(
+                                $"MFT entry/sequence #: {b4.MFTInformation.MFTEntryNumber}/{b4.MFTInformation.MFTSequenceNumber} (0x{b4.MFTInformation.MFTEntryNumber:X}/0x{b4.MFTInformation.MFTSequenceNumber:X})");
                             if (b4.MFTInformation.Note.Length > 0)
                             {
                                 b4Sb.AppendLine($"File system hint: {b4.MFTInformation.Note}");
                             }
                         }
-                        
-                        
+
+
                         sb.Append(b4Sb);
                     }
                     else if (extensionBlock is Beef0025)
@@ -100,11 +82,11 @@ namespace Lnk.ShellItems
                     {
                         var b3 = extensionBlock as Beef0003;
 
-                        var b3sb = new StringBuilder();
+                        var b3Sb = new StringBuilder();
 
-                        b3sb.AppendLine($"GUID: {b3.GUID1} ({b3.GUID1Folder})");
+                        b3Sb.AppendLine($"GUID: {b3.GUID1} ({b3.GUID1Folder})");
 
-                        sb.Append(b3sb);
+                        sb.Append(b3Sb);
                     }
                     else
                     {
@@ -118,7 +100,7 @@ namespace Lnk.ShellItems
                 sb.Append("--------------------------------------------------");
             }
 
-           
+
             return sb.ToString();
         }
     }

@@ -8,27 +8,17 @@ using ExtensionBlocks;
 
 namespace Lnk.ShellItems
 {
-    public class ShellBag0x00 : ShellBag
+    public class ShellBag0X00 : ShellBag
     {
-        private string _ClassID;
-        private string _FileSystemName;
+        private string _classId;
+        private string _fileSystemName;
         private List<string> _guids;
-        private object _MTPType1GuidName;
-        private string _StorageIDName;
+        private object _mtpType1GuidName;
+        private string _storageIdName;
 
 
-        public ShellBag0x00(int slot, int mruPosition, byte[] rawBytes, string bagPath)
+        public ShellBag0X00(byte[] rawBytes)
         {
-            Slot = slot;
-            MruPosition = mruPosition;
-
-            ChildShellBags = new List<IShellBag>();
-
-            //if (bagPath.Contains(@"BagMRU\13") && slot == 2)
-            //{
-            //    Debug.WriteLine("At trap for certain bag in 0x00 bag");
-            //}
-
             _guids = new List<string>();
 
             ShortName = string.Empty;
@@ -37,13 +27,7 @@ namespace Lnk.ShellItems
 
             PropertyStore = new PropertyStore();
 
-            InternalId = Guid.NewGuid().ToString();
-
-            HexValue = rawBytes;
-
             ExtensionBlocks = new List<IExtensionBlock>();
-
-            BagPath = bagPath;
 
             // There are a few special cases for 0x00 items, so pull a special sig and see if we have one of those
             var specialDataSig = BitConverter.ToUInt32(rawBytes, 4);
@@ -51,7 +35,7 @@ namespace Lnk.ShellItems
             switch (specialDataSig)
             {
                 case 0xc001b000: //00-B0-01-C0-
-                    ProcessURLContainer(rawBytes);
+                    ProcessUrlContainer(rawBytes);
 
                     return;
 
@@ -95,17 +79,17 @@ namespace Lnk.ShellItems
                 case 0x00030005:
                 case 0x00000005:
 
-                    ProcessFTPSubItem(rawBytes);
+                    ProcessFtpSubItem(rawBytes);
 
                     break;
                 case 0x23febbee:
-                    ProcessPropertyViewGUID(rawBytes);
+                    ProcessPropertyViewGuid(rawBytes);
 
                     return;
 
                 case 0x10312005:
 
-                    ProcessMTPType2(rawBytes);
+                    ProcessMtpType2(rawBytes);
 
                     return;
 
@@ -118,7 +102,7 @@ namespace Lnk.ShellItems
 
                 case 0x7192006:
 
-                    ProcessMTPType1(rawBytes);
+                    ProcessMtpType1(rawBytes);
 
                     return;
 
@@ -154,17 +138,8 @@ namespace Lnk.ShellItems
         /// </summary>
         public DateTimeOffset? LastAccessTime { get; set; }
 
-        public DateTimeOffset? FTPFolderTime { get; set; }
+        public DateTimeOffset? FtpFolderTime { get; set; }
 
-        ///// <summary>
-        /////     For files and directories, the MFT entry #
-        ///// </summary>
-        //public long? MFTEntryNumber { get; set; }
-
-        ///// <summary>
-        /////     For files and directories, the MFT sequence #
-        ///// </summary>
-        //public int? MFTSequenceNumber { get; set; }
 
         public int FileSize { get; private set; }
 
@@ -174,7 +149,7 @@ namespace Lnk.ShellItems
 
         public string ShortName { get; private set; }
 
-        private void ProcessURLContainer(byte[] rawBytes)
+        private void ProcessUrlContainer(byte[] rawBytes)
         {
             FriendlyName = "Variable: HTTP URI";
 
@@ -200,7 +175,7 @@ namespace Lnk.ShellItems
             FullUrl = url.Replace("\0", "");
         }
 
-        private void ProcessFTPSubItem(byte[] rawBytes)
+        private void ProcessFtpSubItem(byte[] rawBytes)
         {
             FriendlyName = "Variable: FTP URI";
 
@@ -214,7 +189,7 @@ namespace Lnk.ShellItems
 
             if (fileTime1.Year > 1601)
             {
-                FTPFolderTime = fileTime1;
+                FtpFolderTime = fileTime1;
             }
 
             index += 8;
@@ -237,7 +212,6 @@ namespace Lnk.ShellItems
                 index += 1;
             }
 
-
             len1 = 0;
 
             while (rawBytes[index + len1] != 0x00 || rawBytes[index + len1 + 1] != 0x00)
@@ -254,7 +228,7 @@ namespace Lnk.ShellItems
         }
 
 
-        private void ProcessMTPType2(byte[] rawBytes)
+        private void ProcessMtpType2(byte[] rawBytes)
         {
             FriendlyName = "Variable: MTP type 2";
 
@@ -281,7 +255,7 @@ namespace Lnk.ShellItems
 
             index += 4;
 
-            var storageIDStringLen = BitConverter.ToInt32(rawBytes, index);
+            var storageIdStringLen = BitConverter.ToInt32(rawBytes, index);
 
             index += 4;
 
@@ -289,7 +263,7 @@ namespace Lnk.ShellItems
 
             index += 4;
 
-            var numGUIDs = BitConverter.ToInt32(rawBytes, index);
+            var numGuiDs = BitConverter.ToInt32(rawBytes, index);
 
             index += 4; // skip unknown
 
@@ -297,11 +271,11 @@ namespace Lnk.ShellItems
 
             index += storageStringNameLen*2;
 
-            _StorageIDName = Encoding.Unicode.GetString(rawBytes, index, storageIDStringLen*2 - 2);
+            _storageIdName = Encoding.Unicode.GetString(rawBytes, index, storageIdStringLen*2 - 2);
 
-            index += storageIDStringLen*2;
+            index += storageIdStringLen*2;
 
-            _FileSystemName = Encoding.Unicode.GetString(rawBytes, index, fileSystemNameLen*2 - 2);
+            _fileSystemName = Encoding.Unicode.GetString(rawBytes, index, fileSystemNameLen*2 - 2);
 
             index += fileSystemNameLen*2;
 
@@ -309,20 +283,20 @@ namespace Lnk.ShellItems
 
 
             _guids = new List<string>();
-            for (var i = 0; i < numGUIDs; i++)
+            for (var i = 0; i < numGuiDs; i++)
             {
-                var rawGUID = rawBytes.Skip(index).Take(78).ToArray();
+                var rawGuid = rawBytes.Skip(index).Take(78).ToArray();
                 index += 78;
-                var guid = Encoding.Unicode.GetString(rawGUID).Replace("\0", "");
+                var guid = Encoding.Unicode.GetString(rawGuid).Replace("\0", "");
                 _guids.Add(guid);
             }
 
             index += 4; //unknown
 
-            var classIDRaw = rawBytes.Skip(index).Take(16).ToArray();
+            var classIdRaw = rawBytes.Skip(index).Take(16).ToArray();
 
-            var clasIDGUID = Utils.ExtractGuidFromShellItem(classIDRaw);
-            _ClassID = Utils.GetFolderNameFromGuid(clasIDGUID);
+            var clasIdguid = Utils.ExtractGuidFromShellItem(classIdRaw);
+            _classId = Utils.GetFolderNameFromGuid(clasIdguid);
 
             index += 16;
 
@@ -335,7 +309,7 @@ namespace Lnk.ShellItems
             Value = storageName;
         }
 
-        private void ProcessMTPType1(byte[] rawBytes)
+        private void ProcessMtpType1(byte[] rawBytes)
         {
             FriendlyName = "Variable: MTP type 1";
 
@@ -360,7 +334,7 @@ namespace Lnk.ShellItems
 
             var rawGuid = rawBytes.Skip(index).Take(16).ToArray();
             var guidString = Utils.ExtractGuidFromShellItem(rawGuid);
-            _MTPType1GuidName = Utils.GetFolderNameFromGuid(guidString);
+            _mtpType1GuidName = Utils.GetFolderNameFromGuid(guidString);
 
             index = 0x3e;
 
@@ -368,7 +342,7 @@ namespace Lnk.ShellItems
 
             index += 4;
 
-            var storageIDStringLen = BitConverter.ToInt32(rawBytes, index);
+            var storageIdStringLen = BitConverter.ToInt32(rawBytes, index);
 
             index += 4;
 
@@ -380,11 +354,11 @@ namespace Lnk.ShellItems
 
             index += storageStringNameLen*2;
 
-            _StorageIDName = Encoding.Unicode.GetString(rawBytes, index, storageIDStringLen*2 - 2);
+            _storageIdName = Encoding.Unicode.GetString(rawBytes, index, storageIdStringLen*2 - 2);
 
-            index += storageIDStringLen*2;
+            index += storageIdStringLen*2;
 
-            _FileSystemName = Encoding.Unicode.GetString(rawBytes, index, fileSystemNameLen*2 - 2);
+            _fileSystemName = Encoding.Unicode.GetString(rawBytes, index, fileSystemNameLen*2 - 2);
 
             index += fileSystemNameLen*2;
 
@@ -392,18 +366,18 @@ namespace Lnk.ShellItems
 
             if (storageName.Length > 0)
             {
-                if (storageName == _StorageIDName)
+                if (storageName == _storageIdName)
                 {
                     Value = storageName;
                 }
                 else
                 {
-                    Value = $"{storageName} ({_StorageIDName})";
+                    Value = $"{storageName} ({_storageIdName})";
                 }
             }
             else
             {
-                Value = _StorageIDName;
+                Value = _storageIdName;
             }
         }
 
@@ -416,7 +390,7 @@ namespace Lnk.ShellItems
             {
                 //we have a good date
 
-                var zip = new ShellBagZipContents(Slot, MruPosition, rawBytes, BagPath);
+                var zip = new ShellBagZipContents(rawBytes);
                 FriendlyName = zip.FriendlyName;
                 LastAccessTime = zip.LastAccessTime;
 
@@ -435,21 +409,15 @@ namespace Lnk.ShellItems
 
             var shellPropertySheetListSize = BitConverter.ToInt16(rawBytes, index);
 
-            //       SiAuto.Main.LogMessage("shellPropertySheetListSize: {0}", shellPropertySheetListSize);
-
             index += 2;
 
             var identifiersize = BitConverter.ToInt16(rawBytes, index);
-
-            //    SiAuto.Main.LogMessage("identifiersize: {0}", identifiersize);
 
             index += 2;
 
             var identifierData = new byte[identifiersize];
 
             Array.Copy(rawBytes, index, identifierData, 0, identifiersize);
-
-            //   SiAuto.Main.LogArray("identifierData", identifierData);
 
             index += identifiersize;
 
@@ -513,7 +481,7 @@ namespace Lnk.ShellItems
                 {
                     //we have a good date
 
-                    var zip = new ShellBagZipContents(Slot, MruPosition, rawBytes, BagPath);
+                    var zip = new ShellBagZipContents(rawBytes);
                     FriendlyName = zip.FriendlyName;
                     LastAccessTime = zip.LastAccessTime;
 
@@ -522,7 +490,6 @@ namespace Lnk.ShellItems
                     return;
                 }
                 Debug.Write("Oh no! No property sheets!");
-
 
                 Value = "!!! Unable to determine Value !!!";
             }
@@ -547,7 +514,6 @@ namespace Lnk.ShellItems
 
                         var signature1 = BitConverter.ToUInt32(extBytes, 4);
 
-                        //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
 
                         var block1 = Utils.GetExtensionBlockFromBytes(signature1, extBytes);
 
@@ -590,7 +556,7 @@ namespace Lnk.ShellItems
             Value = valuestring;
         }
 
-        private void ProcessPropertyViewGUID(byte[] rawBytes)
+        private void ProcessPropertyViewGuid(byte[] rawBytes)
         {
             // this is a guid
 
@@ -611,29 +577,17 @@ namespace Lnk.ShellItems
 
             if (identifierSize > 0)
             {
-                var raw00guid = new byte[16];
+                var raw00Guid = new byte[16];
 
-                Array.Copy(rawBytes, index, raw00guid, 0, 16);
+                Array.Copy(rawBytes, index, raw00Guid, 0, 16);
 
-                //    SiAuto.Main.LogArray("Raw00guid", raw00guid);
 
-                var preguid = Utils.ExtractGuidFromShellItem(raw00guid);
+                var preguid = Utils.ExtractGuidFromShellItem(raw00Guid);
 
-                //   SiAuto.Main.LogMessage("preguid after ExtractGUIDFromShellItem: {0}", preguid);
 
                 var tempString = Utils.GetFolderNameFromGuid(preguid);
 
-                //  SiAuto.Main.LogMessage("tempString after GetFolderNameFromGUID: {0}", tempString);
-
-                //dfd5009b-23a3-008d-0400-000000008900
-                if (tempString == preguid)
-                {
-                    //SiAuto.Main.LogWarning("GUID did not map to name! {0}", preguid);
-                }
-
                 Value = tempString;
-
-                //   SiAuto.Main.LogMessage("set value to {0}", tempString);
 
                 index += 16;
             }
@@ -658,8 +612,6 @@ namespace Lnk.ShellItems
                     index += extBlockSize;
 
                     var signature1 = BitConverter.ToUInt32(extBytes, 4);
-
-                    //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
 
                     var block1 = Utils.GetExtensionBlockFromBytes(signature1, extBytes);
 
@@ -692,10 +644,10 @@ namespace Lnk.ShellItems
                 sb.AppendLine($"Short name: {ShortName}");
             }
 
-            if (FTPFolderTime.HasValue)
+            if (FtpFolderTime.HasValue)
             {
                 sb.AppendLine();
-                sb.AppendLine($"FTP folder time: {FTPFolderTime.Value}");
+                sb.AppendLine($"FTP folder time: {FtpFolderTime.Value}");
             }
 
             if (FullUrl != null)
@@ -740,21 +692,21 @@ namespace Lnk.ShellItems
             }
             sb.AppendLine();
 
-            if (_FileSystemName != null)
+            if (_fileSystemName != null)
             {
-                sb.AppendLine($"File system name: {_FileSystemName}");
+                sb.AppendLine($"File system name: {_fileSystemName}");
             }
-            if (_StorageIDName != null)
+            if (_storageIdName != null)
             {
-                sb.AppendLine($"Storage ID name: {_StorageIDName}");
+                sb.AppendLine($"Storage ID name: {_storageIdName}");
             }
-            if (_ClassID != null)
+            if (_classId != null)
             {
-                sb.AppendLine($"Class ID: {_ClassID}");
+                sb.AppendLine($"Class ID: {_classId}");
             }
-            if (_MTPType1GuidName != null)
+            if (_mtpType1GuidName != null)
             {
-                sb.AppendLine($"GUID: {_MTPType1GuidName}");
+                sb.AppendLine($"GUID: {_mtpType1GuidName}");
             }
 
 

@@ -8,29 +8,13 @@ using ExtensionBlocks;
 
 namespace Lnk.ShellItems
 {
-    public class ShellBag0x71 : ShellBag
+    public class ShellBag0X71 : ShellBag
     {
-        public ShellBag0x71(int slot, int mruPosition, byte[] rawBytes, string bagPath)
+        public ShellBag0X71(byte[] rawBytes)
         {
-            Slot = slot;
-            MruPosition = mruPosition;
-
             FriendlyName = "GUID: Control panel";
 
-            ChildShellBags = new List<IShellBag>();
-
-            InternalId = Guid.NewGuid().ToString();
-
-//            if (bagPath.Contains(@"BagMRU\1\3") && slot == 3)
-//            {
-//                Debug.WriteLine("At trap for certain bag in 0x71 bag");
-//            }
-
-            HexValue = rawBytes;
-
             ExtensionBlocks = new List<IExtensionBlock>();
-
-            BagPath = bagPath;
 
             var index = 2;
 
@@ -65,20 +49,11 @@ namespace Lnk.ShellItems
 
             index += 16;
 
-            //     SiAuto.Main.LogArray("rawguid1", rawguid1);
 
             var rawguid = Utils.ExtractGuidFromShellItem(rawguid1);
 
-            //  SiAuto.Main.LogMessage("preguid71 after ExtractGUIDFromShellItem: {0}", rawguid);
 
             var foldername = Utils.GetFolderNameFromGuid(rawguid);
-
-            //     SiAuto.Main.LogMessage("foldername after GetFolderNameFromGUID: {0}", foldername);
-
-            if (foldername.Contains(rawguid))
-            {
-                //  SiAuto.Main.LogWarning("GUID did not map to name! {0}", rawguid);
-            }
 
             Value = foldername;
 
@@ -87,8 +62,6 @@ namespace Lnk.ShellItems
                 index = 0x1e;
 
                 var signature1 = BitConverter.ToUInt32(rawBytes, index + 4);
-
-                //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
 
                 var block1 = Utils.GetExtensionBlockFromBytes(signature1, rawBytes.Skip(index).ToArray());
 
@@ -105,13 +78,11 @@ namespace Lnk.ShellItems
 
             var shellPropertySheetListSize = BitConverter.ToInt16(rawBytes, index);
 
-            //       SiAuto.Main.LogMessage("shellPropertySheetListSize: {0}", shellPropertySheetListSize);
 
             index += 2;
 
             var identifiersize = BitConverter.ToInt16(rawBytes, index);
 
-            //    SiAuto.Main.LogMessage("identifiersize: {0}", identifiersize);
 
             index += 2;
 
@@ -119,7 +90,6 @@ namespace Lnk.ShellItems
 
             Array.Copy(rawBytes, index, identifierData, 0, identifiersize);
 
-            //   SiAuto.Main.LogArray("identifierData", identifierData);
 
             index += identifiersize;
 
@@ -134,7 +104,7 @@ namespace Lnk.ShellItems
 
                 if (p.Any())
                 {
-                    //we can now look thry prop bytes for extension blocks
+                    //we can now look thru prop bytes for extension blocks
                     //TODO this is a hack until we can process vectors natively
 
                     var extOffsets = new List<int>();
@@ -157,7 +127,6 @@ namespace Lnk.ShellItems
 
                             var signature1 = BitConverter.ToUInt32(exBytes, 4);
 
-                            //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
 
                             var block1 = Utils.GetExtensionBlockFromBytes(signature1, exBytes);
 
@@ -170,20 +139,17 @@ namespace Lnk.ShellItems
                         // Syntax error in the regular expression
                     }
 
-                    //     Debug.WriteLine("Found 32 key");
                 }
             }
             else
             {
-                //   Debug.Write("Oh no! No property sheets!");
-                // SiAuto.Main.LogWarning("Oh no! No property sheets!");
 
                 if (rawBytes[0x28] == 0x2f ||
                     (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
                 {
                     //we have a good date
 
-                    var zip = new ShellBagZipContents(Slot, MruPosition, rawBytes, BagPath);
+                    var zip = new ShellBagZipContents(rawBytes);
                     FriendlyName = zip.FriendlyName;
                     //   LastAccessTime = zip.LastAccessTime;
 
@@ -191,7 +157,6 @@ namespace Lnk.ShellItems
 
                     return;
                 }
-                Debug.Write("Oh no! No property sheets!");
             }
 
             index += shellPropertySheetListSize;
@@ -200,7 +165,6 @@ namespace Lnk.ShellItems
 
 
             var rawguid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
-            //var rawguid = ShellBagUtils.ExtractGuidFromShellItem(bin.ReadBytes(16));
             index += 16;
 
             rawguid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
@@ -224,7 +188,6 @@ namespace Lnk.ShellItems
 
                     var signature1 = BitConverter.ToUInt32(extBytes, 4);
 
-                    //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
 
                     var block1 = Utils.GetExtensionBlockFromBytes(signature1, extBytes);
 
@@ -269,14 +232,11 @@ namespace Lnk.ShellItems
         {
             var sb = new StringBuilder();
 
-            if (PropertyStore != null)
+            if (PropertyStore?.Sheets.Count > 0)
             {
-                if (PropertyStore.Sheets.Count > 0)
-                {
-                    sb.AppendLine("Property Sheets");
+                sb.AppendLine("Property Sheets");
 
-                    sb.AppendLine(PropertyStore.ToString());
-                }
+                sb.AppendLine(PropertyStore.ToString());
             }
 
             sb.AppendLine(base.ToString());

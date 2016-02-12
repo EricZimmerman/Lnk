@@ -8,9 +8,9 @@ namespace Lnk
         [Flags]
         public enum DataFlag
         {
-            [Description("The LNK file contains a link target identifier")] HasTargetIDList = 0x00000001,
+            [Description("The LNK file contains a link target identifier")] HasTargetIdList = 0x00000001,
             [Description("The LNK file contains location information")] HasLinkInfo = 0x00000002,
-            [Description("The LNK file contains a [Description data string")] HasName = 0x00000004,
+            [Description("The LNK file contains a Description data string")] HasName = 0x00000004,
             [Description("The LNK file contains a relative path data string")] HasRelativePath = 0x00000008,
             [Description("The LNK file contains a working directory data string")] HasWorkingDir = 0x00000010,
             [Description("The LNK file contains a command line arguments data string")] HasArguments = 0x00000020,
@@ -24,13 +24,13 @@ namespace Lnk
             [Description("A 16-bit target application is run in a separate virtual machine.")] RunInSeparateProcess =
                 0x00000400,
             Reserved0 = 0x00000800,
-            [Description("The LNK file contains a Darwin (Mac OS-X) properties data block")] HasDarwinID = 0x00001000,
+            [Description("The LNK file contains a Darwin (Mac OS-X) properties data block")] HasDarwinId = 0x00001000,
             [Description("The target application is run as a different user.")] RunAsUser = 0x00002000,
             [Description("The LNK file contains an icon location data block")] HasExpIcon = 0x00004000,
 
             [Description(
                 "The file system location is represented in the shell namespace when the path to an item is parsed into the link target identifiers"
-                )] NoPidlAlias0x00008000,
+                )] NoPidlAlias0X00008000,
             Reserved1 = 0x00010000,
 
             [Description(
@@ -50,59 +50,59 @@ namespace Lnk
             AllowLinkToLink = 0x00800000,
             UnaliasOnSave = 0x01000000,
             PreferEnvironmentPath = 0x02000000,
-            KeepLocalIDListForUNCTarget = 0x04000000
+            KeepLocalIdListForUncTarget = 0x04000000
         }
 
         [Flags]
         public enum FileAttribute
         {
-            [Description("Is read-only")] FILE_ATTRIBUTE_READONLY = 0x00000001,
-            [Description("Is hidden")] FILE_ATTRIBUTE_HIDDEN = 0x00000002,
-            [Description("Is a system file or directory")] FILE_ATTRIBUTE_SYSTEM = 0x00000004,
-            [Description("Is a volume label/Reserved, not used by the LNK format")] RES_VOLUME_LABEL = 0x00000008,
-            [Description("Is a directory")] FILE_ATTRIBUTE_DIRECTORY = 0x00000010,
-            [Description("Should be archived")] FILE_ATTRIBUTE_ARCHIVE = 0x00000020,
-            [Description("Is a device/Reserved, not used by the LNK format")] FILE_ATTRIBUTE_DEVICE = 0x00000040,
-            [Description("Is normal (None of the other flags should be set)")] FILE_ATTRIBUTE_NORMAL = 0x00000080,
-            [Description("Is temporary")] FILE_ATTRIBUTE_TEMPORARY = 0x00000100,
-            [Description("Is a sparse file")] FILE_ATTRIBUTE_SPARSE_FILE = 0x00000200,
-            [Description("Is a reparse point or symbolic link")] FILE_ATTRIBUTE_REPARSE_POINT = 0x00000400,
-            [Description("Is compressed")] FILE_ATTRIBUTE_COMPRESSED = 0x00000800,
+            [Description("Is read-only")] FileAttributeReadonly = 0x00000001,
+            [Description("Is hidden")] FileAttributeHidden = 0x00000002,
+            [Description("Is a system file or directory")] FileAttributeSystem = 0x00000004,
+            [Description("Is a volume label/Reserved, not used by the LNK format")] ResVolumeLabel = 0x00000008,
+            [Description("Is a directory")] FileAttributeDirectory = 0x00000010,
+            [Description("Should be archived")] FileAttributeArchive = 0x00000020,
+            [Description("Is a device/Reserved, not used by the LNK format")] FileAttributeDevice = 0x00000040,
+            [Description("Is normal (None of the other flags should be set)")] FileAttributeNormal = 0x00000080,
+            [Description("Is temporary")] FileAttributeTemporary = 0x00000100,
+            [Description("Is a sparse file")] FileAttributeSparseFile = 0x00000200,
+            [Description("Is a reparse point or symbolic link")] FileAttributeReparsePoint = 0x00000400,
+            [Description("Is compressed")] FileAttributeCompressed = 0x00000800,
 
-            [Description("Is offline. The data of the file is stored on an offline storage.")] FILE_ATTRIBUTE_OFFLINE =
+            [Description("Is offline. The data of the file is stored on an offline storage.")] FileAttributeOffline =
                 0x00001000,
 
             [Description(
                 "Do not index content. The content of the file or directory should not be indexed by the indexing service."
-                )] FILE_ATTRIBUTE_NOT_CONTENT_INDEXED = 0x00002000,
-            [Description("Is encrypted")] FILE_ATTRIBUTE_ENCRYPTED = 0x00004000,
-            [Description("Unknown (seen on Windows 95 FAT)")] UNK_WIN95_FAT = 0x00008000,
-            [Description("Is virtual/Currently reserved for future use, not used by the LNK format")] FILE_ATTRIBUTE_VIRTUAL = 0x00010000
+                )] FileAttributeNotContentIndexed = 0x00002000,
+            [Description("Is encrypted")] FileAttributeEncrypted = 0x00004000,
+            [Description("Unknown (seen on Windows 95 FAT)")] UnkWin95Fat = 0x00008000,
+            [Description("Is virtual/Currently reserved for future use, not used by the LNK format")] FileAttributeVirtual = 0x00010000
         }
 
         public enum ShowWindowOption
         {
-            [Description("Hides the window and activates another window.")] SW_HIDE = 0,
+            [Description("Hides the window and activates another window.")] SwHide = 0,
 
             [Description(
                 "Activates and displays the window. The window is restored to its original size and position if the window is minimized or maximized."
-                )] SW_NORMAL = 1,
-            [Description("Activates and minimizes the window.")] SW_SHOWMINIMIZED = 2,
-            [Description("Activates and maximizes the window.")] SW_MAXIMIZE = 3,
-            [Description("Display the window in its most recent position and size without activating it.")] SW_SHOWNOACTIVATE = 4,
-            [Description("Activates the window and displays it in its current size and position.")] SW_SHOW = 5,
-            [Description("Minimizes the window and activates the next top-level windows (in order of depth (Z order))")] SW_MINIMIZE = 6,
-            [Description("Display the window as minimized without activating it.")] SW_SHOWMINNOACTIVE = 7,
-            [Description("Display the window in its current size and position without activating it.")] SW_SHOWNA = 8,
+                )] SwNormal = 1,
+            [Description("Activates and minimizes the window.")] SwShowminimized = 2,
+            [Description("Activates and maximizes the window.")] SwMaximize = 3,
+            [Description("Display the window in its most recent position and size without activating it.")] SwShownoactivate = 4,
+            [Description("Activates the window and displays it in its current size and position.")] SwShow = 5,
+            [Description("Minimizes the window and activates the next top-level windows (in order of depth (Z order))")] SwMinimize = 6,
+            [Description("Display the window as minimized without activating it.")] SwShowminnoactive = 7,
+            [Description("Display the window in its current size and position without activating it.")] SwShowna = 8,
 
             [Description(
                 "Activates and displays the window. The window is restored to its original size and position if the window is minimized or maximized."
-                )] SW_RESTORE = 9,
+                )] SwRestore = 9,
 
             [Description(
-                "Set the show state based on the ShowWindow values specified during the creation of the process.")] SW_SHOWDEFAULT = 10,
-            [Description("Minimizes a window, even if the thread that owns the window is not responding.")] SW_FORCEMINIMIZE = 11,
-            [Description("Undocumented according to wine project.")] SW_NORMALNA = 0xcc
+                "Set the show state based on the ShowWindow values specified during the creation of the process.")] SwShowdefault = 10,
+            [Description("Minimizes a window, even if the thread that owns the window is not responding.")] SwForceminimize = 11,
+            [Description("Undocumented according to wine project.")] SwNormalna = 0xcc
         }
 
         private readonly Guid _goodSignature = new Guid("{00021401-0000-0000-c000-000000000046}");
@@ -162,7 +162,6 @@ namespace Lnk
 
         private string GetHotkey(byte low, byte high)
         {
-            //TODO set up test cases for all manner of shortcuts
             var hk = string.Empty;
 
             if (low == 0 && high == 0)

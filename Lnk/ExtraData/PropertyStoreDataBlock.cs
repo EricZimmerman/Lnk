@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using ExtensionBlocks;
 
@@ -39,7 +38,8 @@ namespace Lnk.ExtraData
 
                         var prefix = $"{prop.GUID}\\{propertyName.Key}".PadRight(43);
 
-                        var suffix = $"{Utils.GetDescriptionFromGuidAndKey(prop.GUID, int.Parse(propertyName.Key))}".PadRight(35);
+                        var suffix =
+                            $"{Utils.GetDescriptionFromGuidAndKey(prop.GUID, int.Parse(propertyName.Key))}".PadRight(35);
 
                         sb.AppendLine($"{prefix} {suffix} ==> {propertyName.Value}");
                     }

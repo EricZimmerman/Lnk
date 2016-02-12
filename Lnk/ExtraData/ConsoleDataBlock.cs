@@ -95,7 +95,6 @@ namespace Lnk.ExtraData
             }
         }
 
-
         public FillAttribute FillAttributes { get; }
         public FillAttribute PopupFillAttributes { get; }
 

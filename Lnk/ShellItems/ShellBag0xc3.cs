@@ -7,27 +7,11 @@ namespace Lnk.ShellItems
 {
     public class ShellBag0Xc3 : ShellBag
     {
-        public ShellBag0Xc3(int slot, int mruPosition, byte[] rawBytes, string bagPath)
+        public ShellBag0Xc3(byte[] rawBytes)
         {
-            Slot = slot;
-            MruPosition = mruPosition;
-
             FriendlyName = "Network location";
 
-            ChildShellBags = new List<IShellBag>();
-
-            //if (bagPath.Contains(@"BagMRU\5\3") && slot == 0)
-            //{
-            //    Debug.WriteLine(1);
-            //}
-
-            InternalId = Guid.NewGuid().ToString();
-
-            HexValue = rawBytes;
-
             ExtensionBlocks = new List<IExtensionBlock>();
-
-            BagPath = bagPath;
 
             var index = 0;
 
@@ -43,14 +27,8 @@ namespace Lnk.ShellItems
             var flags = rawBytes[index];
             index += 1;
 
-//            if (flags != 0xc1 && flags != 0xc5)
-//            {
-//                SiAuto.Main.LogWarning("Different flag found! {0}", flags);
-//            }
-
             var len = 0;
 
-            //SiAuto.Main.LogMessage("Walking out 0s");
             while (rawBytes[index + len] != 0x0)
             {
                 len += 1;
@@ -63,9 +41,6 @@ namespace Lnk.ShellItems
 
             var location = Encoding.GetEncoding(1252).GetString(tempBytes);
 
-            //    SiAuto.Main.LogMessage("location: {0}", location);
-
-            //SiAuto.Main.LogMessage("Walking out 0s");
             while (rawBytes[index] == 0x0)
             {
                 index += 1;
@@ -81,7 +56,6 @@ namespace Lnk.ShellItems
 
             Value = location;
 
-            // SiAuto.Main.LogMessage("Got drive letter: {0}", Value);
         }
 
         public override string ToString()

@@ -7,30 +7,13 @@ namespace Lnk.ShellItems
 {
     public class ShellBag0X01 : ShellBag
     {
-        public ShellBag0X01(int slot, int mruPosition, byte[] rawBytes, string bagPath)
+        public ShellBag0X01(byte[] rawBytes)
         {
-            Slot = slot;
-            MruPosition = mruPosition;
-
             DriveLetter = string.Empty;
 
             FriendlyName = "Control Panel Category";
 
-            //if (bagPath.Contains(@"BagMRU\13\0") && (slot == 0 || slot == 1)) 
-            //{
-            //    Debug.WriteLine("In 0x31 trap");
-            //}
-
-            ChildShellBags = new List<IShellBag>();
-
-            InternalId = Guid.NewGuid().ToString();
-
-            HexValue = rawBytes;
-
             ExtensionBlocks = new List<IExtensionBlock>();
-
-            BagPath = bagPath;
-
 
             // another special case when dealing with at least Hyper-V browsing
             if (rawBytes[8] == 0x3A && rawBytes[9] == 0x00)

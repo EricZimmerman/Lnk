@@ -11,27 +11,11 @@ namespace Lnk.ShellItems
         // Fields...
 
 
-        public ShellBag0X61(int slot, int mruPosition, byte[] rawBytes, string bagPath)
+        public ShellBag0X61(byte[] rawBytes)
         {
-            Slot = slot;
-            MruPosition = mruPosition;
-
             FriendlyName = "URI";
 
-            ChildShellBags = new List<IShellBag>();
-
-            InternalId = Guid.NewGuid().ToString();
-
-            //if (bagPath.Contains(@"BagMRU\1\1\2") && slot == 0)
-            //{
-            //    Debug.WriteLine("At trap for certain bag in 0x71 bag");
-            //}
-
-            HexValue = rawBytes;
-
             ExtensionBlocks = new List<IExtensionBlock>();
-
-            BagPath = bagPath;
 
             var index = 2; //past size
 
@@ -98,7 +82,7 @@ namespace Lnk.ShellItems
                     len1 += 1;
                 }
 
-                URI = Encoding.GetEncoding(1252).GetString(rawBytes, index, len1);
+                Uri = Encoding.GetEncoding(1252).GetString(rawBytes, index, len1);
 
 
                 index += len1 + 1;
@@ -111,11 +95,9 @@ namespace Lnk.ShellItems
             Trace.Assert(dataSize == 0, "extra data in ftp case");
         }
 
-        //   public PropertyStore PropertyStore { get; private set; }
-
         public DateTimeOffset? FileTime1 { get; }
 
-        public string URI { get; set; }
+        public string Uri { get; set; }
 
 
         public string UserName { get; set; }
@@ -124,7 +106,7 @@ namespace Lnk.ShellItems
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"URI: {URI}");
+            sb.AppendLine($"URI: {Uri}");
             sb.AppendLine();
 
             sb.AppendLine($"Connect time: {FileTime1}");

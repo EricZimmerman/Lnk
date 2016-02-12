@@ -9,19 +9,19 @@ namespace Lnk
     {
         public enum DriveTypes
         {
-            [Description("Unknown")] DRIVE_UNKNOWN = 0,
+            [Description("Unknown")] DriveUnknown = 0,
 
-            [Description("No root directory")] DRIVE_NO_ROOT_DIR = 1,
+            [Description("No root directory")] DriveNoRootDir = 1,
 
-            [Description("Removable storage media (Floppy, USB)")] DRIVE_REMOVABLE = 2,
+            [Description("Removable storage media (Floppy, USB)")] DriveRemovable = 2,
 
-            [Description("Fixed storage media (Hard drive)")] DRIVE_FIXED = 3,
+            [Description("Fixed storage media (Hard drive)")] DriveFixed = 3,
 
-            [Description("Remote storage")] DRIVE_REMOTE = 4,
+            [Description("Remote storage")] DriveRemote = 4,
 
-            [Description("Optical disc (CD-ROM, DVD, BD)")] DRIVE_CDROM = 5,
+            [Description("Optical disc (CD-ROM, DVD, BD)")] DriveCdrom = 5,
 
-            [Description("RAM drive")] DRIVE_RAMDISK = 6
+            [Description("RAM drive")] DriveRamdisk = 6
         }
 
         public VolumeInfo(byte[] rawBytes)

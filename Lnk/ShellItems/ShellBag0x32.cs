@@ -8,29 +8,13 @@ namespace Lnk.ShellItems
 {
     public class ShellBag0X32 : ShellBag
     {
-        public ShellBag0X32(int slot, int mruPosition, byte[] rawBytes, string bagPath)
+        public ShellBag0X32(byte[] rawBytes)
         {
-            Slot = slot;
-            MruPosition = mruPosition;
-
             FriendlyName = "File";
-
-            ChildShellBags = new List<IShellBag>();
-
-            InternalId = Guid.NewGuid().ToString();
-
-            HexValue = rawBytes;
 
             ExtensionBlocks = new List<IExtensionBlock>();
 
             ShortName = string.Empty;
-
-            BagPath = bagPath;
-
-            //if (bagPath.Contains(@"BagMRU\3\2") && slot == 19)
-            //{
-            //    Debug.WriteLine(1);
-            //}
 
             var index = 2;
 
@@ -40,7 +24,7 @@ namespace Lnk.ShellItems
 
                 try
                 {
-                    var zip = new ShellBagZipContents(Slot, MruPosition, rawBytes, BagPath);
+                    var zip = new ShellBagZipContents(rawBytes);
                     FriendlyName = zip.FriendlyName;
                     LastAccessTime = zip.LastAccessTime;
 
@@ -60,7 +44,6 @@ namespace Lnk.ShellItems
 
             var fileSize = BitConverter.ToUInt32(rawBytes, index);
 
-            //   SiAuto.Main.LogMessage("fileSize: {0}", fileSize);
 
             FileSize = (int) fileSize;
 
@@ -72,19 +55,13 @@ namespace Lnk.ShellItems
 
             LastModificationTime = Utils.ExtractDateTimeOffsetFromBytes(lastmodifiedUtcRaw);
 
-            //      SiAuto.Main.LogMessage("Got last modified time: {0}", LastModificationTime);
 
             index += 4;
-
-            //   string fileAttribues = BitConverter.ToString(rawBytes, index, 2);
-
-            //    SiAuto.Main.LogMessage("fileAttribues: {0}", fileAttribues);
 
             index += 2;
 
             var len = 0;
 
-            //SiAuto.Main.LogMessage("Walking out 0s");
             while (rawBytes[index + len] != 0x0)
             {
                 len += 1;
@@ -99,15 +76,12 @@ namespace Lnk.ShellItems
 
             ShortName = shortName;
 
-            //    SiAuto.Main.LogMessage("shortName: {0}", shortName);
-
-            //SiAuto.Main.LogMessage("Walking out 0s");
             while (rawBytes[index] == 0x0)
             {
                 index += 1;
             }
 
-            //we are at extensnon blocks, so cut them up and process
+            //we are at extension blocks, so cut them up and process
             // here is where we need to cut up the rest into extension blocks
             var chunks = new List<byte[]>();
 
@@ -162,25 +136,10 @@ namespace Lnk.ShellItems
         /// </summary>
         public DateTimeOffset? LastModificationTime { get; set; }
 
-        ///// <summary>
-        /////     Created time of BagPath
-        ///// </summary>
-        //public DateTimeOffset? CreatedOnTime { get; set; }
-
         /// <summary>
         ///     Last access time of BagPath
         /// </summary>
         public DateTimeOffset? LastAccessTime { get; set; }
-
-        ///// <summary>
-        /////     For files and directories, the MFT entry #
-        ///// </summary>
-        //public long? MFTEntryNumber { get; set; }
-
-        ///// <summary>
-        /////     For files and directories, the MFT sequence #
-        ///// </summary>
-        //public int? MFTSequenceNumber { get; set; }
 
         public string ShortName { get; }
 
@@ -201,7 +160,7 @@ namespace Lnk.ShellItems
                 sb.AppendLine($"File size: {FileSize:N0}");
             }
 
-            //TODO denote custom properties vs stadard ones
+            //TODO denote custom properties vs standard ones
             if (LastModificationTime.HasValue)
             {
                 sb.AppendLine(

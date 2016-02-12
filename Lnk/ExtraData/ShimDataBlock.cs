@@ -21,6 +21,6 @@ namespace Lnk.ExtraData
         {
             return $"Shimcache data block" +
                    $"\r\nLayerName: {LayerName}";
-            }
+        }
     }
 }

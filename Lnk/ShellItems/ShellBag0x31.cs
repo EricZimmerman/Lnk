@@ -9,32 +9,13 @@ namespace Lnk.ShellItems
 {
     public class ShellBag0X31 : ShellBag
     {
-        public ShellBag0X31(int slot, int mruPosition, byte[] rawBytes, string bagPath)
+        public ShellBag0X31( byte[] rawBytes)
         {
-            Slot = slot;
-            MruPosition = mruPosition;
-
             FriendlyName = "Directory";
 
-            ChildShellBags = new List<IShellBag>();
-
-            InternalId = Guid.NewGuid().ToString();
-
-            if (bagPath.Contains(@"BagMRU\0\11\20") && slot == 98)
-            {
-                Debug.WriteLine("In 0x31 trap");
-            }
-
-            //if (bagPath.Contains(@"BagMRU\0\11\20\97") && slot == 2)
-            //{
-            //    Debug.WriteLine(1);
-            //}
-
-            HexValue = rawBytes;
 
             ExtensionBlocks = new List<IExtensionBlock>();
 
-            BagPath = bagPath;
 
             var index = 2;
             if ((rawBytes[0x27] == 0x00 && rawBytes[0x28] == 0x2f && rawBytes[0x29] == 0x00) ||
@@ -44,7 +25,7 @@ namespace Lnk.ShellItems
 
                 try
                 {
-                    var zip = new ShellBagZipContents(Slot, MruPosition, rawBytes, BagPath);
+                    var zip = new ShellBagZipContents(rawBytes);
                     FriendlyName = zip.FriendlyName;
                     LastAccessTime = zip.LastAccessTime;
 
@@ -67,19 +48,11 @@ namespace Lnk.ShellItems
 
             LastModificationTime = Utils.ExtractDateTimeOffsetFromBytes(rawBytes.Skip(index).Take(4).ToArray());
 
-            //    SiAuto.Main.LogMessage("Got last modified time: {0}", LastModificationTime);
-
             index += 4;
-
-            //    string fileAttribues = BitConverter.ToString(rawBytes, index, 2);
-
-            //     SiAuto.Main.LogMessage("fileAttribues: {0}", fileAttribues);
 
             index += 2;
 
             var len = 0;
-
-            //SiAuto.Main.LogMessage("Walking out 0s");
 
             var beefPos = BitConverter.ToString(rawBytes).IndexOf("04-00-EF-BE", StringComparison.InvariantCulture)/3;
             beefPos = beefPos - 4; //add header back for beef
@@ -88,10 +61,6 @@ namespace Lnk.ShellItems
 
             if (rawBytes[2] == 0x35)
             {
-//                while (rawBytes[index + len] != 0x0 || rawBytes[index + len + 1] != 0x0)
-//                {
-//                    len += 1;
-//                }
                 len = strLen;
             }
             else
@@ -123,9 +92,6 @@ namespace Lnk.ShellItems
 
             Value = shortName;
 
-            //       SiAuto.Main.LogMessage("shortName: {0} in {1}", shortName, bagPath);
-
-            //SiAuto.Main.LogMessage("Walking out 0s");
             while (rawBytes[index] == 0x0)
             {
                 index += 1;
@@ -199,25 +165,11 @@ namespace Lnk.ShellItems
         /// </summary>
         public DateTimeOffset? LastModificationTime { get; set; }
 
-        ///// <summary>
-        /////     Created time of BagPath
-        ///// </summary>
-        //public DateTimeOffset? CreatedOnTime { get; set; }
-
+       
         /// <summary>
         ///     Last access time of BagPath
         /// </summary>
         public DateTimeOffset? LastAccessTime { get; set; }
-
-        ///// <summary>
-        /////     For files and directories, the MFT entry #
-        ///// </summary>
-        //public long? MFTEntryNumber { get; set; }
-
-        ///// <summary>
-        /////     For files and directories, the MFT sequence #
-        ///// </summary>
-        //public int? MFTSequenceNumber { get; set; }
 
         public string ShortName { get; }
 

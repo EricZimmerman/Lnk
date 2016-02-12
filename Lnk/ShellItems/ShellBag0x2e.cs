@@ -8,27 +8,11 @@ using ExtensionBlocks;
 
 namespace Lnk.ShellItems
 {
-    public class ShellBag0x2e : ShellBag
+    public class ShellBag0X2E : ShellBag
     {
-        public ShellBag0x2e(int slot, int mruPosition, byte[] rawBytes, string bagPath)
+        public ShellBag0X2E(byte[] rawBytes)
         {
-            Slot = slot;
-            MruPosition = mruPosition;
-
-            ChildShellBags = new List<IShellBag>();
-
-            InternalId = Guid.NewGuid().ToString();
-
-            HexValue = rawBytes;
-
             ExtensionBlocks = new List<IExtensionBlock>();
-
-            //if (bagPath.Contains(@"BagMRU\2") && slot == 5)
-            //{
-            //    Debug.WriteLine("At trap for certain bag in 0x71 bag");
-            //}
-
-            BagPath = bagPath;
 
             var index = 0;
 
@@ -70,7 +54,7 @@ namespace Lnk.ShellItems
             {
                 //we have a good date
 
-                var zip = new ShellBagZipContents(Slot, MruPosition, rawBytes, BagPath);
+                var zip = new ShellBagZipContents( rawBytes);
                 FriendlyName = zip.FriendlyName;
                 LastAccessTime = zip.LastAccessTime;
 
@@ -100,7 +84,7 @@ namespace Lnk.ShellItems
 
             index += 4;
 
-            var storageIDStringLen = BitConverter.ToInt32(rawBytes, index);
+            var storageIdStringLen = BitConverter.ToInt32(rawBytes, index);
 
             index += 4;
 
@@ -112,9 +96,9 @@ namespace Lnk.ShellItems
 
             index += storageStringNameLen*2;
 
-            var storageIDName = Encoding.Unicode.GetString(rawBytes, index, storageIDStringLen*2 - 2);
+            var storageIdName = Encoding.Unicode.GetString(rawBytes, index, storageIdStringLen*2 - 2);
 
-            index += storageIDStringLen*2;
+            index += storageIdStringLen*2;
 
             Value = storageName;
         }
@@ -133,13 +117,11 @@ namespace Lnk.ShellItems
 
             var shellPropertySheetListSize = BitConverter.ToInt16(rawBytes, index);
 
-            //       SiAuto.Main.LogMessage("shellPropertySheetListSize: {0}", shellPropertySheetListSize);
 
             index += 2;
 
             var identifiersize = BitConverter.ToInt16(rawBytes, index);
 
-            //    SiAuto.Main.LogMessage("identifiersize: {0}", identifiersize);
 
             index += 2;
 
@@ -147,7 +129,6 @@ namespace Lnk.ShellItems
 
             Array.Copy(rawBytes, index, identifierData, 0, identifiersize);
 
-            //   SiAuto.Main.LogArray("identifierData", identifierData);
 
             index += identifiersize;
 
@@ -185,7 +166,6 @@ namespace Lnk.ShellItems
 
                             var signature1 = BitConverter.ToUInt32(exBytes, 4);
 
-                            //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
 
                             var block1 = Utils.GetExtensionBlockFromBytes(signature1, exBytes);
 
@@ -198,20 +178,17 @@ namespace Lnk.ShellItems
                         // Syntax error in the regular expression
                     }
 
-                    //     Debug.WriteLine("Found 32 key");
                 }
             }
             else
             {
-                //   Debug.Write("Oh no! No property sheets!");
-                // SiAuto.Main.LogWarning("Oh no! No property sheets!");
 
                 if (rawBytes[0x28] == 0x2f ||
                     (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
                 {
                     //we have a good date
 
-                    var zip = new ShellBagZipContents(Slot, MruPosition, rawBytes, BagPath);
+                    var zip = new ShellBagZipContents(rawBytes);
                     FriendlyName = zip.FriendlyName;
                     LastAccessTime = zip.LastAccessTime;
 
@@ -227,7 +204,6 @@ namespace Lnk.ShellItems
             index += 2; //move past end of property sheet terminator
 
             var rawguid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
-            //var rawguid = ShellBagUtils.ExtractGuidFromShellItem(bin.ReadBytes(16));
             index += 16;
 
             rawguid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
@@ -251,7 +227,6 @@ namespace Lnk.ShellItems
 
                     var signature1 = BitConverter.ToUInt32(extBytes, 4);
 
-                    //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
 
                     var block1 = Utils.GetExtensionBlockFromBytes(signature1, extBytes);
 
@@ -328,11 +303,11 @@ namespace Lnk.ShellItems
         {
             FriendlyName = "Root folder: GUID";
 
-            var delegateGUID = Utils.ExtractGuidFromShellItem(rawBytes.Skip(20).Take(16).ToArray());
+            var delegateGuid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(20).Take(16).ToArray());
 
-            var folderGUID = Utils.ExtractGuidFromShellItem(rawBytes.Skip(36).Take(16).ToArray());
+            var folderGuid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(36).Take(16).ToArray());
 
-            var foldername = Utils.GetFolderNameFromGuid(folderGUID);
+            var foldername = Utils.GetFolderNameFromGuid(folderGuid);
 
             Value = foldername;
         }

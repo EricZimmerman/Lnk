@@ -8,20 +8,9 @@ namespace Lnk.ShellItems
 {
     public class ShellBagZipContents : ShellBag
     {
-        public ShellBagZipContents(int slot, int mruPosition, byte[] rawBytes, string bagPath)
+        public ShellBagZipContents(byte[] rawBytes)
         {
-            Slot = slot;
-            MruPosition = mruPosition;
-
-            ChildShellBags = new List<IShellBag>();
-
-            InternalId = Guid.NewGuid().ToString();
-
-            HexValue = rawBytes;
-
             ExtensionBlocks = new List<IExtensionBlock>();
-
-            BagPath = bagPath;
 
             FriendlyName = "Zip file contents";
 
@@ -132,8 +121,6 @@ namespace Lnk.ShellItems
                     var folderName2 = Encoding.Unicode.GetString(rawBytes, index, nameSize2*2);
                     index += nameSize2*2;
 
-                    //  Value = string.Format("{0}/{1}", Value, folderName2);
-
                     index += 2; // skip end of unicode string
                 }
             }
@@ -161,19 +148,12 @@ namespace Lnk.ShellItems
         {
             var sb = new StringBuilder();
 
-//            if (LastAccessTime.HasValue)
-//            {
-//                sb.AppendLine(
-//                    $"Accessed On: {LastAccessTime.Value.ToString(ShellBagUtils.GetDateTimeFormatWithMilliseconds())}");
-//                sb.AppendLine();
-//            }
 
             if (LastAccessTimeString.Equals("N/A") == false)
             {
                 sb.AppendLine($"Last access internal value: {LastAccessTimeString}");
                 sb.AppendLine();
             }
-
 
             sb.AppendLine(base.ToString());
 

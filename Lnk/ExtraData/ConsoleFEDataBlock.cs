@@ -2,11 +2,11 @@
 
 namespace Lnk.ExtraData
 {
-    public class ConsoleFEDataBlock : ExtraDataBase
+    public class ConsoleFeDataBlock : ExtraDataBase
     {
-        public ConsoleFEDataBlock(byte[] rawBytes)
+        public ConsoleFeDataBlock(byte[] rawBytes)
         {
-            Signature = ExtraDataTypes.ConsoleFEDataBlock;
+            Signature = ExtraDataTypes.ConsoleFeDataBlock;
 
             Size = BitConverter.ToUInt32(rawBytes, 0);
 
@@ -18,7 +18,7 @@ namespace Lnk.ExtraData
         public override string ToString()
         {
             return $"Console FE data block" +
-                   $"\r\nCodePage: {CodePage}";            
+                   $"\r\nCodePage: {CodePage}";
         }
     }
 }

@@ -51,23 +51,23 @@ namespace Lnk.ExtraData
         private DateTimeOffset GetDateTimeOffsetFromGuid(Guid guid)
         {
             // offset to move from 1/1/0001, which is 0-time for .NET, to gregorian 0-time of 10/15/1582
-            var GregorianCalendarStart = new DateTimeOffset(1582, 10, 15, 0, 0, 0, TimeSpan.Zero);
-            const int VersionByte = 7;
-            const int VersionByteMask = 0x0f;
-            const int VersionByteShift = 4;
-            const byte TimestampByte = 0;
+            var gregorianCalendarStart = new DateTimeOffset(1582, 10, 15, 0, 0, 0, TimeSpan.Zero);
+            const int versionByte = 7;
+            const int versionByteMask = 0x0f;
+            const int versionByteShift = 4;
+            const byte timestampByte = 0;
 
             var bytes = guid.ToByteArray();
 
             // reverse the version
-            bytes[VersionByte] &= VersionByteMask;
-            bytes[VersionByte] |= 0x01 >> VersionByteShift;
+            bytes[versionByte] &= versionByteMask;
+            bytes[versionByte] |= 0x01 >> versionByteShift;
 
             var timestampBytes = new byte[8];
-            Array.Copy(bytes, TimestampByte, timestampBytes, 0, 8);
+            Array.Copy(bytes, timestampByte, timestampBytes, 0, 8);
 
             var timestamp = BitConverter.ToInt64(timestampBytes, 0);
-            var ticks = timestamp + GregorianCalendarStart.Ticks;
+            var ticks = timestamp + gregorianCalendarStart.Ticks;
 
             return new DateTimeOffset(ticks, TimeSpan.Zero);
         }

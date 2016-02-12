@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,145 +11,13 @@ namespace Lnk
 {
     public class LnkFile
     {
-        public List<ShellBag> TargetIDs { get; }
-        public List<ExtraDataBase> ExtraBlocks { get; }
-
-        public override string ToString()
-        {
-            var sb = new StringBuilder();
-
-            sb.AppendLine($"Source file: {SourceFile}");
-            sb.AppendLine($"Source created: {SourceCreated}");
-            sb.AppendLine($"Source modified: {SourceModified}");
-            sb.AppendLine($"Source accessed: {SourceAccessed}");
-            sb.AppendLine();
-            sb.AppendLine("--- Header ---");
-            sb.AppendLine($"  File size: {Header.FileSize:N0}");
-            sb.AppendLine($"  Flags: {Header.DataFlags}");
-            sb.AppendLine($"  File attributes: {Header.FileAttributes}");
-
-            if (Header.HotKey.Length > 0)
-            {
-                sb.AppendLine($"  Hot key: {Header.HotKey}");
-            }
-            
-            sb.AppendLine($"  Icon index: {Header.IconIndex}");
-            sb.AppendLine($"  Show window: {Header.ShowWindow} ({Helpers.GetDescriptionFromEnumValue(Header.ShowWindow)})");
-            sb.AppendLine($"  Target created: {Header.TargetCreationDate}");
-            sb.AppendLine($"  Target modified: {Header.TargetLastAccessedDate}");
-            sb.AppendLine($"  Target accessed: {Header.TargetModificationDate}");
-            
-
-            if (TargetIDs.Count > 0)
-            {
-                sb.AppendLine();
-                sb.AppendLine("--- Target ID information ---");
-                foreach (var shellBag in TargetIDs)
-                {
-                    sb.Append($">>{shellBag}");
-                }
-            }
-
-            if ((Header.DataFlags & Header.DataFlag.HasLinkInfo) == Header.DataFlag.HasLinkInfo)
-            {
-                sb.AppendLine();
-                sb.AppendLine("--- Link information ---");
-                sb.AppendLine($"Location flags: {LocationFlags}");
-
-                if (VolumeInfo != null)
-                {
-                    sb.AppendLine();
-                    sb.AppendLine("Volume information");
-                    sb.AppendLine($"Drive type: {VolumeInfo.DriveType}");
-                    sb.AppendLine($"Serial number: {VolumeInfo.DriveSerialNumber}");
-
-                    var label = VolumeInfo.VolumeLabel.Length > 0 ? VolumeInfo.VolumeLabel : "(No label)";
-
-                    sb.AppendLine($"Label: {label}");
-                }
-
-                if (LocalPath?.Length > 0)
-                {
-                    sb.AppendLine($"Local path: {LocalPath}");
-                }
-
-                if (NetworkShareInfo != null)
-                {
-                    sb.AppendLine();
-                    sb.AppendLine("Network share information");
-
-                    if (NetworkShareInfo.DeviceName.Length > 0)
-                    {
-                        sb.AppendLine($"Device name: {NetworkShareInfo.DeviceName}");
-                    }
-                    
-                    sb.AppendLine($"Share name: {NetworkShareInfo.NetworkShareName}");
-
-                    sb.AppendLine($"Provider type: {NetworkShareInfo.NetworkProviderType}");
-                    sb.AppendLine($"Share flags: {NetworkShareInfo.ShareFlags}");
-
-                }
-
-                if (CommonPath.Length > 0)
-                {
-                    sb.AppendLine($"Common path: {CommonPath}");
-                }
-           }
-
-            if ((Header.DataFlags & Header.DataFlag.HasName) == Header.DataFlag.HasName)
-            {
-                sb.AppendLine($"Name: {Name}");
-            }
-
-            if ((Header.DataFlags & Header.DataFlag.HasRelativePath) == Header.DataFlag.HasRelativePath)
-            {
-                sb.AppendLine($"Relative Path: {RelativePath}");
-            }
-
-            if ((Header.DataFlags & Header.DataFlag.HasWorkingDir) == Header.DataFlag.HasWorkingDir)
-            {
-                sb.AppendLine($"Working Directory: {WorkingDirectory}");
-            }
-
-            if ((Header.DataFlags & Header.DataFlag.HasArguments) == Header.DataFlag.HasArguments)
-            {
-                sb.AppendLine($"Arguments: {Arguments}");
-            }
-
-            if ((Header.DataFlags & Header.DataFlag.HasIconLocation) == Header.DataFlag.HasIconLocation)
-            {
-                sb.AppendLine($"Icon Location: {IconLocation}");
-            }
-
-            if (ExtraBlocks.Count > 0)
-            {
-                sb.AppendLine();
-                sb.AppendLine("--- Extra blocks information ---");
-                foreach (var extraDataBase in ExtraBlocks)
-                {
-                    sb.AppendLine($">>{extraDataBase}");
-                    sb.AppendLine();
-                }
-            }
-            
-
-            return sb.ToString();
-        }
-
         [Flags]
         public enum LocationFlag
         {
-            [Description("The linked file is on a volume")] VolumeIDAndLocalBasePath = 0x0001,
+            [Description("The linked file is on a volume")] VolumeIdAndLocalBasePath = 0x0001,
 
             [Description("The linked file is on a network share")] CommonNetworkRelativeLinkAndPathSuffix = 0x0002
         }
-
-        //TODO Include this at all?
-        //public string FullName;
-
-            public DateTimeOffset SourceCreated { get; }
-            public DateTimeOffset SourceModified { get; }
-            public DateTimeOffset SourceAccessed { get; }
 
         public LnkFile(byte[] rawBytes, string sourceFile)
         {
@@ -170,7 +37,7 @@ namespace Lnk
 
             TargetIDs = new List<ShellBag>();
 
-            if ((Header.DataFlags & Header.DataFlag.HasTargetIDList) == Header.DataFlag.HasTargetIDList)
+            if ((Header.DataFlags & Header.DataFlag.HasTargetIdList) == Header.DataFlag.HasTargetIdList)
             {
                 //process shell items
                 var shellItemSize = BitConverter.ToInt16(rawBytes, index);
@@ -202,53 +69,53 @@ namespace Lnk
                     switch (shellItem[2])
                     {
                         case 0x1f:
-                            var f = new ShellBag0x1f(-1, -1, shellItem, "");
+                            var f = new ShellBag0X1F(shellItem);
                             TargetIDs.Add(f);
                             break;
 
                         case 0x2f:
-                            var ff = new ShellBag0X2F(-1, -1, shellItem, "");
+                            var ff = new ShellBag0X2F(shellItem);
                             TargetIDs.Add(ff);
                             break;
                         case 0x2e:
-                            var ee = new ShellBag0x2e(-1, -1, shellItem, "");
+                            var ee = new ShellBag0X2E(shellItem);
                             TargetIDs.Add(ee);
                             break;
                         case 0xb1:
                         case 0x31:
                         case 0x35:
-                            var d = new ShellBag0X31(-1, -1, shellItem, "");
+                            var d = new ShellBag0X31(shellItem);
                             TargetIDs.Add(d);
                             break;
                         case 0x32:
-                            var d2 = new ShellBag0X32(-1, -1, shellItem, "");
+                            var d2 = new ShellBag0X32(shellItem);
                             TargetIDs.Add(d2);
                             break;
                         case 0x00:
-                            var v0 = new ShellBag0x00(-1, -1, shellItem, "");
+                            var v0 = new ShellBag0X00(shellItem);
                             TargetIDs.Add(v0);
                             break;
                         case 0x01:
-                            var one = new ShellBag0X01(-1, -1, shellItem, "");
+                            var one = new ShellBag0X01(shellItem);
                             TargetIDs.Add(one);
                             break;
                         case 0x71:
-                            var sevenone = new ShellBag0x71(-1, -1, shellItem, "");
+                            var sevenone = new ShellBag0X71(shellItem);
                             TargetIDs.Add(sevenone);
                             break;
                         case 0x61:
-                            var sixone = new ShellBag0X61(-1, -1, shellItem, "");
+                            var sixone = new ShellBag0X61(shellItem);
                             TargetIDs.Add(sixone);
                             break;
 
                         case 0xC3:
-                            var c3 = new ShellBag0Xc3(-1, -1, shellItem, "");
+                            var c3 = new ShellBag0Xc3(shellItem);
                             TargetIDs.Add(c3);
                             break;
 
                         case 0x74:
                         case 0x77:
-                            var sev = new ShellBag0x74(-1, -1, shellItem, "");
+                            var sev = new ShellBag0X74(shellItem);
                             TargetIDs.Add(sev);
                             break;
 
@@ -257,7 +124,7 @@ namespace Lnk
                         case 0x43:
                         case 0x46:
                         case 0x47:
-                            var forty = new ShellBag0x40(-1, -1, shellItem, "");
+                            var forty = new ShellBag0X40(shellItem);
                             TargetIDs.Add(forty);
                             break;
                         default:
@@ -265,7 +132,7 @@ namespace Lnk
                     }
                 }
 
-                //TODO tie back extra block for SpecialFolderDataBlock and KnownFolderDataBlock
+                //TODO tie back extra block for SpecialFolderDataBlock and KnownFolderDataBlock??
 
                 index += shellItemSize;
             }
@@ -293,7 +160,7 @@ namespace Lnk
                 var localPathOffset = BitConverter.ToInt32(locationBytes, 16);
                 var networkShareOffset = BitConverter.ToInt32(locationBytes, 20);
 
-                if ((LocationFlags & LocationFlag.VolumeIDAndLocalBasePath) == LocationFlag.VolumeIDAndLocalBasePath)
+                if ((LocationFlags & LocationFlag.VolumeIdAndLocalBasePath) == LocationFlag.VolumeIdAndLocalBasePath)
                 {
                     LocalPath = Encoding.GetEncoding(1252)
                         .GetString(locationBytes, localPathOffset, locationBytes.Length - localPathOffset)
@@ -460,8 +327,8 @@ namespace Lnk
                         var cdb = new ConsoleDataBlock(extraBlock);
                         ExtraBlocks.Add(cdb);
                         break;
-                    case ExtraDataTypes.ConsoleFEDataBlock:
-                        var cfeb = new ConsoleFEDataBlock(extraBlock);
+                    case ExtraDataTypes.ConsoleFeDataBlock:
+                        var cfeb = new ConsoleFeDataBlock(extraBlock);
                         ExtraBlocks.Add(cfeb);
                         break;
                     case ExtraDataTypes.DarwinDataBlock:
@@ -483,10 +350,6 @@ namespace Lnk
                     case ExtraDataTypes.PropertyStoreDataBlock:
                         var ps = new PropertyStoreDataBlock(extraBlock);
 
-//                        Debug.WriteLine(
-//                            $"File: {Path.GetFileName(sourceFile)} Extra blocks start at: 0x{index:X} Flags: {Header.DataFlags}");
-//                        Debug.WriteLine(ps);
-
                         ExtraBlocks.Add(ps);
                         break;
                     case ExtraDataTypes.ShimDataBlock:
@@ -497,8 +360,8 @@ namespace Lnk
                         var sf = new SpecialFolderDataBlock(extraBlock);
                         ExtraBlocks.Add(sf);
                         break;
-                    case ExtraDataTypes.VistaAndAboveIDListDataBlock:
-                        var vid = new VistaAndAboveIDListDataBlock(extraBlock);
+                    case ExtraDataTypes.VistaAndAboveIdListDataBlock:
+                        var vid = new VistaAndAboveIdListDataBlock(extraBlock);
                         ExtraBlocks.Add(vid);
                         break;
                     default:
@@ -507,6 +370,16 @@ namespace Lnk
                 }
             }
         }
+
+        public List<ShellBag> TargetIDs { get; }
+        public List<ExtraDataBase> ExtraBlocks { get; }
+
+        //TODO Include this at all?
+        //public string FullName;
+
+        public DateTimeOffset SourceCreated { get; }
+        public DateTimeOffset SourceModified { get; }
+        public DateTimeOffset SourceAccessed { get; }
 
         public string CommonPath { get; }
         public string LocalPath { get; }
@@ -522,5 +395,127 @@ namespace Lnk
         public string IconLocation { get; }
 
         public LocationFlag LocationFlags { get; }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"Source file: {SourceFile}");
+            sb.AppendLine($"Source created: {SourceCreated}");
+            sb.AppendLine($"Source modified: {SourceModified}");
+            sb.AppendLine($"Source accessed: {SourceAccessed}");
+            sb.AppendLine();
+            sb.AppendLine("--- Header ---");
+            sb.AppendLine($"  File size: {Header.FileSize:N0}");
+            sb.AppendLine($"  Flags: {Header.DataFlags}");
+            sb.AppendLine($"  File attributes: {Header.FileAttributes}");
+
+            if (Header.HotKey.Length > 0)
+            {
+                sb.AppendLine($"  Hot key: {Header.HotKey}");
+            }
+
+            sb.AppendLine($"  Icon index: {Header.IconIndex}");
+            sb.AppendLine(
+                $"  Show window: {Header.ShowWindow} ({Helpers.GetDescriptionFromEnumValue(Header.ShowWindow)})");
+            sb.AppendLine($"  Target created: {Header.TargetCreationDate}");
+            sb.AppendLine($"  Target modified: {Header.TargetLastAccessedDate}");
+            sb.AppendLine($"  Target accessed: {Header.TargetModificationDate}");
+
+
+            if (TargetIDs.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("--- Target ID information ---");
+                foreach (var shellBag in TargetIDs)
+                {
+                    sb.Append($">>{shellBag}");
+                }
+            }
+
+            if ((Header.DataFlags & Header.DataFlag.HasLinkInfo) == Header.DataFlag.HasLinkInfo)
+            {
+                sb.AppendLine();
+                sb.AppendLine("--- Link information ---");
+                sb.AppendLine($"Location flags: {LocationFlags}");
+
+                if (VolumeInfo != null)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine("Volume information");
+                    sb.AppendLine($"Drive type: {VolumeInfo.DriveType}");
+                    sb.AppendLine($"Serial number: {VolumeInfo.DriveSerialNumber}");
+
+                    var label = VolumeInfo.VolumeLabel.Length > 0 ? VolumeInfo.VolumeLabel : "(No label)";
+
+                    sb.AppendLine($"Label: {label}");
+                }
+
+                if (LocalPath?.Length > 0)
+                {
+                    sb.AppendLine($"Local path: {LocalPath}");
+                }
+
+                if (NetworkShareInfo != null)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine("Network share information");
+
+                    if (NetworkShareInfo.DeviceName.Length > 0)
+                    {
+                        sb.AppendLine($"Device name: {NetworkShareInfo.DeviceName}");
+                    }
+
+                    sb.AppendLine($"Share name: {NetworkShareInfo.NetworkShareName}");
+
+                    sb.AppendLine($"Provider type: {NetworkShareInfo.NetworkProviderType}");
+                    sb.AppendLine($"Share flags: {NetworkShareInfo.ShareFlags}");
+                }
+
+                if (CommonPath.Length > 0)
+                {
+                    sb.AppendLine($"Common path: {CommonPath}");
+                }
+            }
+
+            if ((Header.DataFlags & Header.DataFlag.HasName) == Header.DataFlag.HasName)
+            {
+                sb.AppendLine($"Name: {Name}");
+            }
+
+            if ((Header.DataFlags & Header.DataFlag.HasRelativePath) == Header.DataFlag.HasRelativePath)
+            {
+                sb.AppendLine($"Relative Path: {RelativePath}");
+            }
+
+            if ((Header.DataFlags & Header.DataFlag.HasWorkingDir) == Header.DataFlag.HasWorkingDir)
+            {
+                sb.AppendLine($"Working Directory: {WorkingDirectory}");
+            }
+
+            if ((Header.DataFlags & Header.DataFlag.HasArguments) == Header.DataFlag.HasArguments)
+            {
+                sb.AppendLine($"Arguments: {Arguments}");
+            }
+
+            if ((Header.DataFlags & Header.DataFlag.HasIconLocation) == Header.DataFlag.HasIconLocation)
+            {
+                sb.AppendLine($"Icon Location: {IconLocation}");
+            }
+
+            if (ExtraBlocks.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("--- Extra blocks information ---");
+                foreach (var extraDataBase in ExtraBlocks)
+                {
+                    sb.AppendLine($">>{extraDataBase}");
+                    sb.AppendLine();
+                }
+            }
+
+
+            return sb.ToString();
+        }
     }
 }

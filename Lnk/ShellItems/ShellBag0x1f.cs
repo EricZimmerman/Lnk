@@ -9,36 +9,18 @@ using ExtensionBlocks;
 
 namespace Lnk.ShellItems
 {
-    public class ShellBag0x1f : ShellBag
+    public class ShellBag0X1F : ShellBag
     {
-        private readonly List<PropertySheet> Sheets;
+        private readonly List<PropertySheet> _sheets;
 
 
-        public ShellBag0x1f(int slot, int mruPosition, byte[] rawBytes, string bagPath)
+        public ShellBag0X1F( byte[] rawBytes)
         {
-            Slot = slot;
-            MruPosition = mruPosition;
-
-            ChildShellBags = new List<IShellBag>();
-
-            //SiAuto.Main.LogDebug(BitConverter.ToString(rawBytes));
-
-            //if (bagPath.Contains(@"BagMRU") && slot == 57)
-            //{
-            //    Debug.WriteLine("At trap for certain bag in 0x1f bag");
-            //}
-
-            InternalId = Guid.NewGuid().ToString();
-
-            HexValue = rawBytes;
-
             ExtensionBlocks = new List<IExtensionBlock>();
 
             PropertyStore = new PropertyStore();
 
-            Sheets = new List<PropertySheet>();
-
-            BagPath = bagPath;
+            _sheets = new List<PropertySheet>();
 
             var index = 0;
 
@@ -115,9 +97,6 @@ namespace Lnk.ShellItems
 
             var dataSignature = bin.ReadUInt32(); //  BitConverter.ToUInt32(rawBytes, index);
 
-            //Debug.WriteLine(dataSignature);
-            //Debug.WriteLine(dataSignature.ToString("X"));
-
             var propertyStoreSize = bin.ReadUInt16(); //BitConverter.ToUInt16(rawBytes, index);
 
             var identifierSize = bin.ReadUInt16(); //BitConverter.ToUInt16(rawBytes, index);
@@ -125,13 +104,11 @@ namespace Lnk.ShellItems
             if (identifierSize > 0)
             {
                 bin.ReadBytes(identifierSize);
-                //index += identifierSize; // whts here?
+                //index += identifierSize; // whats here?
             }
 
             if (propertyStoreSize > 0)
             {
-                // var propStore = new PropertyStore(rawBytes.Skip(index).Take(propertyStoreSize).ToArray());
-
                 var propertysheetBytes = bin.ReadBytes(propertyStoreSize);
 
                 var propStore = new PropertyStore(propertysheetBytes);
@@ -163,7 +140,6 @@ namespace Lnk.ShellItems
 
                             var signature1 = BitConverter.ToUInt32(exBytes, 4);
 
-                            //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
 
                             var block1 = Utils.GetExtensionBlockFromBytes(signature1, exBytes);
 
@@ -176,17 +152,14 @@ namespace Lnk.ShellItems
                         // Syntax error in the regular expression
                     }
 
-                    //     Debug.WriteLine("Found 32 key");
                 }
 
                 PropertyStore = propStore;
             }
 
-            //index += propertyStoreSize;
 
             bin.ReadBytes(2); //skip end of property sheet marker
 
-            //var rawguid = ShellBagUtils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
             var rawguid = Utils.ExtractGuidFromShellItem(bin.ReadBytes(16));
             //    index += 16;
 
@@ -277,13 +250,9 @@ namespace Lnk.ShellItems
 
             var shellPropertySheetListSize = BitConverter.ToInt16(rawBytes, index);
 
-            //       SiAuto.Main.LogMessage("shellPropertySheetListSize: {0}", shellPropertySheetListSize);
-
             index += 2;
 
             var identifiersize = BitConverter.ToInt16(rawBytes, index);
-
-            //    SiAuto.Main.LogMessage("identifiersize: {0}", identifiersize);
 
             index += 2;
 
@@ -291,7 +260,6 @@ namespace Lnk.ShellItems
 
             Array.Copy(rawBytes, index, identifierData, 0, identifiersize);
 
-            //   SiAuto.Main.LogArray("identifierData", identifierData);
 
             index += identifiersize;
 
@@ -329,8 +297,6 @@ namespace Lnk.ShellItems
 
                             var signature1 = BitConverter.ToUInt32(exBytes, 4);
 
-                            //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
-
                             var block1 = Utils.GetExtensionBlockFromBytes(signature1, exBytes);
 
                             ExtensionBlocks.Add(block1);
@@ -342,20 +308,17 @@ namespace Lnk.ShellItems
                         // Syntax error in the regular expression
                     }
 
-                    //     Debug.WriteLine("Found 32 key");
                 }
             }
             else
             {
-                //   Debug.Write("Oh no! No property sheets!");
-                // SiAuto.Main.LogWarning("Oh no! No property sheets!");
 
                 if (rawBytes[0x28] == 0x2f ||
                     (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
                 {
                     //we have a good date
 
-                    var zip = new ShellBagZipContents(Slot, MruPosition, rawBytes, BagPath);
+                    var zip = new ShellBagZipContents(rawBytes);
                     FriendlyName = zip.FriendlyName;
                     LastAccessTime = zip.LastAccessTime;
 
@@ -387,7 +350,6 @@ namespace Lnk.ShellItems
 
                     var signature1 = BitConverter.ToUInt32(extBytes, 4);
 
-                    //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
 
                     var block1 = Utils.GetExtensionBlockFromBytes(signature1, extBytes);
 

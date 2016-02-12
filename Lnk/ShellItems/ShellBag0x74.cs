@@ -6,24 +6,13 @@ using ExtensionBlocks;
 
 namespace Lnk.ShellItems
 {
-    public class ShellBag0x74 : ShellBag
+    public class ShellBag0X74 : ShellBag
     {
-        public ShellBag0x74(int slot, int mruPosition, byte[] rawBytes, string bagPath)
+        public ShellBag0X74(byte[] rawBytes)
         {
-            Slot = slot;
-            MruPosition = mruPosition;
-
             FriendlyName = "Users Files Folder";
 
-            ChildShellBags = new List<IShellBag>();
-
-            InternalId = Guid.NewGuid().ToString();
-
-            HexValue = rawBytes;
-
             ExtensionBlocks = new List<IExtensionBlock>();
-
-            BagPath = bagPath;
 
             var index = 2;
 
@@ -42,7 +31,7 @@ namespace Lnk.ShellItems
                 {
                     //we have a good date
 
-                    var zip = new ShellBagZipContents(Slot, MruPosition, rawBytes, BagPath);
+                    var zip = new ShellBagZipContents(rawBytes);
                     FriendlyName = zip.FriendlyName;
                     LastAccessTime = zip.LastAccessTime;
 
@@ -84,7 +73,6 @@ namespace Lnk.ShellItems
 
             var len = 0;
 
-            //       SiAuto.Main.LogMessage("Walking out 0s to find end of name");
             while (rawBytes[index + len] != 0x0)
             {
                 len += 1;
@@ -97,9 +85,7 @@ namespace Lnk.ShellItems
 
             var primaryName = Encoding.GetEncoding(1252).GetString(tempBytes);
 
-            //   SiAuto.Main.LogMessage("shortName: {0}", primaryName);
 
-            //     SiAuto.Main.LogMessage("Walking out 0s to next section");
             while (rawBytes[index] == 0x0)
             {
                 index += 1;
@@ -109,13 +95,8 @@ namespace Lnk.ShellItems
 
             Array.Copy(rawBytes, index, delegateGuidRaw, 0, 16);
 
-            //     SiAuto.Main.LogArray("delegateGuid", delegateGuidRaw);
 
             var delegateGuid = Utils.ExtractGuidFromShellItem(delegateGuidRaw);
-
-            //      SiAuto.Main.LogMessage("delegateGuid after ExtractGUIDFromShellItem: {0}", delegateGuid);
-
-            //5e591a74-df96-48d3-8d67-1733bcee28ba
 
             if (delegateGuid != "5e591a74-df96-48d3-8d67-1733bcee28ba")
             {
@@ -190,25 +171,12 @@ namespace Lnk.ShellItems
         /// </summary>
         public DateTimeOffset? LastModificationTime { get; set; }
 
-        ///// <summary>
-        /////     Created time of BagPath
-        ///// </summary>
-        //public DateTimeOffset? CreatedOnTime { get; set; }
+
 
         /// <summary>
         ///     Last access time of BagPath
         /// </summary>
         public DateTimeOffset? LastAccessTime { get; set; }
-
-        ///// <summary>
-        /////     For files and directories, the MFT entry #
-        ///// </summary>
-        //public long? MFTEntryNumber { get; set; }
-
-        ///// <summary>
-        /////     For files and directories, the MFT sequence #
-        ///// </summary>
-        //public int? MFTSequenceNumber { get; set; }
 
 
         public override string ToString()

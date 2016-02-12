@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using ExtensionBlocks;
 using Lnk.ShellItems;
 
 namespace Lnk.ExtraData
 {
-    public class VistaAndAboveIDListDataBlock : ExtraDataBase
+    public class VistaAndAboveIdListDataBlock : ExtraDataBase
     {
-        public List<ShellBag> TargetIDs { get; }
-
-        public VistaAndAboveIDListDataBlock(byte[] rawBytes)
+        public VistaAndAboveIdListDataBlock(byte[] rawBytes)
         {
-            Signature = ExtraDataTypes.VistaAndAboveIDListDataBlock;
+            Signature = ExtraDataTypes.VistaAndAboveIdListDataBlock;
 
             Size = BitConverter.ToUInt32(rawBytes, 0);
-            
+
             var index = 8;
             //process shell items
             var shellItemSize = BitConverter.ToInt16(rawBytes, index);
@@ -49,53 +46,53 @@ namespace Lnk.ExtraData
                 switch (bytese[2])
                 {
                     case 0x1f:
-                        var f = new ShellBag0x1f(-1, -1, bytese, "");
+                        var f = new ShellBag0X1F(bytese);
                         TargetIDs.Add(f);
                         break;
 
                     case 0x2f:
-                        var ff = new ShellBag0X2F(-1, -1, bytese, "");
+                        var ff = new ShellBag0X2F(bytese);
                         TargetIDs.Add(ff);
                         break;
                     case 0x2e:
-                        var ee = new ShellBag0x2e(-1, -1, bytese, "");
+                        var ee = new ShellBag0X2E(bytese);
                         TargetIDs.Add(ee);
                         break;
                     case 0xb1:
                     case 0x31:
                     case 0x35:
-                        var d = new ShellBag0X31(-1, -1, bytese, "");
+                        var d = new ShellBag0X31(bytese);
                         TargetIDs.Add(d);
                         break;
                     case 0x32:
-                        var d2 = new ShellBag0X32(-1, -1, bytese, "");
+                        var d2 = new ShellBag0X32(bytese);
                         TargetIDs.Add(d2);
                         break;
                     case 0x00:
-                        var v0 = new ShellBag0x00(-1, -1, bytese, "");
+                        var v0 = new ShellBag0X00(bytese);
                         TargetIDs.Add(v0);
                         break;
                     case 0x01:
-                        var one = new ShellBag0X01(-1, -1, bytese, "");
+                        var one = new ShellBag0X01(bytese);
                         TargetIDs.Add(one);
                         break;
                     case 0x71:
-                        var sevenone = new ShellBag0x71(-1, -1, bytese, "");
+                        var sevenone = new ShellBag0X71(bytese);
                         TargetIDs.Add(sevenone);
                         break;
                     case 0x61:
-                        var sixone = new ShellBag0X61(-1, -1, bytese, "");
+                        var sixone = new ShellBag0X61(bytese);
                         TargetIDs.Add(sixone);
                         break;
 
                     case 0xC3:
-                        var c3 = new ShellBag0Xc3(-1, -1, bytese, "");
+                        var c3 = new ShellBag0Xc3(bytese);
                         TargetIDs.Add(c3);
                         break;
 
                     case 0x74:
                     case 0x77:
-                        var sev = new ShellBag0x74(-1, -1, bytese, "");
+                        var sev = new ShellBag0X74(bytese);
                         TargetIDs.Add(sev);
                         break;
 
@@ -104,7 +101,7 @@ namespace Lnk.ExtraData
                     case 0x43:
                     case 0x46:
                     case 0x47:
-                        var forty = new ShellBag0x40(-1, -1, bytese, "");
+                        var forty = new ShellBag0X40(bytese);
                         TargetIDs.Add(forty);
                         break;
                     default:
@@ -112,6 +109,8 @@ namespace Lnk.ExtraData
                 }
             }
         }
+
+        public List<ShellBag> TargetIDs { get; }
 
         public override string ToString()
         {

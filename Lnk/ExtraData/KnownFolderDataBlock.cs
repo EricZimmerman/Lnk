@@ -14,22 +14,22 @@ namespace Lnk.ExtraData
             var kfBytes = new byte[16];
             Buffer.BlockCopy(rawBytes, 8, kfBytes, 0, 16);
 
-            KnownFolderID = new Guid(kfBytes);
+            KnownFolderId = new Guid(kfBytes);
 
-            KnownFolderName = Utils.GetFolderNameFromGuid(KnownFolderID.ToString());
+            KnownFolderName = Utils.GetFolderNameFromGuid(KnownFolderId.ToString());
 
             Offset = BitConverter.ToUInt32(rawBytes, 24);
         }
 
         public uint Offset { get; }
 
-        public Guid KnownFolderID { get; }
+        public Guid KnownFolderId { get; }
         public string KnownFolderName { get; }
 
         public override string ToString()
         {
             return $"Known folder data block" +
-                   $"\r\nKnown folder GUID: {KnownFolderID} ({KnownFolderName})";
-            }
+                   $"\r\nKnown folder GUID: {KnownFolderId} ({KnownFolderName})";
+        }
     }
 }

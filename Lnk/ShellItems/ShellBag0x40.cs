@@ -5,24 +5,13 @@ using ExtensionBlocks;
 
 namespace Lnk.ShellItems
 {
-    public class ShellBag0x40 : ShellBag
+    public class ShellBag0X40 : ShellBag
     {
         private string _desc;
 
-        public ShellBag0x40(int slot, int mruPosition, byte[] rawBytes, string bagPath)
+        public ShellBag0X40(byte[] rawBytes)
         {
-            Slot = slot;
-            MruPosition = mruPosition;
-
-            ChildShellBags = new List<IShellBag>();
-
-            InternalId = Guid.NewGuid().ToString();
-
-            HexValue = rawBytes;
-
             ExtensionBlocks = new List<IExtensionBlock>();
-
-            BagPath = bagPath;
 
             switch (rawBytes[2])
             {
