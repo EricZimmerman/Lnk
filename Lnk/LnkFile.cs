@@ -27,7 +27,6 @@ namespace Lnk
 
             Header = new Header(headerBytes);
 
-
             var fi = new FileInfo(sourceFile);
             SourceCreated = new DateTimeOffset(fi.CreationTimeUtc);
             SourceModified = new DateTimeOffset(fi.LastWriteTimeUtc);
@@ -200,15 +199,6 @@ namespace Lnk
                     //TODO var unicodeCommonPath = Encoding.Unicode.GetString(locationBytes, uniCommonOffset, 5);
                 }
 
-                //                if (LocationFlags == LocationFlag.VolumeIDAndLocalBasePath)
-//                {
-//                    FullName = Path.Combine(CommonPath, LocalPath);
-//                }
-//                else
-//                {
-//                    FullName = Path.Combine(CommonPath, NetworkShareInfo.NetworkShareName);
-//                }
-
                 index += locationItemSize;
             }
 
@@ -374,8 +364,6 @@ namespace Lnk
         public List<ShellBag> TargetIDs { get; }
         public List<ExtraDataBase> ExtraBlocks { get; }
 
-        //TODO Include this at all?
-        //public string FullName;
 
         public DateTimeOffset SourceCreated { get; }
         public DateTimeOffset SourceModified { get; }
