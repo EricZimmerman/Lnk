@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using ExtensionBlocks;
 
@@ -87,6 +88,10 @@ namespace Lnk.ShellItems
 
                 index += len1 + 1;
             }
+            else
+            {
+                Value = Encoding.Unicode.GetString(rawBytes, 8,rawBytes.Length-8).Split('\0').First();
+            }
 
             dataSize = BitConverter.ToUInt16(rawBytes, index);
             index += 2;
@@ -106,11 +111,18 @@ namespace Lnk.ShellItems
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"URI: {Uri}");
-            sb.AppendLine();
+            if (Uri?.Length > 0)
+            {
+                sb.AppendLine($"URI: {Uri}");
+                sb.AppendLine();
+            }
 
-            sb.AppendLine($"Connect time: {FileTime1}");
-            sb.AppendLine();
+            if (FileTime1.HasValue)
+            {
+                sb.AppendLine($"Connect time: {FileTime1}");
+                sb.AppendLine();
+            }
+            
 
             if (UserName.Length > 0)
             {

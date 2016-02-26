@@ -57,6 +57,12 @@ namespace Lnk.Test
             }
         }
 
+//        [Test]
+//        public void foobar()
+//        {
+//            var foo = Lnk.LoadFile(@"C:\Temp\!!!!!!!out\Offset_0x15BC.lnk");
+//        }
+
         [Test]
         public void InvalidFileShouldThrowException()
         {
