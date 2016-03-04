@@ -76,6 +76,7 @@
     <Compile Include="ShellItems\ShellBag0x71.cs" />
     <Compile Include="ShellItems\ShellBag0x74.cs" />
     <Compile Include="ShellItems\ShellBag0xc3.cs" />
+    <Compile Include="ShellItems\ShellBagCDBurn.cs" />
     <Compile Include="ShellItems\ShellBagZipContents.cs" />
     <Compile Include="VolumeInfo.cs" />
   </ItemGroup>

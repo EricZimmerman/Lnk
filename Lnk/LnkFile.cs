@@ -32,6 +32,21 @@ namespace Lnk
             SourceModified = new DateTimeOffset(fi.LastWriteTimeUtc);
             SourceAccessed = new DateTimeOffset(fi.LastAccessTimeUtc);
 
+            if (SourceCreated.Value.Year == 1601)
+            {
+                SourceCreated = null;
+            }
+
+            if (SourceModified.Value.Year == 1601)
+            {
+                SourceModified = null;
+            }
+
+            if (SourceAccessed.Value.Year == 1601)
+            {
+                SourceAccessed = null;
+            }
+
             var index = 76;
 
             TargetIDs = new List<ShellBag>();
@@ -86,6 +101,7 @@ namespace Lnk
                             var d = new ShellBag0X31(shellItem);
                             TargetIDs.Add(d);
                             break;
+                        case 0x36:
                         case 0x32:
                             var d2 = new ShellBag0X32(shellItem);
                             TargetIDs.Add(d2);
@@ -127,7 +143,7 @@ namespace Lnk
                             TargetIDs.Add(forty);
                             break;
                         default:
-                            throw new Exception($"Unknown item ID: 0x{shellItem[2]:X}");
+                            throw new Exception($"Unknown shell item ID: 0x{shellItem[2]:X}. Please send to saericzimmerman@gmail.com so support can be added.");
                     }
                 }
 
@@ -186,17 +202,17 @@ namespace Lnk
                 if (locationInfoHeaderSize > 28)
                 {
                     var uniLocalOffset = BitConverter.ToInt32(locationBytes, 28);
-                    throw new Exception(
-                        $"Unsupported data found. Email lnk file '{sourceFile}' to saericzimmerman@gmail.com");
-                    //TODO var unicodeLocalPath = Encoding.Unicode.GetString(locationBytes, uniLocalOffset,5);
+                    
+                    var unicodeLocalPath = Encoding.Unicode.GetString(locationBytes, uniLocalOffset, locationBytes.Length - uniLocalOffset).Split('\0').First();
+                    LocalPath = unicodeLocalPath;
                 }
 
                 if (locationInfoHeaderSize > 32)
                 {
                     var uniCommonOffset = BitConverter.ToInt32(locationBytes, 32);
-                    throw new Exception(
-                        $"Unsupported data found. Email lnk file '{sourceFile}' to saericzimmerman@gmail.com");
-                    //TODO var unicodeCommonPath = Encoding.Unicode.GetString(locationBytes, uniCommonOffset, 5);
+                  
+                    var unicodeCommonPath = Encoding.Unicode.GetString(locationBytes, uniCommonOffset, locationBytes.Length - uniCommonOffset).Split('\0').First();
+                    CommonPath = unicodeCommonPath;
                 }
 
                 index += locationItemSize;
@@ -365,9 +381,9 @@ namespace Lnk
         public List<ExtraDataBase> ExtraBlocks { get; }
 
 
-        public DateTimeOffset SourceCreated { get; }
-        public DateTimeOffset SourceModified { get; }
-        public DateTimeOffset SourceAccessed { get; }
+        public DateTimeOffset? SourceCreated { get; }
+        public DateTimeOffset? SourceModified { get; }
+        public DateTimeOffset? SourceAccessed { get; }
 
         public string CommonPath { get; }
         public string LocalPath { get; }

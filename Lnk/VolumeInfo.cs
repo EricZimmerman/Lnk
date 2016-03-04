@@ -33,8 +33,18 @@ namespace Lnk
 
             if (DriveLabelOffset > 16)
             {
-                VolumeLabel = Encoding.Unicode
-                    .GetString(rawBytes, DriveLabelOffset, (rawBytes.Length - DriveLabelOffset)*2);
+                try
+                {
+                    VolumeLabel = Encoding.Unicode
+                    .GetString(rawBytes, DriveLabelOffset, (rawBytes.Length - DriveLabelOffset) * 2);
+                }
+                catch (Exception)
+                {
+                    VolumeLabel = Encoding.GetEncoding(1252)
+                    .GetString(rawBytes, DriveLabelOffset, rawBytes.Length - DriveLabelOffset).Split('\0').First();
+
+                }
+                
             }
             else
             {

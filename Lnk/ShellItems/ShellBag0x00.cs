@@ -489,6 +489,25 @@ namespace Lnk.ShellItems
 
                     return;
                 }
+
+                //41-75-67-4D is AugM
+
+                if (rawBytes[4] == 0x41 && rawBytes[5] == 0x75 && rawBytes[6] == 0x67 && rawBytes[7] == 0x4D)
+                {
+                    var cdb = new ShellBagCDBurn(rawBytes);
+
+                    Value = cdb.Value;
+                    FriendlyName = cdb.FriendlyName;
+                    CreatedOnTime = cdb.CreatedOnTime;
+                    LastModificationTime = cdb.LastModificationTime;
+                    LastAccessTime = cdb.LastAccessTime;
+                    
+
+                    return;
+                }
+
+                
+
                 Debug.Write("Oh no! No property sheets!");
 
                 Value = "!!! Unable to determine Value !!!";
@@ -498,7 +517,7 @@ namespace Lnk.ShellItems
 
             index += 2; //move past end of property sheet terminator
 
-            if (index < rawBytes.Length)
+            if (shellPropertySheetListSize > 0 && index < rawBytes.Length)
             {
                 var extBlockSize = BitConverter.ToInt16(rawBytes, index);
 
