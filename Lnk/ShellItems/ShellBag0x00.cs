@@ -636,17 +636,20 @@ namespace Lnk.ShellItems
 
                     ExtensionBlocks.Add(block1);
 
-
+                    if (index >= rawBytes.Length)
+                    {
+                        break;
+                    }
                     extBlockSize = BitConverter.ToInt16(rawBytes, index);
                 }
             }
-
-            int terminator = BitConverter.ToInt16(rawBytes, index);
-
-            if (terminator > 0)
-            {
-                throw new Exception($"Expected terminator of 0, but got {terminator}");
-            }
+//
+//            int terminator = BitConverter.ToInt16(rawBytes, index);
+//
+//            if (terminator > 0)
+//            {
+//                throw new Exception($"Expected terminator of 0, but got {terminator}");
+//            }
         }
 
         private void ProcessGameFolderShellItem(byte[] rawBytes)

@@ -57,11 +57,11 @@ namespace Lnk.Test
             }
         }
 
-//        [Test]
-//        public void foobar()
-//        {
-//            var foo = Lnk.LoadFile(@"C:\Temp\!!!!!!!out\Offset_0x15BC.lnk");
-//        }
+        [Test]
+        public void foobar()
+        {
+            var foo = Lnk.LoadFile(@"C:\Users\e\Desktop\Tom\AutomaticDestinations\9b9cdc69c1c24e2b.automaticDestinations-ms_Directory name_2");
+        }
 
         [Test]
         public void InvalidFileShouldThrowException()

@@ -199,7 +199,7 @@ namespace Lnk.ShellItems
                     ExtensionBlocks.Add(block1);
                 }
 
-                Trace.Assert(bin.BaseStream.Position == bin.BaseStream.Length);
+                //Trace.Assert(bin.BaseStream.Position == bin.BaseStream.Length);
             }
 
             Value = name;

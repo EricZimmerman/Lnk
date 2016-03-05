@@ -134,6 +134,13 @@ namespace Lnk
                             TargetIDs.Add(sev);
                             break;
 
+                        case 0xae:
+                        case 0xaa:
+                        case 0x79:
+                            var ae = new ShellBagZipContents(shellItem);
+                            TargetIDs.Add(ae);
+                            break;
+
                         case 0x41:
                         case 0x42:
                         case 0x43:
@@ -158,7 +165,9 @@ namespace Lnk
                 var locationBytes = new byte[locationItemSize];
                 Buffer.BlockCopy(rawBytes, index, locationBytes, 0, locationItemSize);
 
-                var locationInfoHeaderSize = BitConverter.ToInt32(locationBytes, 4);
+                if (locationBytes.Length > 20)
+                {
+                    var locationInfoHeaderSize = BitConverter.ToInt32(locationBytes, 4);
 
                 LocationFlags = (LocationFlag) BitConverter.ToInt32(locationBytes, 8);
 
@@ -214,6 +223,9 @@ namespace Lnk
                     var unicodeCommonPath = Encoding.Unicode.GetString(locationBytes, uniCommonOffset, locationBytes.Length - uniCommonOffset).Split('\0').First();
                     CommonPath = unicodeCommonPath;
                 }
+                }
+
+                
 
                 index += locationItemSize;
             }
