@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using ExtensionBlocks;
@@ -60,7 +61,8 @@ namespace Lnk.Test
         [Test]
         public void foobar()
         {
-            var foo = Lnk.LoadFile(@"C:\Users\e\Desktop\Tom\AutomaticDestinations\9b9cdc69c1c24e2b.automaticDestinations-ms_Directory name_2");
+            var foo = Lnk.LoadFile(@"C:\Temp\b.bin");
+            Debug.WriteLine(foo);
         }
 
         [Test]
