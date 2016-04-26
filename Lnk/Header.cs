@@ -122,8 +122,8 @@ namespace Lnk
             FileAttributes = (FileAttribute) BitConverter.ToInt32(rawBytes, 24);
 
             TargetCreationDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 28)).ToUniversalTime();
-            TargetModificationDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 36)).ToUniversalTime();
-            TargetLastAccessedDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 44)).ToUniversalTime();
+            TargetLastAccessedDate  = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 36)).ToUniversalTime();
+            TargetModificationDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 44)).ToUniversalTime();
 
             FileSize = BitConverter.ToInt32(rawBytes, 52);
             IconIndex = BitConverter.ToInt32(rawBytes, 56);

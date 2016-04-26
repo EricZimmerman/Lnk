@@ -61,7 +61,7 @@ namespace Lnk.Test
         [Test]
         public void foobar()
         {
-            var foo = Lnk.LoadFile(@"C:\Temp\b.bin");
+            var foo = Lnk.LoadFile(@"C:\Users\e\Desktop\lab_lnk_file.download");
             Debug.WriteLine(foo);
         }
 
