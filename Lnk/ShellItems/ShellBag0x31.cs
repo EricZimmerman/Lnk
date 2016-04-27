@@ -104,7 +104,7 @@ namespace Lnk.ShellItems
             {
                 var subshellitemdatasize = BitConverter.ToInt16(rawBytes, index);
 
-                if (subshellitemdatasize == 0)
+                if (subshellitemdatasize <= 0)
                 {
                     break;
                 }
