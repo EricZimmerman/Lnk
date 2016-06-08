@@ -95,6 +95,11 @@ namespace Lnk
                             var ee = new ShellBag0X2E(shellItem);
                             TargetIDs.Add(ee);
                             break;
+                        case 0xbd:
+                        case 0x6e:
+                            var bd = new ShellBagZipContents(shellItem);
+                            TargetIDs.Add(bd);
+                            break;
                         case 0xb1:
                         case 0x31:
                         case 0x35:

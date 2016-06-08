@@ -61,7 +61,7 @@ namespace Lnk.Test
         [Test]
         public void foobar()
         {
-            var foo = Lnk.LoadFile(@"D:\Temp\jmpout\b8ab77100df80ab2.automaticDestinations-ms\AppId_b8ab77100df80ab2_DirName_d.lnk");
+            var foo = Lnk.LoadFile(@"C:\Temp\test.lnk.BD");
             Debug.WriteLine(foo);
         }
 

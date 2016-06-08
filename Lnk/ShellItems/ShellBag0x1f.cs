@@ -170,7 +170,7 @@ namespace Lnk.ShellItems
 
             var extsize1 = bin.ReadUInt16(); // BitConverter.ToUInt16(rawBytes, index);
 
-            if (extsize1 > 0)
+            if (extsize1 > 4)
             {
                 //TODO is it ever bigger than one block? if so loop it
 
