@@ -21,6 +21,7 @@ namespace Lnk
 
         public LnkFile(byte[] rawBytes, string sourceFile)
         {
+            RawBytes = rawBytes;
             SourceFile = Path.GetFullPath(sourceFile);
             var headerBytes = new byte[76];
             Buffer.BlockCopy(rawBytes, 0, headerBytes, 0, 76);
@@ -407,6 +408,8 @@ namespace Lnk
         public VolumeInfo VolumeInfo { get; }
         public NetworkShareInfo NetworkShareInfo { get; }
         public string SourceFile { get; }
+
+        public byte[] RawBytes { get; }
         public Header Header { get; }
 
         public string Name { get; }
