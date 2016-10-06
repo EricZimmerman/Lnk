@@ -79,6 +79,7 @@ namespace Lnk
                     shellItemIndex += shellSize;
                 }
 
+                //TODO try catch and add placeholder for shellitem when exeption happens? or ?
                 foreach (var shellItem in shellItemsRaw)
                 {
                     switch (shellItem[2])
