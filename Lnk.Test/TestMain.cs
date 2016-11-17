@@ -61,7 +61,14 @@ namespace Lnk.Test
         [Test]
         public void foobar()
         {
-            var foo = Lnk.LoadFile(@"C:\Temp\boom.bin");
+            var foo = Lnk.LoadFile(@"C:\Temp\47E99F32FDDD19BD94A36BD52E4964FC");
+
+            var d = foo.ExtraBlocks.Single(t => t is DarwinDataBlock) as DarwinDataBlock;
+
+            d?.ProductCode.Should().Be("{7F8559D1-2FF8-4E22-8885-E74D39A1A80E}");
+            d?.ComponentId.Should().Be("{BDDFA5DC-BD69-4232-998E-5167814C21B9}");
+            d?.FeatureName.Should().Be("Main");
+
             Debug.WriteLine(foo);
         }
 
@@ -72,6 +79,20 @@ namespace Lnk.Test
             Action action = () => Lnk.LoadFile(badFile);
 
             action.ShouldThrow<Exception>().WithMessage("Invalid signature!");
+        }
+
+        [Test]
+        public void DarwinBlockLnk()
+        {
+            var darwin = Path.Combine(MiscPath, "local.file.darwin.test");
+
+            var lnk = Lnk.LoadFile(darwin);
+
+            var d = lnk.ExtraBlocks.Single(t => t is DarwinDataBlock) as DarwinDataBlock;
+
+            d?.ProductCode.Should().Be("{AC76BA86-7AD7-1036-7B44-A93000000001}");
+            d?.ComponentId.Should().Be("{F95C9759-13AF-4E41-A46B-DBD281608D53}");
+            d?.FeatureName.Should().Be("ReaderProgramFiles");
         }
 
         [Test]
