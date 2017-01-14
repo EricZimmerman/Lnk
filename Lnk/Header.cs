@@ -125,7 +125,7 @@ namespace Lnk
             TargetLastAccessedDate  = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 36)).ToUniversalTime();
             TargetModificationDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 44)).ToUniversalTime();
 
-            FileSize = BitConverter.ToInt32(rawBytes, 52);
+            FileSize = BitConverter.ToUInt32(rawBytes, 52);
             IconIndex = BitConverter.ToInt32(rawBytes, 56);
 
             ShowWindow = (ShowWindowOption) BitConverter.ToInt32(rawBytes, 60);
@@ -145,7 +145,7 @@ namespace Lnk
         public DateTimeOffset TargetModificationDate { get; }
         public DateTimeOffset TargetLastAccessedDate { get; }
 
-        public int FileSize { get; }
+        public uint FileSize { get; }
         public int IconIndex { get; }
 
         public string HotKey { get; }
