@@ -28,20 +28,20 @@ namespace Lnk
         {
             Size = BitConverter.ToInt32(rawBytes, 0);
             DriveType = (DriveTypes) BitConverter.ToInt32(rawBytes, 4);
-            DriveSerialNumber = BitConverter.ToInt32(rawBytes, 8).ToString("X");
-            DriveLabelOffset = BitConverter.ToInt32(rawBytes, 12);
+            VolumeSerialNumber = BitConverter.ToInt32(rawBytes, 8).ToString("X8");
+            VolumeLabelOffset = BitConverter.ToInt32(rawBytes, 12);
 
-            if (DriveLabelOffset > 16)
+            if (VolumeLabelOffset > 16)
             {
                 try
                 {
                     VolumeLabel = Encoding.Unicode
-                    .GetString(rawBytes, DriveLabelOffset, (rawBytes.Length - DriveLabelOffset) * 2);
+                    .GetString(rawBytes, VolumeLabelOffset, (rawBytes.Length - VolumeLabelOffset) * 2);
                 }
                 catch (Exception)
                 {
                     VolumeLabel = Encoding.GetEncoding(1252)
-                    .GetString(rawBytes, DriveLabelOffset, rawBytes.Length - DriveLabelOffset).Split('\0').First();
+                    .GetString(rawBytes, VolumeLabelOffset, rawBytes.Length - VolumeLabelOffset).Split('\0').First();
 
                 }
                 
@@ -49,21 +49,21 @@ namespace Lnk
             else
             {
                 VolumeLabel = Encoding.GetEncoding(1252)
-                    .GetString(rawBytes, DriveLabelOffset, rawBytes.Length - DriveLabelOffset).Split('\0').First();
+                    .GetString(rawBytes, VolumeLabelOffset, rawBytes.Length - VolumeLabelOffset).Split('\0').First();
             }
         }
 
         public DriveTypes DriveType { get; }
         public int Size { get; }
 
-        public string DriveSerialNumber { get; }
-        public int DriveLabelOffset { get; }
+        public string VolumeSerialNumber { get; }
+        public int VolumeLabelOffset { get; }
 
         public string VolumeLabel { get; }
 
         public override string ToString()
         {
-            return $"Drive type: {DriveType} Size: {Size}, Serial: {DriveSerialNumber}, Vol label: {VolumeLabel}";
+            return $"Drive type: {DriveType} Size: {Size}, Serial: {VolumeSerialNumber}, Vol label: {VolumeLabel}";
         }
     }
 }

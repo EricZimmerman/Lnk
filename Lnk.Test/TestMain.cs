@@ -107,7 +107,7 @@ namespace Lnk.Test
             lnk.VolumeInfo.Should().NotBeNull();
 
             lnk.VolumeInfo.DriveType.Should().Be(VolumeInfo.DriveTypes.DriveFixed);
-            lnk.VolumeInfo.DriveSerialNumber.Should().Be("502E1A8A");
+            lnk.VolumeInfo.VolumeSerialNumber.Should().Be("502E1A8A");
             lnk.VolumeInfo.VolumeLabel.Should().Be("SSD-WIN7");
 
             lnk.LocalPath.Should().Be(@"C:\Users\");
@@ -141,7 +141,7 @@ namespace Lnk.Test
             lnk.VolumeInfo.Should().NotBeNull();
 
             lnk.VolumeInfo.DriveType.Should().Be(VolumeInfo.DriveTypes.DriveFixed);
-            lnk.VolumeInfo.DriveSerialNumber.Should().Be("E0F7E847");
+            lnk.VolumeInfo.VolumeSerialNumber.Should().Be("E0F7E847");
             lnk.VolumeInfo.VolumeLabel.Should().Be("");
 
             lnk.LocalPath.Should().Be(@"C:\Program Files\Windows NT\Accessories\wordpad.exe");
@@ -187,7 +187,7 @@ namespace Lnk.Test
             lnk.VolumeInfo.Should().NotBeNull();
 
             lnk.VolumeInfo.DriveType.Should().Be(VolumeInfo.DriveTypes.DriveFixed);
-            lnk.VolumeInfo.DriveSerialNumber.Should().Be("D85CC709");
+            lnk.VolumeInfo.VolumeSerialNumber.Should().Be("D85CC709");
             lnk.VolumeInfo.VolumeLabel.Should().Be("TestOS");
 
             lnk.LocalPath.Should().Be(@"D:\Windows\System32\wuapp.exe");

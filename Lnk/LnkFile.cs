@@ -469,7 +469,7 @@ namespace Lnk
                     sb.AppendLine();
                     sb.AppendLine("Volume information");
                     sb.AppendLine($"Drive type: {VolumeInfo.DriveType}");
-                    sb.AppendLine($"Serial number: {VolumeInfo.DriveSerialNumber}");
+                    sb.AppendLine($"Serial number: {VolumeInfo.VolumeSerialNumber}");
 
                     var label = VolumeInfo.VolumeLabel.Length > 0 ? VolumeInfo.VolumeLabel : "(No label)";
 
