@@ -61,13 +61,13 @@ namespace Lnk.Test
         [Test]
         public void foobar()
         {
-            var foo = Lnk.LoadFile(@"C:\Temp\47E99F32FDDD19BD94A36BD52E4964FC");
+            var foo = Lnk.LoadFile(@"C:\Users\eric\Desktop\X-Ways Forensics 32-bit.lnk");
 
-            var d = foo.ExtraBlocks.Single(t => t is DarwinDataBlock) as DarwinDataBlock;
-
-            d?.ProductCode.Should().Be("{7F8559D1-2FF8-4E22-8885-E74D39A1A80E}");
-            d?.ComponentId.Should().Be("{BDDFA5DC-BD69-4232-998E-5167814C21B9}");
-            d?.FeatureName.Should().Be("Main");
+//            var d = foo.ExtraBlocks.Single(t => t is DarwinDataBlock) as DarwinDataBlock;
+//
+//            d?.ProductCode.Should().Be("{7F8559D1-2FF8-4E22-8885-E74D39A1A80E}");
+//            d?.ComponentId.Should().Be("{BDDFA5DC-BD69-4232-998E-5167814C21B9}");
+//            d?.FeatureName.Should().Be("Main");
 
             Debug.WriteLine(foo);
         }
