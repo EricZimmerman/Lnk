@@ -93,6 +93,11 @@ namespace Lnk.ShellItems
                 Value = Encoding.Unicode.GetString(rawBytes, 8, rawBytes.Length - 8).Split('\0').First();
             }
 
+            if (rawBytes.Length == index)
+            {
+                return;
+            }
+
             dataSize = BitConverter.ToUInt16(rawBytes, index);
             index += 2;
 

@@ -75,14 +75,17 @@ namespace Lnk.Test
         public void foobar()
         {
            //  var ls = Directory.GetFiles(@"C:\Temp\ll");
-           var ls = Directory.GetFiles(@"C:\Temp\llunknown");
+//           var ls = Directory.GetFiles(@"C:\Temp\llunknown");
+//
+//            foreach (var s in ls)
+//            {
+//                Debug.WriteLine(s);
+//                var l = Lnk.LoadFile(s);
+//                Debug.WriteLine(l);
+//            }
 
-            foreach (var s in ls)
-            {
-                Debug.WriteLine(s);
-                var l = Lnk.LoadFile(s);
-                Debug.WriteLine(l);
-            }
+            var ll = Lnk.LoadFile(@"D:\Sync\Jump lists and lnks\ITA_LNKs\ITA_Win10\Preferenze di lingua di Microsoft Office 2010._lnk");
+            Debug.WriteLine(ll);
         }
 
         [Test]

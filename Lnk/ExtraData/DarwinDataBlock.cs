@@ -62,6 +62,11 @@ namespace Lnk.ExtraData
         {
             var chunks = new string[4];
 
+            if (rawDarwin.Length == 0)
+            {
+                return "";
+            }
+
             for (var i = 0; i < 4; i++)
             {
                 var offset = i * 5;

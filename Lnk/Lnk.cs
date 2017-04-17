@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Lnk
 {
@@ -7,6 +8,11 @@ namespace Lnk
         public static LnkFile LoadFile(string lnkFile)
         {
             var raw = File.ReadAllBytes(lnkFile);
+
+            if (raw[0] != 0x4c)
+            {
+                throw new Exception($"Invalid signature!");
+            }
 
             return new LnkFile(raw, lnkFile);
         }
