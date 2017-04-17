@@ -97,12 +97,12 @@ namespace Lnk
             if (NetworkShareNameOffset > 20)
             {
                 NetworkShareName = Encoding.Unicode
-                    .GetString(rawBytes, NetworkShareNameOffset, (rawBytes.Length - NetworkShareNameOffset)*2);
+                    .GetString(rawBytes, NetworkShareNameOffset, (rawBytes.Length - NetworkShareNameOffset) * 2);
 
                 if (DeviceNameOffset > 0)
                 {
                     DeviceName = Encoding.Unicode
-                        .GetString(rawBytes, DeviceNameOffset, (rawBytes.Length - DeviceNameOffset)*2);
+                        .GetString(rawBytes, DeviceNameOffset, (rawBytes.Length - DeviceNameOffset) * 2);
                 }
             }
             else
@@ -116,7 +116,9 @@ namespace Lnk
                 if (DeviceNameOffset > 0)
                 {
                     DeviceName = Encoding.GetEncoding(1252)
-                        .GetString(rawBytes, DeviceNameOffset, rawBytes.Length - DeviceNameOffset).Split('\0').First();
+                        .GetString(rawBytes, DeviceNameOffset, rawBytes.Length - DeviceNameOffset)
+                        .Split('\0')
+                        .First();
                 }
             }
         }

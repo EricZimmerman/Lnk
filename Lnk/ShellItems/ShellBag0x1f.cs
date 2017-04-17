@@ -14,7 +14,7 @@ namespace Lnk.ShellItems
         private readonly List<PropertySheet> _sheets;
 
 
-        public ShellBag0X1F( byte[] rawBytes)
+        public ShellBag0X1F(byte[] rawBytes)
         {
             ExtensionBlocks = new List<IExtensionBlock>();
 
@@ -133,7 +133,7 @@ namespace Lnk.ShellItems
 
                         foreach (var extOffset in extOffsets)
                         {
-                            var binaryOffset = extOffset/3 - 4;
+                            var binaryOffset = extOffset / 3 - 4;
                             var exSize = BitConverter.ToInt16(propertysheetBytes, binaryOffset);
 
                             var exBytes = propertysheetBytes.Skip(binaryOffset).Take(exSize).ToArray();
@@ -151,7 +151,6 @@ namespace Lnk.ShellItems
                         throw ex;
                         // Syntax error in the regular expression
                     }
-
                 }
 
                 PropertyStore = propStore;
@@ -290,7 +289,7 @@ namespace Lnk.ShellItems
 
                         foreach (var extOffset in extOffsets)
                         {
-                            var binaryOffset = extOffset/3 - 4;
+                            var binaryOffset = extOffset / 3 - 4;
                             var exSize = BitConverter.ToInt16(propBytes, binaryOffset);
 
                             var exBytes = propBytes.Skip(binaryOffset).Take(exSize).ToArray();
@@ -307,14 +306,12 @@ namespace Lnk.ShellItems
                         throw ex;
                         // Syntax error in the regular expression
                     }
-
                 }
             }
             else
             {
-
                 if (rawBytes[0x28] == 0x2f ||
-                    (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
+                    rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41)
                 {
                     //we have a good date
 
@@ -378,7 +375,7 @@ namespace Lnk.ShellItems
                     (from propertySheet in PropertyStore.Sheets
                         from propertyName in propertySheet.PropertyNames
                         select propertyName.Value)
-                        .ToList();
+                    .ToList();
 
                 valuestring = string.Join("::", namesList.ToArray());
             }

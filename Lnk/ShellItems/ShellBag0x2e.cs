@@ -50,11 +50,11 @@ namespace Lnk.ShellItems
             }
 
             //zip file contents check
-            if (rawBytes[0x28] == 0x2f || (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
+            if (rawBytes[0x28] == 0x2f || rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41)
             {
                 //we have a good date
 
-                var zip = new ShellBagZipContents( rawBytes);
+                var zip = new ShellBagZipContents(rawBytes);
                 FriendlyName = zip.FriendlyName;
                 LastAccessTime = zip.LastAccessTime;
 
@@ -92,13 +92,13 @@ namespace Lnk.ShellItems
 
             index = 0x28;
 
-            var storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen*2 - 2);
+            var storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen * 2 - 2);
 
-            index += storageStringNameLen*2;
+            index += storageStringNameLen * 2;
 
-            var storageIdName = Encoding.Unicode.GetString(rawBytes, index, storageIdStringLen*2 - 2);
+            var storageIdName = Encoding.Unicode.GetString(rawBytes, index, storageIdStringLen * 2 - 2);
 
-            index += storageIdStringLen*2;
+            index += storageIdStringLen * 2;
 
             Value = storageName;
         }
@@ -159,7 +159,7 @@ namespace Lnk.ShellItems
 
                         foreach (var extOffset in extOffsets)
                         {
-                            var binaryOffset = extOffset/3 - 4;
+                            var binaryOffset = extOffset / 3 - 4;
                             var exSize = BitConverter.ToInt16(propBytes, binaryOffset);
 
                             var exBytes = propBytes.Skip(binaryOffset).Take(exSize).ToArray();
@@ -177,14 +177,12 @@ namespace Lnk.ShellItems
                         throw ex;
                         // Syntax error in the regular expression
                     }
-
                 }
             }
             else
             {
-
                 if (rawBytes[0x28] == 0x2f ||
-                    (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
+                    rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41)
                 {
                     //we have a good date
 

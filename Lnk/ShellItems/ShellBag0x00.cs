@@ -110,7 +110,8 @@ namespace Lnk.ShellItems
                     if (rawBytes.Length <= 0x64)
                     {
                         FriendlyName = "Server name";
-                        Value = Encoding.Unicode.GetString(rawBytes, 6, rawBytes.Length - 6).Replace("\0", string.Empty);
+                        Value = Encoding.Unicode.GetString(rawBytes, 6, rawBytes.Length - 6)
+                            .Replace("\0", string.Empty);
                     }
                     else
                     {
@@ -267,17 +268,17 @@ namespace Lnk.ShellItems
 
             index += 4; // skip unknown
 
-            var storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen*2 - 2);
+            var storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen * 2 - 2);
 
-            index += storageStringNameLen*2;
+            index += storageStringNameLen * 2;
 
-            _storageIdName = Encoding.Unicode.GetString(rawBytes, index, storageIdStringLen*2 - 2);
+            _storageIdName = Encoding.Unicode.GetString(rawBytes, index, storageIdStringLen * 2 - 2);
 
-            index += storageIdStringLen*2;
+            index += storageIdStringLen * 2;
 
-            _fileSystemName = Encoding.Unicode.GetString(rawBytes, index, fileSystemNameLen*2 - 2);
+            _fileSystemName = Encoding.Unicode.GetString(rawBytes, index, fileSystemNameLen * 2 - 2);
 
-            index += fileSystemNameLen*2;
+            index += fileSystemNameLen * 2;
 
             //index += 6; //get to beginning of GUIDs
 
@@ -350,17 +351,17 @@ namespace Lnk.ShellItems
 
             index += 4;
 
-            var storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen*2 - 2);
+            var storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen * 2 - 2);
 
-            index += storageStringNameLen*2;
+            index += storageStringNameLen * 2;
 
-            _storageIdName = Encoding.Unicode.GetString(rawBytes, index, storageIdStringLen*2 - 2);
+            _storageIdName = Encoding.Unicode.GetString(rawBytes, index, storageIdStringLen * 2 - 2);
 
-            index += storageIdStringLen*2;
+            index += storageIdStringLen * 2;
 
-            _fileSystemName = Encoding.Unicode.GetString(rawBytes, index, fileSystemNameLen*2 - 2);
+            _fileSystemName = Encoding.Unicode.GetString(rawBytes, index, fileSystemNameLen * 2 - 2);
 
-            index += fileSystemNameLen*2;
+            index += fileSystemNameLen * 2;
 
             //TODO pull out modified time/created for OLE?
 
@@ -385,8 +386,8 @@ namespace Lnk.ShellItems
         {
             FriendlyName = "Variable: Zip file contents";
 
-            if (rawBytes[0x28] == 0x2f || (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41) ||
-                rawBytes[0x1c] == 0x2f || (rawBytes[0x18] == 0x4e && rawBytes[0x1a] == 0x2f && rawBytes[0x1c] == 0x41))
+            if (rawBytes[0x28] == 0x2f || rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41 ||
+                rawBytes[0x1c] == 0x2f || rawBytes[0x18] == 0x4e && rawBytes[0x1a] == 0x2f && rawBytes[0x1c] == 0x41)
             {
                 //we have a good date
 
@@ -414,6 +415,19 @@ namespace Lnk.ShellItems
             var identifiersize = BitConverter.ToInt16(rawBytes, index);
 
             index += 2;
+
+            if (identifiersize > rawBytes.Length)
+            {
+                index = 0xc;
+
+                var strs = Encoding.GetEncoding(1252).GetString(rawBytes, index, rawBytes.Length - index).Split('\0');
+
+                var p2 = string.Join(",", strs.Skip(1).ToList());
+
+                Value = $"{strs[0]} ({p2})";
+
+                return;
+            }
 
             var identifierData = new byte[identifiersize];
 
@@ -448,7 +462,7 @@ namespace Lnk.ShellItems
 
                         foreach (var extOffset in extOffsets)
                         {
-                            var binaryOffset = extOffset/3 - 4;
+                            var binaryOffset = extOffset / 3 - 4;
                             var exSize = BitConverter.ToInt16(propBytes, binaryOffset);
 
                             var exBytes = propBytes.Skip(binaryOffset).Take(exSize).ToArray();
@@ -477,7 +491,7 @@ namespace Lnk.ShellItems
                 // SiAuto.Main.LogWarning("Oh no! No property sheets!");
 
                 if (rawBytes[0x28] == 0x2f ||
-                    (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
+                    rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41)
                 {
                     //we have a good date
 
@@ -501,12 +515,11 @@ namespace Lnk.ShellItems
                     CreatedOnTime = cdb.CreatedOnTime;
                     LastModificationTime = cdb.LastModificationTime;
                     LastAccessTime = cdb.LastAccessTime;
-                    
+
 
                     return;
                 }
 
-                
 
                 Debug.Write("Oh no! No property sheets!");
 
@@ -566,7 +579,7 @@ namespace Lnk.ShellItems
                     (from propertySheet in PropertyStore.Sheets
                         from propertyName in propertySheet.PropertyNames
                         select propertyName.Value)
-                        .ToList();
+                    .ToList();
 
                 valuestring = string.Join("::", namesList.ToArray());
             }
@@ -740,7 +753,7 @@ namespace Lnk.ShellItems
             sb.AppendLine(base.ToString());
 
 
-            return sb.ToString();
+            return sb.ToString().TrimStart();
         }
     }
 }

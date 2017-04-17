@@ -91,7 +91,7 @@ namespace Lnk.ExtraData
 
             for (var i = 0; i < 8; i++)
             {
-                ColorTable.Add(BitConverter.ToUInt32(rawBytes, 140 + i*8));
+                ColorTable.Add(BitConverter.ToUInt32(rawBytes, 140 + i * 8));
             }
         }
 

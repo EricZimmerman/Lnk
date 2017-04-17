@@ -90,7 +90,7 @@ namespace Lnk.ShellItems
             }
             else
             {
-                Value = Encoding.Unicode.GetString(rawBytes, 8,rawBytes.Length-8).Split('\0').First();
+                Value = Encoding.Unicode.GetString(rawBytes, 8, rawBytes.Length - 8).Split('\0').First();
             }
 
             dataSize = BitConverter.ToUInt16(rawBytes, index);
@@ -122,7 +122,7 @@ namespace Lnk.ShellItems
                 sb.AppendLine($"Connect time: {FileTime1}");
                 sb.AppendLine();
             }
-            
+
 
             if (UserName.Length > 0)
             {

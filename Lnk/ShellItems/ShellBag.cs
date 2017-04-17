@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using ExtensionBlocks;
 
@@ -7,8 +6,6 @@ namespace Lnk.ShellItems
 {
     public abstract class ShellBag : IShellBag
     {
-        
-
         public string FriendlyName { get; set; }
 
 

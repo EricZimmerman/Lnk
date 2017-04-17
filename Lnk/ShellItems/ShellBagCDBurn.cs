@@ -10,20 +10,17 @@ namespace Lnk.ShellItems
     {
         public ShellBagCDBurn(byte[] rawBytes)
         {
-            
-
             ShortName = string.Empty;
 
             PropertyStore = new PropertyStore();
 
-            
 
             ExtensionBlocks = new List<IExtensionBlock>();
 
 
             FriendlyName = "CDBurn";
 
-            int index = 8; //reset index to after signature
+            var index = 8; //reset index to after signature
 
             index += 4; //skip 4 unknown
             index += 4; //skip 4 unknown
@@ -33,7 +30,7 @@ namespace Lnk.ShellItems
 
             while (index < rawBytes.Length)
             {
-                short subshellitemdatasize = BitConverter.ToInt16(rawBytes, index);
+                var subshellitemdatasize = BitConverter.ToInt16(rawBytes, index);
                 index += 2;
 
                 if (subshellitemdatasize <= 0)
@@ -64,16 +61,16 @@ namespace Lnk.ShellItems
             {
                 index = 0;
 
-                byte typeIndicator = bytes[index];
+                var typeIndicator = bytes[index];
                 index += 1;
                 index += 1; //skip unknown empty value
 
-                int filesize = BitConverter.ToInt32(rawBytes, index);
+                var filesize = BitConverter.ToInt32(rawBytes, index);
                 index += 4;
 
                 FileSize = filesize;
 
-                DateTimeOffset? modDate =
+                var modDate =
                     Utils.ExtractDateTimeOffsetFromBytes(bytes.Skip(index).Take(4).ToArray());
 
                 LastModificationTime = modDate;
@@ -82,13 +79,14 @@ namespace Lnk.ShellItems
 
                 index += 2; //skip 2 bytes for file attributes
 
-                int len = 0;
+                var len = 0;
 
-                string shortName = string.Empty;
+                var shortName = string.Empty;
 
                 //get position of beef0004
 
-                var beefPos = BitConverter.ToString(bytes).IndexOf("04-00-EF-BE", StringComparison.InvariantCulture) / 3;
+                var beefPos = BitConverter.ToString(bytes).IndexOf("04-00-EF-BE", StringComparison.InvariantCulture) /
+                              3;
                 beefPos = beefPos - 4; //add header back for beef
 
                 var strLen = beefPos - index;
@@ -96,7 +94,7 @@ namespace Lnk.ShellItems
                 if (typeIndicator == 0x35)
                 {
                     //unicode
-                    var tempString = Encoding.Unicode.GetString(bytes,index, strLen - 2);
+                    var tempString = Encoding.Unicode.GetString(bytes, index, strLen - 2);
 
                     shortName = tempString;
                     index += strLen;
@@ -118,8 +116,6 @@ namespace Lnk.ShellItems
                 }
 
 
-
-
                 ShortName = shortName;
 
                 while (bytes[index] == 0x0)
@@ -127,7 +123,7 @@ namespace Lnk.ShellItems
                     index += 1;
                 }
 
-                short extsize = BitConverter.ToInt16(bytes, index);
+                var extsize = BitConverter.ToInt16(bytes, index);
 
                 var signature = BitConverter.ToUInt32(bytes, index + 4);
 
@@ -149,7 +145,7 @@ namespace Lnk.ShellItems
                 }
             }
 
-            if (oldIndex+5 < rawBytes.Length)
+            if (oldIndex + 5 < rawBytes.Length)
             {
                 index = oldIndex + 2;
 
@@ -160,12 +156,12 @@ namespace Lnk.ShellItems
                     ExtensionBlocks.Add(new BeefPlaceHolder(null));
                 }
             }
-      
         }
 
-        public PropertyStore PropertyStore { get; private set; }
+        public PropertyStore PropertyStore { get; }
 
-        private IShellBag _extraBag { get; set; }
+        private IShellBag _extraBag { get; }
+
         /// <summary>
         ///     last modified time of BagPath
         /// </summary>
@@ -191,16 +187,14 @@ namespace Lnk.ShellItems
         ///// </summary>
         //public int? MFTSequenceNumber { get; set; }
 
-        public int FileSize { get; private set; }
+        public int FileSize { get; }
 
         public string Miscellaneous { get; private set; }
 
- 
-    
 
-        public string ShortName { get; private set; }
+        public string ShortName { get; }
 
-      
+
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -210,7 +204,6 @@ namespace Lnk.ShellItems
                 sb.AppendLine($"Short name: {ShortName}");
             }
 
-        
 
             //TODO denote custom properties vs standard ones
             if (LastModificationTime.HasValue)
@@ -218,7 +211,6 @@ namespace Lnk.ShellItems
                 sb.AppendLine($"Modified On: {LastModificationTime.Value}");
             }
 
-  
 
             if (PropertyStore.Sheets.Count > 0)
             {
@@ -232,20 +224,19 @@ namespace Lnk.ShellItems
             }
 
 
-                sb.AppendLine(base.ToString());
+            sb.AppendLine(base.ToString());
 
 
+            if (_extraBag != null)
+            {
+                sb.AppendLine();
+                sb.AppendLine("This CDBurn ShellBag contains an additional ShellBag as shown below");
+                sb.AppendLine();
+                sb.AppendLine(_extraBag.ToString());
 
-                if (_extraBag != null)
-                {
-                    sb.AppendLine();
-                    sb.AppendLine("This CDBurn ShellBag contains an additional ShellBag as shown below");
-                    sb.AppendLine();
-                    sb.AppendLine(_extraBag.ToString());
-
-                    sb.AppendLine();
-                    sb.AppendLine("End additional ShellBag");
-                }
+                sb.AppendLine();
+                sb.AppendLine("End additional ShellBag");
+            }
 
             return sb.ToString();
         }

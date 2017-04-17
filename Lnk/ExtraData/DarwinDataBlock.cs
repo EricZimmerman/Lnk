@@ -7,9 +7,8 @@ namespace Lnk.ExtraData
 {
     public class DarwinDataBlock : ExtraDataBase
     {
-        public string FeatureName { get; }
-        public string ComponentId { get; }
-        public string ProductCode { get; }
+        private const string Base85 =
+            "!$%&'()*+,-.0123456789=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~";
 
         public DarwinDataBlock(byte[] rawBytes)
         {
@@ -21,10 +20,8 @@ namespace Lnk.ExtraData
             ApplicationIdentifierAscii = Encoding.GetEncoding(1252).GetString(rawBytes, 8, 260).Split('\0').First();
             ApplicationIdentifierUnicode = Encoding.Unicode.GetString(rawBytes, 268, 520).Split('\0').First();
 
-            char sepChar = '>';
+            var sepChar = '>';
 
-
-           
 
             if (ApplicationIdentifierAscii.Contains("<"))
             {
@@ -52,8 +49,14 @@ namespace Lnk.ExtraData
 
                 ComponentId = DecodeDarwinToGuid(rawDarwin);
             }
-
         }
+
+        public string FeatureName { get; }
+        public string ComponentId { get; }
+        public string ProductCode { get; }
+
+        public string ApplicationIdentifierAscii { get; }
+        public string ApplicationIdentifierUnicode { get; }
 
         private string DecodeDarwinToGuid(string rawDarwin)
         {
@@ -99,7 +102,7 @@ namespace Lnk.ExtraData
         {
             var subs = new List<string>();
 
-            for (int i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 var index = 2 * i;
 
@@ -109,17 +112,13 @@ namespace Lnk.ExtraData
 
             subs.Reverse();
             return string.Join("", subs);
-
         }
-
-        private const string Base85 =
-            "!$%&'()*+,-.0123456789=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{}~";
 
         private int QuadToHex(string quad)
         {
             var dd = 0;
 
-            for (var i =4; i > -1; i--)
+            for (var i = 4; i > -1; i--)
             {
                 var foo = Base85.IndexOf(quad[i]);
 
@@ -133,9 +132,6 @@ namespace Lnk.ExtraData
 
             return dd;
         }
-
-        public string ApplicationIdentifierAscii { get; }
-        public string ApplicationIdentifierUnicode { get; }
 
         public override string ToString()
         {

@@ -39,7 +39,8 @@ namespace Lnk.ExtraData
                         var prefix = $"{prop.GUID}\\{propertyName.Key}".PadRight(43);
 
                         var suffix =
-                            $"{Utils.GetDescriptionFromGuidAndKey(prop.GUID, int.Parse(propertyName.Key))}".PadRight(35);
+                            $"{Utils.GetDescriptionFromGuidAndKey(prop.GUID, int.Parse(propertyName.Key))}"
+                                .PadRight(35);
 
                         sb.AppendLine($"{prefix} {suffix} ==> {propertyName.Value}");
                     }

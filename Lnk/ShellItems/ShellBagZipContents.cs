@@ -79,8 +79,8 @@ namespace Lnk.ShellItems
 
                 if (nameSize1 > 0)
                 {
-                    var folderName1 = Encoding.Unicode.GetString(rawBytes, index, nameSize1*2);
-                    index += nameSize1*2;
+                    var folderName1 = Encoding.Unicode.GetString(rawBytes, index, nameSize1 * 2);
+                    index += nameSize1 * 2;
 
                     Value = folderName1;
 
@@ -89,8 +89,8 @@ namespace Lnk.ShellItems
 
                 if (nameSize2 > 0)
                 {
-                    var folderName2 = Encoding.Unicode.GetString(rawBytes, index, nameSize2*2);
-                    index += nameSize2*2;
+                    var folderName2 = Encoding.Unicode.GetString(rawBytes, index, nameSize2 * 2);
+                    index += nameSize2 * 2;
 
                     //  Value = string.Format("{0}/{1}", Value, folderName2);
 
@@ -108,8 +108,8 @@ namespace Lnk.ShellItems
 
                 if (nameSize1 > 0)
                 {
-                    var folderName1 = Encoding.Unicode.GetString(rawBytes, index, nameSize1*2);
-                    index += nameSize1*2;
+                    var folderName1 = Encoding.Unicode.GetString(rawBytes, index, nameSize1 * 2);
+                    index += nameSize1 * 2;
 
                     Value = folderName1;
 
@@ -118,8 +118,8 @@ namespace Lnk.ShellItems
 
                 if (nameSize2 > 0)
                 {
-                    var folderName2 = Encoding.Unicode.GetString(rawBytes, index, nameSize2*2);
-                    index += nameSize2*2;
+                    var folderName2 = Encoding.Unicode.GetString(rawBytes, index, nameSize2 * 2);
+                    index += nameSize2 * 2;
 
                     index += 2; // skip end of unicode string
                 }

@@ -82,6 +82,28 @@ namespace Lnk
                 //TODO try catch and add placeholder for shellitem when exeption happens? or ?
                 foreach (var shellItem in shellItemsRaw)
                 {
+                    if (shellItem.Length >= 0x28)
+                    {
+                        var sig1 = BitConverter.ToInt64(shellItem, 0x8);
+                        var sig2 = BitConverter.ToInt64(shellItem, 0x18);
+
+                        if (sig1 == 0 && sig2 == 0
+                        ) // if ((sig1 == zip1_0 && sig2 == zip2_0) || sig2 == zip2_1 || (sig1 == zip1_1 && sig2 == zip2_0))
+                        {
+                            //double check
+                            if (shellItem[0x28] == 0x2f || shellItem[0x26] == 0x2f || shellItem[0x1a] == 0x2f ||
+                                shellItem[0x1c] == 0x2f)
+                                // forward slash in date or N / A
+                            {
+                                //zip?
+                                var zz = new ShellBagZipContents(shellItem);
+
+                                TargetIDs.Add(zz);
+                                continue;
+                            }
+                        }
+                    }
+
                     switch (shellItem[2])
                     {
                         case 0x1f:
@@ -97,11 +119,7 @@ namespace Lnk
                             var ee = new ShellBag0X2E(shellItem);
                             TargetIDs.Add(ee);
                             break;
-                        case 0xbd:
-                        case 0x6e:
-                            var bd = new ShellBagZipContents(shellItem);
-                            TargetIDs.Add(bd);
-                            break;
+
                         case 0xb1:
                         case 0x31:
                         case 0x35:
@@ -156,8 +174,13 @@ namespace Lnk
                             var forty = new ShellBag0X40(shellItem);
                             TargetIDs.Add(forty);
                             break;
+                        case 0x4C:
+                            var fc = new ShellBag0X4C(shellItem);
+                            TargetIDs.Add(fc);
+                            break;
                         default:
-                            throw new Exception($"Unknown shell item ID: 0x{shellItem[2]:X}. Please send to saericzimmerman@gmail.com so support can be added.");
+                            throw new Exception(
+                                $"Unknown shell item ID: 0x{shellItem[2]:X}. Please send to saericzimmerman@gmail.com so support can be added.");
                     }
                 }
 
@@ -176,63 +199,69 @@ namespace Lnk
                 {
                     var locationInfoHeaderSize = BitConverter.ToInt32(locationBytes, 4);
 
-                LocationFlags = (LocationFlag) BitConverter.ToInt32(locationBytes, 8);
+                    LocationFlags = (LocationFlag) BitConverter.ToInt32(locationBytes, 8);
 
-                var volOffset = BitConverter.ToInt32(locationBytes, 12);
-                var vbyteSize = BitConverter.ToInt32(locationBytes, volOffset);
-                var volBytes = new byte[vbyteSize];
-                Buffer.BlockCopy(locationBytes, volOffset, volBytes, 0, vbyteSize);
+                    var volOffset = BitConverter.ToInt32(locationBytes, 12);
+                    var vbyteSize = BitConverter.ToInt32(locationBytes, volOffset);
+                    var volBytes = new byte[vbyteSize];
+                    Buffer.BlockCopy(locationBytes, volOffset, volBytes, 0, vbyteSize);
 
-                if (volOffset > 0)
-                {
-                    VolumeInfo = new VolumeInfo(volBytes);
-                }
+                    if (volOffset > 0)
+                    {
+                        VolumeInfo = new VolumeInfo(volBytes);
+                    }
 
-                var localPathOffset = BitConverter.ToInt32(locationBytes, 16);
-                var networkShareOffset = BitConverter.ToInt32(locationBytes, 20);
+                    var localPathOffset = BitConverter.ToInt32(locationBytes, 16);
+                    var networkShareOffset = BitConverter.ToInt32(locationBytes, 20);
 
-                if ((LocationFlags & LocationFlag.VolumeIdAndLocalBasePath) == LocationFlag.VolumeIdAndLocalBasePath)
-                {
-                    LocalPath = Encoding.GetEncoding(1252)
-                        .GetString(locationBytes, localPathOffset, locationBytes.Length - localPathOffset)
+                    if ((LocationFlags & LocationFlag.VolumeIdAndLocalBasePath) ==
+                        LocationFlag.VolumeIdAndLocalBasePath)
+                    {
+                        LocalPath = Encoding.GetEncoding(1252)
+                            .GetString(locationBytes, localPathOffset, locationBytes.Length - localPathOffset)
+                            .Split('\0')
+                            .First();
+                    }
+                    if ((LocationFlags & LocationFlag.CommonNetworkRelativeLinkAndPathSuffix) ==
+                        LocationFlag.CommonNetworkRelativeLinkAndPathSuffix)
+                    {
+                        var networkShareSize = BitConverter.ToInt32(locationBytes, networkShareOffset);
+                        var networkBytes = new byte[networkShareSize];
+                        Buffer.BlockCopy(locationBytes, networkShareOffset, networkBytes, 0, networkShareSize);
+
+                        NetworkShareInfo = new NetworkShareInfo(networkBytes);
+                    }
+
+                    var commonPathOffset = BitConverter.ToInt32(locationBytes, 24);
+
+                    CommonPath = Encoding.GetEncoding(1252)
+                        .GetString(locationBytes, commonPathOffset, locationBytes.Length - commonPathOffset)
                         .Split('\0')
                         .First();
-                }
-                if ((LocationFlags & LocationFlag.CommonNetworkRelativeLinkAndPathSuffix) ==
-                    LocationFlag.CommonNetworkRelativeLinkAndPathSuffix)
-                {
-                    var networkShareSize = BitConverter.ToInt32(locationBytes, networkShareOffset);
-                    var networkBytes = new byte[networkShareSize];
-                    Buffer.BlockCopy(locationBytes, networkShareOffset, networkBytes, 0, networkShareSize);
 
-                    NetworkShareInfo = new NetworkShareInfo(networkBytes);
-                }
+                    if (locationInfoHeaderSize > 28)
+                    {
+                        var uniLocalOffset = BitConverter.ToInt32(locationBytes, 28);
 
-                var commonPathOffset = BitConverter.ToInt32(locationBytes, 24);
+                        var unicodeLocalPath = Encoding.Unicode
+                            .GetString(locationBytes, uniLocalOffset, locationBytes.Length - uniLocalOffset)
+                            .Split('\0')
+                            .First();
+                        LocalPath = unicodeLocalPath;
+                    }
 
-                CommonPath = Encoding.GetEncoding(1252)
-                    .GetString(locationBytes, commonPathOffset, locationBytes.Length - commonPathOffset)
-                    .Split('\0')
-                    .First();
+                    if (locationInfoHeaderSize > 32)
+                    {
+                        var uniCommonOffset = BitConverter.ToInt32(locationBytes, 32);
 
-                if (locationInfoHeaderSize > 28)
-                {
-                    var uniLocalOffset = BitConverter.ToInt32(locationBytes, 28);
-                    
-                    var unicodeLocalPath = Encoding.Unicode.GetString(locationBytes, uniLocalOffset, locationBytes.Length - uniLocalOffset).Split('\0').First();
-                    LocalPath = unicodeLocalPath;
+                        var unicodeCommonPath = Encoding.Unicode
+                            .GetString(locationBytes, uniCommonOffset, locationBytes.Length - uniCommonOffset)
+                            .Split('\0')
+                            .First();
+                        CommonPath = unicodeCommonPath;
+                    }
                 }
 
-                if (locationInfoHeaderSize > 32)
-                {
-                    var uniCommonOffset = BitConverter.ToInt32(locationBytes, 32);
-                  
-                    var unicodeCommonPath = Encoding.Unicode.GetString(locationBytes, uniCommonOffset, locationBytes.Length - uniCommonOffset).Split('\0').First();
-                    CommonPath = unicodeCommonPath;
-                }
-                }
-
-                
 
                 index += locationItemSize;
             }
@@ -243,7 +272,7 @@ namespace Lnk
                 index += 2;
                 if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
                 {
-                    Name = Encoding.Unicode.GetString(rawBytes, index, nameLen*2);
+                    Name = Encoding.Unicode.GetString(rawBytes, index, nameLen * 2);
                     index += nameLen;
                 }
                 else
@@ -259,7 +288,7 @@ namespace Lnk
                 index += 2;
                 if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
                 {
-                    RelativePath = Encoding.Unicode.GetString(rawBytes, index, relLen*2);
+                    RelativePath = Encoding.Unicode.GetString(rawBytes, index, relLen * 2);
                     index += relLen;
                 }
                 else
@@ -275,7 +304,7 @@ namespace Lnk
                 index += 2;
                 if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
                 {
-                    WorkingDirectory = Encoding.Unicode.GetString(rawBytes, index, workLen*2);
+                    WorkingDirectory = Encoding.Unicode.GetString(rawBytes, index, workLen * 2);
                     index += workLen;
                 }
                 else
@@ -291,7 +320,7 @@ namespace Lnk
                 index += 2;
                 if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
                 {
-                    Arguments = Encoding.Unicode.GetString(rawBytes, index, argLen*2);
+                    Arguments = Encoding.Unicode.GetString(rawBytes, index, argLen * 2);
                     index += argLen;
                 }
                 else
@@ -307,7 +336,7 @@ namespace Lnk
                 index += 2;
                 if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
                 {
-                    IconLocation = Encoding.Unicode.GetString(rawBytes, index, icoLen*2);
+                    IconLocation = Encoding.Unicode.GetString(rawBytes, index, icoLen * 2);
                     index += icoLen;
                 }
                 else

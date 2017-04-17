@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using ExtensionBlocks;
@@ -9,7 +8,7 @@ namespace Lnk.ShellItems
 {
     public class ShellBag0X31 : ShellBag
     {
-        public ShellBag0X31( byte[] rawBytes)
+        public ShellBag0X31(byte[] rawBytes)
         {
             FriendlyName = "Directory";
 
@@ -18,8 +17,8 @@ namespace Lnk.ShellItems
 
 
             var index = 2;
-            if ((rawBytes[0x27] == 0x00 && rawBytes[0x28] == 0x2f && rawBytes[0x29] == 0x00) ||
-                (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
+            if (rawBytes[0x27] == 0x00 && rawBytes[0x28] == 0x2f && rawBytes[0x29] == 0x00 ||
+                rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41)
             {
                 //we have a good date
 
@@ -54,7 +53,7 @@ namespace Lnk.ShellItems
 
             var len = 0;
 
-            var beefPos = BitConverter.ToString(rawBytes).IndexOf("04-00-EF-BE", StringComparison.InvariantCulture)/3;
+            var beefPos = BitConverter.ToString(rawBytes).IndexOf("04-00-EF-BE", StringComparison.InvariantCulture) / 3;
             beefPos = beefPos - 4; //add header back for beef
 
             var strLen = beefPos - index;
@@ -165,7 +164,7 @@ namespace Lnk.ShellItems
         /// </summary>
         public DateTimeOffset? LastModificationTime { get; set; }
 
-       
+
         /// <summary>
         ///     Last access time of BagPath
         /// </summary>

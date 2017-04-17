@@ -27,7 +27,7 @@ namespace Lnk.ShellItems
             if (sig74 == "CF\0\0")
             {
                 if (rawBytes[0x28] == 0x2f ||
-                    (rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
+                    rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41)
                 {
                     //we have a good date
 
@@ -170,7 +170,6 @@ namespace Lnk.ShellItems
         ///     last modified time of BagPath
         /// </summary>
         public DateTimeOffset? LastModificationTime { get; set; }
-
 
 
         /// <summary>

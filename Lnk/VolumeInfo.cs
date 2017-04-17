@@ -36,20 +36,22 @@ namespace Lnk
                 try
                 {
                     VolumeLabel = Encoding.Unicode
-                    .GetString(rawBytes, VolumeLabelOffset, (rawBytes.Length - VolumeLabelOffset) * 2);
+                        .GetString(rawBytes, VolumeLabelOffset, (rawBytes.Length - VolumeLabelOffset) * 2);
                 }
                 catch (Exception)
                 {
                     VolumeLabel = Encoding.GetEncoding(1252)
-                    .GetString(rawBytes, VolumeLabelOffset, rawBytes.Length - VolumeLabelOffset).Split('\0').First();
-
+                        .GetString(rawBytes, VolumeLabelOffset, rawBytes.Length - VolumeLabelOffset)
+                        .Split('\0')
+                        .First();
                 }
-                
             }
             else
             {
                 VolumeLabel = Encoding.GetEncoding(1252)
-                    .GetString(rawBytes, VolumeLabelOffset, rawBytes.Length - VolumeLabelOffset).Split('\0').First();
+                    .GetString(rawBytes, VolumeLabelOffset, rawBytes.Length - VolumeLabelOffset)
+                    .Split('\0')
+                    .First();
             }
         }
 

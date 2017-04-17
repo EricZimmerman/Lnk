@@ -55,7 +55,6 @@ namespace Lnk.ShellItems
             //M-i-c-r-o-s-o-f-t- -N-e-t-w-o-r-k------
 
             Value = location;
-
         }
 
         public override string ToString()

@@ -28,7 +28,6 @@ namespace Lnk.ShellItems
 
                 ExtensionBlocks.Add(block1);
             }
-
         }
 
         public override string ToString()
