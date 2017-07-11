@@ -84,7 +84,7 @@ namespace Lnk.Test
 //                Debug.WriteLine(l);
 //            }
 
-            var ll = Lnk.LoadFile(@"D:\Sync\Jump lists and lnks\ITA_LNKs\ITA_Win10\Preferenze di lingua di Microsoft Office 2010._lnk");
+            var ll = Lnk.LoadFile(@"D:\Temp\ImDisk Virtual Disk Driver.lnk.txt");
             Debug.WriteLine(ll);
         }
 

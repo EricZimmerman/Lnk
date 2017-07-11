@@ -107,7 +107,7 @@ namespace Lnk.ShellItems
                     return;
 
                 default: // includes known 0xbeebee00
-                    if (rawBytes.Length <= 0x64)
+                    if (rawBytes.Length <= 0x60)
                     {
                         FriendlyName = "Server name";
                         Value = Encoding.Unicode.GetString(rawBytes, 6, rawBytes.Length - 6)
