@@ -62,6 +62,7 @@
     <Compile Include="LnkFile.cs" />
     <Compile Include="NetworkShareInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ShellItems\ShellBag0X23.cs" />
     <Compile Include="ShellItems\ShellBag0X4C.cs" />
     <Compile Include="ShellItems\IShellBag.cs" />
     <Compile Include="ShellItems\ShellBag.cs" />

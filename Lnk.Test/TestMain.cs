@@ -84,7 +84,7 @@ namespace Lnk.Test
 //                Debug.WriteLine(l);
 //            }
 
-            var ll = Lnk.LoadFile(@"D:\Temp\ImDisk Virtual Disk Driver.lnk.txt");
+            var ll = Lnk.LoadFile(@"D:\Temp\ll\Component Services.ln_");
             Debug.WriteLine(ll);
         }
 

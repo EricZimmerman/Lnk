@@ -17,8 +17,8 @@ namespace Lnk.ShellItems
 
 
             var index = 2;
-            if (rawBytes[0x27] == 0x00 && rawBytes[0x28] == 0x2f && rawBytes[0x29] == 0x00 ||
-                rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41)
+            if (rawBytes.Length>0x29 && ( rawBytes[0x27] == 0x00 && rawBytes[0x28] == 0x2f && rawBytes[0x29] == 0x00 ||
+                rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41))
             {
                 //we have a good date
 
@@ -91,9 +91,21 @@ namespace Lnk.ShellItems
 
             Value = shortName;
 
+            if (rawBytes.Length == index)
+            {
+                return;
+            }
+
             while (rawBytes[index] == 0x0)
             {
+              
+                
                 index += 1;
+
+                if (rawBytes.Length == index)
+                {
+                    return;
+                }
             }
 
             // here is where we need to cut up the rest into extension blocks
