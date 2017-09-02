@@ -2,6 +2,7 @@
 {
     public enum ExtraDataTypes : uint
     {
+        DamagedDataBlock = 0x0,
         ConsoleDataBlock = 0xA0000002,
         ConsoleFeDataBlock = 0xA0000004,
         DarwinDataBlock = 0xA0000006,

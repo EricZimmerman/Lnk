@@ -84,7 +84,7 @@ namespace Lnk.Test
 //                Debug.WriteLine(l);
 //            }
 
-            var ll = Lnk.LoadFile(@"D:\Temp\ll\Component Services.ln_");
+            var ll = Lnk.LoadFile(@"C:\Temp\!Azure\UpdateCheck.lnk.448476763.DROPPED");
             Debug.WriteLine(ll);
         }
 

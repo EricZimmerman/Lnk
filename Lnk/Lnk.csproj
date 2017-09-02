@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="ExtraData\ConsoleDataBlock.cs" />
     <Compile Include="ExtraData\ConsoleFEDataBlock.cs" />
+    <Compile Include="ExtraData\DamagedDataBlock.cs" />
     <Compile Include="ExtraData\DarwinDataBlock.cs" />
     <Compile Include="ExtraData\EnvironmentVariableDataBlock.cs" />
     <Compile Include="ExtraData\ExtraDataBase.cs" />

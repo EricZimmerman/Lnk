@@ -360,6 +360,11 @@ namespace Lnk
                     break;
                 }
 
+                if (extraSize > rawBytes.Length - index)
+                {
+                    extraSize = rawBytes.Length - index;
+                }
+
                 var extraBytes = new byte[extraSize];
                 Buffer.BlockCopy(rawBytes, index, extraBytes, 0, extraSize);
 
@@ -372,7 +377,9 @@ namespace Lnk
 
             foreach (var extraBlock in extraByteBlocks)
             {
-                var sig = (ExtraDataTypes) BitConverter.ToInt32(extraBlock, 4);
+                try
+                {
+var sig = (ExtraDataTypes) BitConverter.ToInt32(extraBlock, 4);
 
                 switch (sig)
                 {
@@ -425,6 +432,14 @@ namespace Lnk
                         throw new Exception(
                             $"Unknown extra data block signature: 0x{sig:X}. Please send lnk file to saericzimmerman@gmail.com so support can be added");
                 }
+                }
+                catch (Exception e)
+                {
+                    var dmg = new DamagedDataBlock(extraBlock,e.Message);
+                    ExtraBlocks.Add(dmg);
+                   
+                }
+                
             }
         }
 
