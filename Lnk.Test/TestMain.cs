@@ -94,7 +94,9 @@ namespace Lnk.Test
             var badFile = Path.Combine(BadPath, "$I2GXWHL.lnk");
             Action action = () => Lnk.LoadFile(badFile);
 
-            action.ShouldThrow<Exception>().WithMessage("Invalid signature!");
+            
+
+            action.Should().Throw<Exception>().WithMessage("Invalid signature!");
         }
 
         [Test]
