@@ -61,30 +61,56 @@ namespace Lnk.ShellItems
             index += 2;
 
             var len = 0;
+            var beefPos = BitConverter.ToString(rawBytes).IndexOf("04-00-EF-BE", StringComparison.InvariantCulture) / 3;
 
-            while (rawBytes[index + len] != 0x0)
+            if (beefPos == 0)
             {
-                len += 1;
+                var hackName = Encoding.GetEncoding(1255).GetString(rawBytes, index, rawBytes.Length - index);
+
+                var segs = hackName.Split(new[] {'\0'}, StringSplitOptions.RemoveEmptyEntries);
+
+                ShortName = string.Join("|", segs);
+
+                Value = ShortName;
+                return;
             }
 
-            tempBytes = new byte[len];
+
+            beefPos = beefPos - 4; //add header back for beef
+
+            var strLen = beefPos - index;
+
+            if (rawBytes[2] == 0x35)
+            {
+                len = strLen;
+            }
+            else
+            {
+                while (rawBytes[index + len] != 0x0)
+                {
+                    len += 1;
+                }
+            }
+
+             tempBytes = new byte[len];
             Array.Copy(rawBytes, index, tempBytes, 0, len);
 
-            index += len;
+            var shortName = "";
 
-            var shortName = Encoding.GetEncoding(1252).GetString(tempBytes);
+            if (rawBytes[2] == 0x35)
+            {
+                shortName = Encoding.Unicode.GetString(tempBytes);
+            }
+            else
+            {
+                shortName = Encoding.GetEncoding(1252).GetString(tempBytes);
+            }
 
             ShortName = shortName;
 
-            while (rawBytes[index] == 0x0)
-            {
-                index += 1;
+            Value = shortName;
 
-                if (rawBytes.Length == index)
-                {
-                    return;
-                }
-            }
+            index = beefPos;
 
             //we are at extension blocks, so cut them up and process
             // here is where we need to cut up the rest into extension blocks
