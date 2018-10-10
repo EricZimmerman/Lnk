@@ -80,7 +80,7 @@ namespace Lnk.ShellItems
 
             var strLen = beefPos - index;
 
-            if (rawBytes[2] == 0x35)
+            if (rawBytes[2] == 0x36)
             {
                 len = strLen;
             }
@@ -97,7 +97,7 @@ namespace Lnk.ShellItems
 
             var shortName = "";
 
-            if (rawBytes[2] == 0x35)
+            if (rawBytes[2] == 0x36)
             {
                 shortName = Encoding.Unicode.GetString(tempBytes);
             }

@@ -126,12 +126,13 @@ namespace Lnk
                         case 0xb1:
                         case 0x31:
                         case 0x35:
-                        case 0x36:
+                       
                             var d = new ShellBag0X31(shellItem);
                             TargetIDs.Add(d);
                             break;
                         
                         case 0x32:
+                        case 0x36:
                             var d2 = new ShellBag0X32(shellItem);
                             TargetIDs.Add(d2);
                             break;
