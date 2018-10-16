@@ -105,11 +105,11 @@ namespace Lnk.Test
         [Test]
         public void UnicodeNetworkPath()
         {
-            var winP = @"C:\Temp\说明.txt - Shortcut.lnk";
+            var winP =Path.Combine(MiscPath, "unicodeNetworkPath.lnk.test");
 
             var lnk = Lnk.LoadFile(winP);
             Debug.WriteLine(lnk);
-
+           
         }
 
         [Test]
