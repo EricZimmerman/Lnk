@@ -22,19 +22,33 @@ namespace Lnk.ShellItems
             {
                 //we have a good date
 
-                try
+                if (rawBytes[0x28] == 0x2f || rawBytes[0x26] == 0x2f || rawBytes[0x1a] == 0x2f ||
+                    rawBytes[0x1c] == 0x2f)
+                    // forward slash in date or N / A
                 {
-                    var zip = new ShellBagZipContents(rawBytes);
-                    FriendlyName = zip.FriendlyName;
-                    LastAccessTime = zip.LastAccessTime;
+                    //zip?
+                    
 
-                    Value = zip.Value;
+                    try
+                    {
+                        var zip = new ShellBagZipContents(rawBytes);
+                        FriendlyName = zip.FriendlyName;
+                        LastAccessTime = zip.LastAccessTime;
 
-                    return;
-                }
-                catch (Exception)
-                {
-                    //this isnt really this kind of entry despite our best efforts to make sure it is, so fall thru and process normally
+                        Value = zip.Value;
+
+                        if (Value.Contains("Unable to determine value") == false)
+                        {
+                            return;
+                        }
+
+                        return;
+                    }
+                    catch (Exception)
+                    {
+                    }
+
+
                 }
             }
 
