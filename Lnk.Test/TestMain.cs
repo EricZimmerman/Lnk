@@ -103,6 +103,16 @@ namespace Lnk.Test
         }
 
         [Test]
+        public void UnicodeNetworkPath()
+        {
+            var winP =Path.Combine(MiscPath, "unicodeNetworkPath.lnk.test");
+
+            var lnk = Lnk.LoadFile(winP);
+            Debug.WriteLine(lnk);
+           
+        }
+
+        [Test]
         public void RemoteFileLnk()
         {
             var winP = Path.Combine(MiscPath, "remote.file.xp.test");

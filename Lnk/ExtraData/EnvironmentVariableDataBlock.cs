@@ -23,7 +23,8 @@ namespace Lnk.ExtraData
         public override string ToString()
         {
             return $"Environment variable data block" +
-                   $"\r\nEnvironment variables: {EnvironmentVariablesAscii}";
+                   $"\r\nEnvironment variables Ascii: {EnvironmentVariablesAscii}" +
+                   $"\r\nEnvironment variables unicode: {EnvironmentVariablesUnicode}";
         }
     }
 }

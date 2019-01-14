@@ -135,6 +135,7 @@
     <None Include="TestFiles\Misc\remote.directory.xp.test" />
     <None Include="TestFiles\Misc\remote.file.aidlist.test" />
     <None Include="TestFiles\Misc\remote.file.xp.test" />
+    <None Include="TestFiles\Misc\unicodeNetworkPath.lnk.test" />
     <None Include="TestFiles\Win10\!!__Files from SOME COMPUTER_Files Copied.txt.lnk.test" />
     <None Include="TestFiles\Win10\%24I2GXWHL.lnk" />
     <None Include="TestFiles\Win10\%24I3OUUAG.lnk" />

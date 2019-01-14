@@ -96,13 +96,17 @@ namespace Lnk
 
             if (NetworkShareNameOffset > 20)
             {
-                NetworkShareName = Encoding.Unicode
-                    .GetString(rawBytes, NetworkShareNameOffset, (rawBytes.Length - NetworkShareNameOffset) * 2);
+                var uniNetworkNameOffset = BitConverter.ToInt32(rawBytes, 20);
+                var uniDeviceNameOffset = BitConverter.ToInt32(rawBytes, 24);
 
-                if (DeviceNameOffset > 0)
+                NetworkShareName = Encoding.Unicode
+                    .GetString(rawBytes, uniNetworkNameOffset, (rawBytes.Length - uniNetworkNameOffset) );
+
+                DeviceName = string.Empty;
+                if (uniDeviceNameOffset > 0)
                 {
                     DeviceName = Encoding.Unicode
-                        .GetString(rawBytes, DeviceNameOffset, (rawBytes.Length - DeviceNameOffset) * 2);
+                        .GetString(rawBytes, DeviceNameOffset, (rawBytes.Length - uniDeviceNameOffset));
                 }
             }
             else
