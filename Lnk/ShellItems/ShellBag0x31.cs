@@ -41,8 +41,6 @@ namespace Lnk.ShellItems
                         {
                             return;
                         }
-
-                        return;
                     }
                     catch (Exception)
                     {
