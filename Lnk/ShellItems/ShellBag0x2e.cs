@@ -12,95 +12,87 @@ namespace Lnk.ShellItems
     {
         public ShellBag0X2E(byte[] rawBytes)
         {
+
             ExtensionBlocks = new List<IExtensionBlock>();
+
 
             var index = 0;
 
-            var postSig = BitConverter.ToInt64(rawBytes, rawBytes.Length - 8);
-
-            if (postSig == 0x0000ee306bfe9555)
-            {
-                FriendlyName = "User profile";
-
-                var la = Utils.ExtractDateTimeOffsetFromBytes(rawBytes.Skip(rawBytes.Length - 14).Take(4).ToArray());
-
-                LastAccessTime = la;
-
-                index = 10;
-
-                var tempString = Encoding.Unicode.GetString(rawBytes.Skip(index).ToArray()).Split('\0')[0];
-
-                Value = tempString;
-
-                return;
-            }
-
-            //this needs to change to be the default
-            if (rawBytes[0] == 20 || rawBytes[0] == 50 || rawBytes[0] == 0x3a)
+            if (rawBytes[3] == 0x80 || rawBytes.Length == 0x16)
             {
                 ProcessGuid(rawBytes);
-                return;
             }
-
-            //this needs to change to be the default
-            if (rawBytes[2] == 0x53)
+            else
             {
-                ProcessGuid2(rawBytes);
-                return;
-            }
+                var postSig = BitConverter.ToUInt64(rawBytes, rawBytes.Length - 8);
 
-            //zip file contents check
-            if (rawBytes[0x28] == 0x2f || rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41)
-            {
-                //we have a good date
+                if (postSig == 0x0000ee306bfe9555 || postSig == 0xee306bfe9555c589)
+                {
+                    FriendlyName = "User profile";
 
-                var zip = new ShellBagZipContents(rawBytes);
-                FriendlyName = zip.FriendlyName;
-                LastAccessTime = zip.LastAccessTime;
+                    var la =
+                        Utils.ExtractDateTimeOffsetFromBytes(
+                            rawBytes.Skip(rawBytes.Length - 14).Take(4).ToArray());
 
-                Value = zip.Value;
+                    LastAccessTime = la;
 
-                return;
-            }
+                    index = 10;
+
+                    var tempString = Encoding.Unicode.GetString(rawBytes.Skip(index).ToArray()).Split('\0')[0];
+
+                    if (tempString == "")
+                    {
+                        tempString = "(None)";
+                    }
+
+                    Value = tempString;
+
+                    return;
+                }
 
 
-            try
-            {
+                var testSig2 = BitConverter.ToInt32(rawBytes, 5);
+
+                if (testSig2 >= 0x15032601)
+                {
+                    FriendlyName = "Control panel category";
+
+                    index = 0x12;
+
+                    var val1 = Encoding.Unicode.GetString(rawBytes, index, 0x48 * 2).Trim('\0');
+
+                    index = 0x116;
+
+                    var val2 = Encoding.Unicode.GetString(rawBytes, index, rawBytes.Length - 0x22 - index).Trim('\0');
+
+                    var guidb = new byte[16];
+                    index = rawBytes.Length - 0x22; //beginning of guids
+
+                    Buffer.BlockCopy(rawBytes, index, guidb, 0, 16);
+
+                    var g = new Guid(guidb);
+                    var gf = GuidMapping.GuidMapping.GetDescriptionFromGuid(g.ToString());
+
+                    index += 16;
+
+                    guidb = new byte[16];
+                    Buffer.BlockCopy(rawBytes, index, guidb, 0, 16);
+
+                    var g2 = new Guid(guidb);
+                    var g2f = GuidMapping.GuidMapping.GetDescriptionFromGuid(g2.ToString());
+
+                    Value = val2;
+
+                    DevicePath = val1;
+
+                    Category = g2f;
+
+                    return;
+                }
+
+
                 ProcessPropertyViewDefault(rawBytes);
-
-                return;
             }
-            catch (Exception)
-            {
-            }
-
-            //this is a different animal,
-
-            FriendlyName = "Root folder: MPT device";
-
-            index = 0x1e;
-
-            var storageStringNameLen = BitConverter.ToInt32(rawBytes, index);
-
-            index += 4;
-
-            var storageIdStringLen = BitConverter.ToInt32(rawBytes, index);
-
-            index += 4;
-
-            var fileSystemNameLen = BitConverter.ToInt32(rawBytes, index);
-
-            index = 0x28;
-
-            var storageName = Encoding.Unicode.GetString(rawBytes, index, storageStringNameLen * 2 - 2);
-
-            index += storageStringNameLen * 2;
-
-            var storageIdName = Encoding.Unicode.GetString(rawBytes, index, storageIdStringLen * 2 - 2);
-
-            index += storageIdStringLen * 2;
-
-            Value = storageName;
         }
 
         /// <summary>
@@ -110,9 +102,13 @@ namespace Lnk.ShellItems
 
         public PropertyStore PropertyStore { get; private set; }
 
-        private void ProcessPropertyViewDefault(byte[] rawBytes)
+
+        public string Category { get; }
+        public string DevicePath { get; }
+
+       private void ProcessPropertyViewDefault(byte[] rawBytes)
         {
-            FriendlyName = "Variable: Users property view";
+            FriendlyName = "Users property view";
             var index = 10;
 
             var shellPropertySheetListSize = BitConverter.ToInt16(rawBytes, index);
@@ -128,7 +124,6 @@ namespace Lnk.ShellItems
             var identifierData = new byte[identifiersize];
 
             Array.Copy(rawBytes, index, identifierData, 0, identifiersize);
-
 
             index += identifiersize;
 
@@ -172,32 +167,18 @@ namespace Lnk.ShellItems
                             ExtensionBlocks.Add(block1);
                         }
                     }
-                    catch (ArgumentException ex)
+                    catch (ArgumentException)
                     {
-                        throw ex;
                         // Syntax error in the regular expression
                     }
                 }
             }
             else
+
+
             {
-                if (rawBytes[0x28] == 0x2f ||
-                    rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41)
-                {
-                    //we have a good date
-
-                    var zip = new ShellBagZipContents(rawBytes);
-                    FriendlyName = zip.FriendlyName;
-                    LastAccessTime = zip.LastAccessTime;
-
-                    Value = zip.Value;
-
-                    return;
-                }
-                Debug.Write("Oh no! No property sheets!");
+                index += shellPropertySheetListSize;
             }
-
-            index += shellPropertySheetListSize;
 
             index += 2; //move past end of property sheet terminator
 
@@ -207,7 +188,7 @@ namespace Lnk.ShellItems
             rawguid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
             index += 16;
 
-            var name = Utils.GetFolderNameFromGuid(rawguid);
+            var name = GuidMapping.GuidMapping.GetDescriptionFromGuid(rawguid);
 
             Value = name;
 

@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Lnk</RootNamespace>
     <AssemblyName>Lnk</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -33,6 +33,10 @@
   <ItemGroup>
     <Reference Include="ExtensionBlocks">
       <HintPath>..\..\ExtensionBlocks\ExtensionBlocks\bin\Release\ExtensionBlocks.dll</HintPath>
+    </Reference>
+    <Reference Include="GuidMapping, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependencies\GuidMapping.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -82,6 +86,10 @@
     <Compile Include="ShellItems\ShellBagCDBurn.cs" />
     <Compile Include="ShellItems\ShellBagZipContents.cs" />
     <Compile Include="VolumeInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Dependencies\GuidMapping.dll" />
+    <Content Include="Dependencies\GuidMapping.pdb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
