@@ -11,7 +11,7 @@ namespace Lnk.ShellItems
 {
     public class ShellBag0X1F : ShellBag
     {
-        private readonly List<PropertySheet> _sheets;
+        private readonly List<PropertySheet> Sheets;
 
 
         public ShellBag0X1F(byte[] rawBytes)
@@ -20,9 +20,94 @@ namespace Lnk.ShellItems
 
             PropertyStore = new PropertyStore();
 
-            _sheets = new List<PropertySheet>();
+            Sheets = new List<PropertySheet>();
 
             var index = 0;
+
+            if (rawBytes[0] == 0x14) //This is a GUID only
+            {
+                ProcessGuid(rawBytes);
+                return;
+            }
+
+            if (rawBytes[4] == 0x2f)
+            {
+                index = 13;
+
+                var dl = Encoding.GetEncoding(1252).GetString(rawBytes, index, 3);
+
+                FriendlyName = "Users property view: Drive letter";
+
+                Value = dl;
+
+                return;
+
+                //There are GUIDs at the end but they arent useful
+            }
+
+            var off3 = rawBytes[3];
+            var off3Bitmask = off3 & 0x70;
+
+            switch (off3Bitmask)
+            {
+                case 0x00:
+
+                    break;
+                case 0x40:
+                    case 0x50:
+
+
+                {
+                    ProcessGuid(rawBytes);
+
+                    index += 20;
+                        var extsize = BitConverter.ToInt16(rawBytes, index);
+
+                    while (extsize>0)
+                    {
+                        var signature = BitConverter.ToUInt32(rawBytes, index + 4);
+
+                        var block = Utils.GetExtensionBlockFromBytes(signature, rawBytes.Skip(index).ToArray());
+
+                        ExtensionBlocks.Add(block);
+                        index += extsize;
+
+                        if (index == rawBytes.Length)
+                        {
+                            return;
+                        }
+
+
+                        extsize = BitConverter.ToInt16(rawBytes, index);
+
+                    }
+
+                    if (index == rawBytes.Length)
+                    {
+                        return;
+                    }
+
+                    var lastSize = BitConverter.ToInt16(rawBytes, index);
+
+                    if (lastSize != 0)
+                    {
+                        Debug.WriteLine("remaining data!!!");
+                    }
+
+                    return;
+                }
+
+
+                case 0x60:
+
+                    break;
+                case 0x70:
+                    ProcessGuid(rawBytes);
+                    return;
+
+                default:
+                    throw new Exception($"unknown off3bitmask: 0x{off3Bitmask:X2}");
+            }
 
 
             var dataSig = BitConverter.ToUInt32(rawBytes, 6);
@@ -33,28 +118,13 @@ namespace Lnk.ShellItems
                 return;
             }
 
-            if (dataSig == 0xF5A6B710)
+            if (dataSig == 0x4c644970)
             {
-                // this is a strange one. it contains a drive letter and other unknown items
-
-                index = 13;
-
-                var dl = Encoding.GetEncoding(1252).GetString(rawBytes, index, 3);
-
-                FriendlyName = "Users property view?: Drive letter";
-
-                Value = dl;
-
+                ProcessWindowsBackup(rawBytes);
 
                 return;
             }
 
-
-            if (rawBytes[0] == 0x14) //This is a GUID only
-            {
-                ProcessGuid(rawBytes);
-                return;
-            }
 
             if (rawBytes[0] == 50 || rawBytes[0] == 58) //This is a GUID and a beefXX, usually 25
             {
@@ -89,13 +159,16 @@ namespace Lnk.ShellItems
 
             bin.ReadBytes(2); // skip size
 
-            bin.ReadByte(); //skip indicator (0x1F)
+            bin.ReadByte(); //skip indicator (0x1F)/
 
             var sortIndicator = bin.ReadByte();
 
             var dataSize = bin.ReadUInt16(); // BitConverter.ToUInt16(rawBytes, index);
 
             var dataSignature = bin.ReadUInt32(); //  BitConverter.ToUInt32(rawBytes, index);
+
+            //Debug.WriteLine(dataSignature);
+            //Debug.WriteLine(dataSignature.ToString("X"));
 
             var propertyStoreSize = bin.ReadUInt16(); //BitConverter.ToUInt16(rawBytes, index);
 
@@ -104,60 +177,89 @@ namespace Lnk.ShellItems
             if (identifierSize > 0)
             {
                 bin.ReadBytes(identifierSize);
-                //index += identifierSize; // whats here?
+                //index += identifierSize; // whts here?
             }
 
             if (propertyStoreSize > 0)
             {
+                // var propStore = new PropertyStore(rawBytes.Skip(index).Take(propertyStoreSize).ToArray());
+
                 var propertysheetBytes = bin.ReadBytes(propertyStoreSize);
 
                 var propStore = new PropertyStore(propertysheetBytes);
 
-                var p = propStore.Sheets.Where(t => t.PropertyNames.ContainsKey("AutoList"));
-
-                if (p.Any())
-                {
-                    //we can now look thry prop bytes for extension blocks
-                    //TODO this is a hack until we can process vectors natively
-
-                    var extOffsets = new List<int>();
-                    try
-                    {
-                        var regexObj = new Regex("([0-9A-F]{2})-00-EF-BE", RegexOptions.IgnoreCase);
-                        var matchResult = regexObj.Match(BitConverter.ToString(propertysheetBytes));
-                        while (matchResult.Success)
-                        {
-                            extOffsets.Add(matchResult.Index);
-                            matchResult = matchResult.NextMatch();
-                        }
-
-                        foreach (var extOffset in extOffsets)
-                        {
-                            var binaryOffset = extOffset / 3 - 4;
-                            var exSize = BitConverter.ToInt16(propertysheetBytes, binaryOffset);
-
-                            var exBytes = propertysheetBytes.Skip(binaryOffset).Take(exSize).ToArray();
-
-                            var signature1 = BitConverter.ToUInt32(exBytes, 4);
-
-
-                            var block1 = Utils.GetExtensionBlockFromBytes(signature1, exBytes);
-
-                            ExtensionBlocks.Add(block1);
-                        }
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        throw ex;
-                        // Syntax error in the regular expression
-                    }
-                }
+                //TODO remove this hack once you have autolist parsing done. find it in all related classes as well
+//                var p = propStore.Sheets.Where(t => t.PropertyNames.ContainsKey("AutoList"));
+//
+//                if (p.Any())
+//                {
+//                    //we can now look thry prop bytes for extension blocks
+//                    //TODO this is a hack until we can process vectors natively
+//
+//                    var extOffsets = new List<int>();
+//                    try
+//                    {
+//                        var regexObj = new Regex("([0-9A-F]{2})-00-EF-BE", RegexOptions.IgnoreCase);
+//                        var matchResult = regexObj.Match(BitConverter.ToString(propertysheetBytes));
+//                        while (matchResult.Success)
+//                        {
+//                            extOffsets.Add(matchResult.Index);
+//                            matchResult = matchResult.NextMatch();
+//                        }
+//
+//                        foreach (var extOffset in extOffsets)
+//                        {
+//                            var binaryOffset = extOffset / 3 - 4;
+//                            var exSize = BitConverter.ToInt16(propertysheetBytes, binaryOffset);
+//
+//                            var exBytes = propertysheetBytes.Skip(binaryOffset).Take(exSize).ToArray();
+//
+//                            var signature1 = BitConverter.ToUInt32(exBytes, 4);
+//
+//                            var block1 = ShellBagUtils.GetExtensionBlockFromBytes(signature1, exBytes);
+//
+//                            ExtensionBlocks.Add(block1);
+//                        }
+//                    }
+//                    catch (ArgumentException )
+//                    {
+//                        // Syntax error in the regular expression
+//                    }
+//
+//                }
 
                 PropertyStore = propStore;
             }
 
+            //index += propertyStoreSize;
 
             bin.ReadBytes(2); //skip end of property sheet marker
+
+            if (bin.BaseStream.Position == rawBytes.Length)
+            {
+                //hack
+                index = 0x4;
+                var gb = new byte[16];
+                Buffer.BlockCopy(rawBytes, index, gb, 0, 16);
+                var g = new Guid(gb);
+                var gf = GuidMapping.GuidMapping.GetDescriptionFromGuid(g.ToString());
+
+                Value = gf;
+
+                index += 16;
+
+                var exSize = BitConverter.ToInt16(rawBytes, index);
+
+                var exBytes = rawBytes.Skip(index).Take(exSize).ToArray();
+
+                var signature1 = BitConverter.ToUInt32(exBytes, 4);
+
+                var block1 = Utils.GetExtensionBlockFromBytes(signature1, exBytes);
+
+                ExtensionBlocks.Add(block1);
+
+                return;
+            }
 
             var rawguid = Utils.ExtractGuidFromShellItem(bin.ReadBytes(16));
             //    index += 16;
@@ -165,11 +267,11 @@ namespace Lnk.ShellItems
             rawguid = Utils.ExtractGuidFromShellItem(bin.ReadBytes(16));
             //   index += 16;
 
-            var name = Utils.GetFolderNameFromGuid(rawguid);
+            var name = GuidMapping.GuidMapping.GetDescriptionFromGuid(rawguid);
 
             var extsize1 = bin.ReadUInt16(); // BitConverter.ToUInt16(rawBytes, index);
 
-            if (extsize1 > 4)
+            if (extsize1 > 0)
             {
                 //TODO is it ever bigger than one block? if so loop it
 
@@ -191,14 +293,12 @@ namespace Lnk.ShellItems
 
                     var signature1 = BitConverter.ToUInt32(extBytes, 4);
 
-                    //Debug.WriteLine(" 0x1f bag sig: " + signature1.ToString("X8"));
-
                     var block1 = Utils.GetExtensionBlockFromBytes(signature1, extBytes);
 
                     ExtensionBlocks.Add(block1);
                 }
 
-                //Trace.Assert(bin.BaseStream.Position == bin.BaseStream.Length);
+                Trace.Assert(bin.BaseStream.Position == bin.BaseStream.Length);
             }
 
             Value = name;
@@ -209,7 +309,56 @@ namespace Lnk.ShellItems
         /// <summary>
         ///     Last access time of BagPath
         /// </summary>
+        public DateTimeOffset? ModifiedDateFromBackup { get; set; }
+
+        public DateTimeOffset? CreatedDateFromBackup { get; set; }
+        public DateTimeOffset? BackupDateTime { get; set; }
+        public DateTimeOffset? BackupUnknownDateTime { get; set; }
         public DateTimeOffset? LastAccessTime { get; set; }
+
+        private void ProcessWindowsBackup(byte[] rawBytes)
+        {
+            int index;
+            FriendlyName = "Windows Backup";
+
+            index = 0xc;
+
+            BackupDateTime = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, index)).ToUniversalTime();
+            index += 8;
+            ModifiedDateFromBackup =
+                DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, index)).ToUniversalTime();
+            index += 8;
+            CreatedDateFromBackup = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, index)).ToUniversalTime();
+            index += 8;
+            BackupUnknownDateTime = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, index)).ToUniversalTime();
+            index += 8;
+
+            index += 12; //unknown
+
+            var nameLen = BitConverter.ToInt16(rawBytes, index);
+            index += 2;
+
+            Value = Encoding.Unicode.GetString(rawBytes, index, nameLen * 2);
+            index += nameLen * 2;
+
+            index += 4; //unknown
+
+            var rawGuidBytes = new byte[16];
+            Buffer.BlockCopy(rawBytes, index, rawGuidBytes, 0, 16);
+
+            var rawguid1 = Utils.ExtractGuidFromShellItem(rawGuidBytes);
+            index += 16;
+
+            rawGuidBytes = new byte[16];
+            Buffer.BlockCopy(rawBytes, index, rawGuidBytes, 0, 16);
+
+            var rawguid2 = Utils.ExtractGuidFromShellItem(rawGuidBytes);
+            index += 16;
+
+            var folder = GuidMapping.GuidMapping.GetDescriptionFromGuid(rawguid2);
+
+            index += 2; //end of the line
+        }
 
         private void ProcessGuid(byte[] rawBytes)
         {
@@ -225,21 +374,11 @@ namespace Lnk.ShellItems
 
             var rawguid = Utils.ExtractGuidFromShellItem(rawguid1);
 
-            var foldername = Utils.GetFolderNameFromGuid(rawguid);
+            var foldername = GuidMapping.GuidMapping.GetDescriptionFromGuid(rawguid);
 
             index += 16;
 
             Value = foldername;
-
-            if (rawBytes.Length == index)
-            {
-            }
-
-//            var size = BitConverter.ToInt16(rawBytes, index);
-//            if (size == 0)
-//            {
-//                index += 2;
-//            }
         }
 
         private void ProcessPropertyViewDefault(byte[] rawBytes)
@@ -258,7 +397,6 @@ namespace Lnk.ShellItems
             var identifierData = new byte[identifiersize];
 
             Array.Copy(rawBytes, index, identifierData, 0, identifiersize);
-
 
             index += identifiersize;
 
@@ -301,33 +439,13 @@ namespace Lnk.ShellItems
                             ExtensionBlocks.Add(block1);
                         }
                     }
-                    catch (ArgumentException ex)
+                    catch (ArgumentException)
                     {
-                        throw ex;
                         // Syntax error in the regular expression
                     }
                 }
             }
-            else
-            {
-                if (rawBytes[0x28] == 0x2f ||
-                    rawBytes[0x24] == 0x4e && rawBytes[0x26] == 0x2f && rawBytes[0x28] == 0x41)
-                {
-                    //we have a good date
 
-                    var zip = new ShellBagZipContents(rawBytes);
-                    FriendlyName = zip.FriendlyName;
-                    LastAccessTime = zip.LastAccessTime;
-
-                    Value = zip.Value;
-
-                    return;
-                }
-                Debug.Write("Oh no! No property sheets!");
-
-
-                Value = "!!! Unable to determine Value !!!";
-            }
 
             index += shellPropertySheetListSize;
 
@@ -346,7 +464,6 @@ namespace Lnk.ShellItems
                     index += extBlockSize;
 
                     var signature1 = BitConverter.ToUInt32(extBytes, 4);
-
 
                     var block1 = Utils.GetExtensionBlockFromBytes(signature1, extBytes);
 
@@ -382,7 +499,7 @@ namespace Lnk.ShellItems
 
             if (valuestring == "")
             {
-                valuestring = "No Property sheet value found";
+                valuestring = "No Property sheets found";
             }
 
             Value = valuestring;
@@ -396,6 +513,34 @@ namespace Lnk.ShellItems
             {
                 sb.AppendLine(
                     $"Accessed On: {LastAccessTime.Value.ToString(Utils.GetDateTimeFormatWithMilliseconds())}");
+                sb.AppendLine();
+            }
+
+            if (ModifiedDateFromBackup.HasValue)
+            {
+                sb.AppendLine(
+                    $"Modified Date From Backup: {ModifiedDateFromBackup.Value.ToString(Utils.GetDateTimeFormatWithMilliseconds())}");
+                sb.AppendLine();
+            }
+
+            if (CreatedDateFromBackup.HasValue)
+            {
+                sb.AppendLine(
+                    $"Created Date From Backup: {CreatedDateFromBackup.Value.ToString(Utils.GetDateTimeFormatWithMilliseconds())}");
+                sb.AppendLine();
+            }
+
+            if (BackupDateTime.HasValue)
+            {
+                sb.AppendLine(
+                    $"Backup Date Time: {BackupDateTime.Value.ToString(Utils.GetDateTimeFormatWithMilliseconds())}");
+                sb.AppendLine();
+            }
+
+            if (BackupUnknownDateTime.HasValue)
+            {
+                sb.AppendLine(
+                    $"Backup Unknown Date Time: {BackupUnknownDateTime.Value.ToString(Utils.GetDateTimeFormatWithMilliseconds())}");
                 sb.AppendLine();
             }
 

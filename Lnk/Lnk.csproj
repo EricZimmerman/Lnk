@@ -31,8 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ExtensionBlocks">
-      <HintPath>..\..\ExtensionBlocks\ExtensionBlocks\bin\Release\ExtensionBlocks.dll</HintPath>
+    <Reference Include="ExtensionBlocks, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependencies\ExtensionBlocks.dll</HintPath>
     </Reference>
     <Reference Include="GuidMapping, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -88,6 +89,8 @@
     <Compile Include="VolumeInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Dependencies\ExtensionBlocks.dll" />
+    <Content Include="Dependencies\ExtensionBlocks.pdb" />
     <Content Include="Dependencies\GuidMapping.dll" />
     <Content Include="Dependencies\GuidMapping.pdb" />
   </ItemGroup>
