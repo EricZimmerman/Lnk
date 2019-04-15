@@ -31,7 +31,7 @@ namespace Lnk
 
             [Description(
                 "The file system location is represented in the shell namespace when the path to an item is parsed into the link target identifiers"
-            )] NoPidlAlias0X00008000,
+            )] NoPidlAlias = 0X00008000,
             Reserved1 = 0x00010000,
 
             [Description(
