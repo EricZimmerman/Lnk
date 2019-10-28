@@ -110,6 +110,7 @@ namespace Lnk
                             var f = new ShellBag0X1F(shellItem);
                             TargetIDs.Add(f);
                             break;
+                        case 0x22:
                         case 0x23:
                             var two3 = new ShellBag0X23(shellItem);
                             TargetIDs.Add(two3);
