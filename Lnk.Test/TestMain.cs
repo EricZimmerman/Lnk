@@ -84,7 +84,7 @@ namespace Lnk.Test
 //                Debug.WriteLine(l);
 //            }
 
-          var ll = Lnk.LoadFile(@"C:\Temp\d31ced1e2c2ca447e08fdc33f92ea77bf498abaf1cbf83db9bf9904d0fe9740d");
+          var ll = Lnk.LoadFile(@"C:\Temp\lnk\f01b4d95cf55d32a.automaticDestinations-ms\AppId_f01b4d95cf55d32a_DirName_5.lnk");
           Debug.WriteLine(ll);
 
         //    ll = Lnk.LoadFile(@"C:\Temp\1\12dc1ea8e34b5a6.automaticDestinations-ms\AppId_12dc1ea8e34b5a6_DirName_2.lnk");
