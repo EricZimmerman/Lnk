@@ -12,13 +12,16 @@ namespace Lnk.ExtraData
         {
             Signature = ExtraDataTypes.DamagedDataBlock;
             
-            OriginalSignature  = (ExtraDataTypes)BitConverter.ToInt32(rawBytes, 4);
-            OriginalData = rawBytes;
-
             Size = (uint)rawBytes.Length;
             ErrorMessage = errMsg;
 
+            if (rawBytes.Length < 4)
+            {
+                return;
+            }
 
+            OriginalSignature  = (ExtraDataTypes)BitConverter.ToInt32(rawBytes, 4);
+            OriginalData = rawBytes;
         }
 
         public ExtraDataTypes OriginalSignature { get;  }
