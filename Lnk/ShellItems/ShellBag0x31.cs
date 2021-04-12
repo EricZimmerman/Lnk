@@ -149,6 +149,11 @@ namespace Lnk.ShellItems
 
                 var extsize = BitConverter.ToInt16(bytes, index);
 
+                if (bytes.Length < 8)
+                {
+                    return;
+                }
+
                 var signature = BitConverter.ToUInt32(bytes, 0x04);
 
                 //TODO does this need to check if its a 0xbeef?? regex?

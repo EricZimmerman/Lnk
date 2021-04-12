@@ -84,7 +84,7 @@ namespace Lnk.Test
 //                Debug.WriteLine(l);
 //            }
 
-          var ll = Lnk.LoadFile(@"C:\Temp\lnk\f01b4d95cf55d32a.automaticDestinations-ms\AppId_f01b4d95cf55d32a_DirName_5.lnk");
+          var ll = Lnk.LoadFile(@"C:\temp\lnk\Shortcut to Psd BACKUP OF JPGs.lnk");
           Debug.WriteLine(ll);
 
         //    ll = Lnk.LoadFile(@"C:\Temp\1\12dc1ea8e34b5a6.automaticDestinations-ms\AppId_12dc1ea8e34b5a6_DirName_2.lnk");
