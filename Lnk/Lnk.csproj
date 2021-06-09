@@ -10,9 +10,9 @@
     <Copyright>Eric Zimmerman</Copyright>
     <PackageProjectUrl>https://github.com/EricZimmerman/lnk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/EricZimmerman/lnk</RepositoryUrl>
-    <AssemblyVersion>1.2.0.2</AssemblyVersion>
-    <FileVersion>1.2.0.2</FileVersion>
-    <Version>1.2.0.2</Version>
+    <AssemblyVersion>1.2.0.3</AssemblyVersion>
+    <FileVersion>1.2.0.3</FileVersion>
+    <Version>1.2.0.3</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
@@ -23,10 +23,10 @@
 
   <ItemGroup>
     <PackageReference Include="ExtensionBlocks">
-      <Version>1.1.0.1</Version>
+      <Version>1.2.0</Version>
     </PackageReference>
     <PackageReference Include="GuidMapping">
-      <Version>1.0.0.3</Version>
+      <Version>1.0.0.4</Version>
     </PackageReference>
   </ItemGroup>
 </Project>
