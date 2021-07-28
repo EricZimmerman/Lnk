@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lnk.Test", "Lnk.Test\Lnk.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lnk", "Lnk\Lnk.csproj", "{DE859960-446E-410F-BDF9-FF62DD69DC10}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lnk.Example", "Lnk.Example\Lnk.Example.csproj", "{948C7BF4-883B-49A2-A97E-47D3F64D4CA3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{DE859960-446E-410F-BDF9-FF62DD69DC10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE859960-446E-410F-BDF9-FF62DD69DC10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE859960-446E-410F-BDF9-FF62DD69DC10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{948C7BF4-883B-49A2-A97E-47D3F64D4CA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{948C7BF4-883B-49A2-A97E-47D3F64D4CA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{948C7BF4-883B-49A2-A97E-47D3F64D4CA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{948C7BF4-883B-49A2-A97E-47D3F64D4CA3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
