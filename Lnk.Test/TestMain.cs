@@ -13,7 +13,7 @@ namespace Lnk.Test
     [TestFixture]
     public class TestMain
     {
-        public static string BasePath = @"..\..\TestFiles";
+        public static string BasePath = @"..\..\..\TestFiles";
         public static string Win10Path = Path.Combine(BasePath, "Win10");
         public static string WinXpPath = Path.Combine(BasePath, "WinXP");
         public static string Win2K3Path = Path.Combine(BasePath, "Win2k3");
@@ -69,26 +69,6 @@ namespace Lnk.Test
             d?.ProductCode.Should().Be("{AC76BA86-7AD7-1036-7B44-A93000000001}");
             d?.ComponentId.Should().Be("{F95C9759-13AF-4E41-A46B-DBD281608D53}");
             d?.FeatureName.Should().Be("ReaderProgramFiles");
-        }
-
-        [Test]
-        public void foobar()
-        {
-           //  var ls = Directory.GetFiles(@"C:\Temp\ll");
-//           var ls = Directory.GetFiles(@"C:\Temp\llunknown");
-//
-//            foreach (var s in ls)
-//            {
-//                Debug.WriteLine(s);
-//                var l = Lnk.LoadFile(s);
-//                Debug.WriteLine(l);
-//            }
-
-          var ll = Lnk.LoadFile(@"C:\temp\foo.lnk");
-          Debug.WriteLine(ll);
-
-        //    ll = Lnk.LoadFile(@"C:\Temp\1\12dc1ea8e34b5a6.automaticDestinations-ms\AppId_12dc1ea8e34b5a6_DirName_2.lnk");
-       //     Debug.WriteLine(ll);
         }
 
         [Test]

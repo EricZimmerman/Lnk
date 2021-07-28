@@ -37,6 +37,7 @@ namespace Lnk.ShellItems
                     break;
             }
 
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             var temp = Encoding.GetEncoding(1252).GetString(rawBytes, 5, rawBytes.Length - 5).Split('\0');
 

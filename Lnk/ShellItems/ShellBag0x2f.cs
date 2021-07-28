@@ -14,6 +14,7 @@ namespace Lnk.ShellItems
 
             ExtensionBlocks = new List<IExtensionBlock>();
 
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var driveLetter = Encoding.GetEncoding(1252).GetString(rawBytes, 3, 2);
 
             Value = driveLetter;

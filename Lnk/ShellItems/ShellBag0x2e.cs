@@ -12,7 +12,6 @@ namespace Lnk.ShellItems
     {
         public ShellBag0X2E(byte[] rawBytes)
         {
-
             ExtensionBlocks = new List<IExtensionBlock>();
 
 
@@ -106,7 +105,7 @@ namespace Lnk.ShellItems
         public string Category { get; }
         public string DevicePath { get; }
 
-       private void ProcessPropertyViewDefault(byte[] rawBytes)
+        private void ProcessPropertyViewDefault(byte[] rawBytes)
         {
             FriendlyName = "Users property view";
             var index = 10;
@@ -116,16 +115,16 @@ namespace Lnk.ShellItems
 
             index += 2;
 
-            var identifiersize = BitConverter.ToInt16(rawBytes, index);
+            var identifierSize = BitConverter.ToInt16(rawBytes, index);
 
 
             index += 2;
 
-            var identifierData = new byte[identifiersize];
+            var identifierData = new byte[identifierSize];
 
-            Array.Copy(rawBytes, index, identifierData, 0, identifiersize);
+            Array.Copy(rawBytes, index, identifierData, 0, identifierSize);
 
-            index += identifiersize;
+            index += identifierSize;
 
             if (shellPropertySheetListSize > 0)
             {
@@ -182,13 +181,13 @@ namespace Lnk.ShellItems
 
             index += 2; //move past end of property sheet terminator
 
-            var rawguid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
+            var rawGuid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
             index += 16;
 
-            rawguid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
+            rawGuid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
             index += 16;
 
-            var name = GuidMapping.GuidMapping.GetDescriptionFromGuid(rawguid);
+            var name = GuidMapping.GuidMapping.GetDescriptionFromGuid(rawGuid);
 
             Value = name;
 
@@ -233,19 +232,19 @@ namespace Lnk.ShellItems
 
             index += 2; // move past index and a single unknown value
 
-            var rawguid1 = new byte[16];
+            var rawGuid1 = new byte[16];
 
-            Array.Copy(rawBytes, index, rawguid1, 0, 16);
+            Array.Copy(rawBytes, index, rawGuid1, 0, 16);
 
-            var rawguid = Utils.ExtractGuidFromShellItem(rawguid1);
+            var rawGuid = Utils.ExtractGuidFromShellItem(rawGuid1);
 
-            var foldername = Utils.GetFolderNameFromGuid(rawguid);
+            var folderName = Utils.GetFolderNameFromGuid(rawGuid);
 
             index += 16;
 
             if (index >= rawBytes.Length)
             {
-                Value = foldername;
+                Value = folderName;
                 return;
             }
 
@@ -257,7 +256,7 @@ namespace Lnk.ShellItems
 
             if (size > rawBytes.Length)
             {
-                Value = foldername;
+                Value = folderName;
                 return;
             }
 
@@ -275,7 +274,7 @@ namespace Lnk.ShellItems
                 index += size;
             }
 
-            Value = foldername;
+            Value = folderName;
         }
 
         private void ProcessGuid2(byte[] rawBytes)
@@ -286,9 +285,9 @@ namespace Lnk.ShellItems
 
             var folderGuid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(36).Take(16).ToArray());
 
-            var foldername = Utils.GetFolderNameFromGuid(folderGuid);
+            var folderName = Utils.GetFolderNameFromGuid(folderGuid);
 
-            Value = foldername;
+            Value = folderName;
         }
 
         public override string ToString()
