@@ -107,35 +107,27 @@ namespace Lnk.ShellItems
                     //TODO this is a hack until we can process vectors natively
 
                     var extOffsets = new List<int>();
-                    try
+                    var regexObj = new Regex("([0-9A-F]{2})-00-EF-BE", RegexOptions.IgnoreCase);
+                    var matchResult = regexObj.Match(BitConverter.ToString(propBytes));
+                    while (matchResult.Success)
                     {
-                        var regexObj = new Regex("([0-9A-F]{2})-00-EF-BE", RegexOptions.IgnoreCase);
-                        var matchResult = regexObj.Match(BitConverter.ToString(propBytes));
-                        while (matchResult.Success)
-                        {
-                            extOffsets.Add(matchResult.Index);
-                            matchResult = matchResult.NextMatch();
-                        }
-
-                        foreach (var extOffset in extOffsets)
-                        {
-                            var binaryOffset = extOffset / 3 - 4;
-                            var exSize = BitConverter.ToInt16(propBytes, binaryOffset);
-
-                            var exBytes = propBytes.Skip(binaryOffset).Take(exSize).ToArray();
-
-                            var signature1 = BitConverter.ToUInt32(exBytes, 4);
-
-
-                            var block1 = Utils.GetExtensionBlockFromBytes(signature1, exBytes);
-
-                            ExtensionBlocks.Add(block1);
-                        }
+                        extOffsets.Add(matchResult.Index);
+                        matchResult = matchResult.NextMatch();
                     }
-                    catch (ArgumentException ex)
+
+                    foreach (var extOffset in extOffsets)
                     {
-                        throw ex;
-                        // Syntax error in the regular expression
+                        var binaryOffset = extOffset / 3 - 4;
+                        var exSize = BitConverter.ToInt16(propBytes, binaryOffset);
+
+                        var exBytes = propBytes.Skip(binaryOffset).Take(exSize).ToArray();
+
+                        var signature1 = BitConverter.ToUInt32(exBytes, 4);
+
+
+                        var block1 = Utils.GetExtensionBlockFromBytes(signature1, exBytes);
+
+                        ExtensionBlocks.Add(block1);
                     }
                 }
             }
