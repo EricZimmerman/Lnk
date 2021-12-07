@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net461;net6.0;netstandard2.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Eric Zimmerman</Authors>
     <Company>Eric Zimmerman</Company>
@@ -10,10 +10,13 @@
     <Copyright>Eric Zimmerman</Copyright>
     <PackageProjectUrl>https://github.com/EricZimmerman/lnk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/EricZimmerman/lnk</RepositoryUrl>
-    <AssemblyVersion>1.2.0.3</AssemblyVersion>
-    <FileVersion>1.2.0.3</FileVersion>
+    <AssemblyVersion>1.2.1.0</AssemblyVersion>
+    <FileVersion>1.2.1.0</FileVersion>
     <Version>1.2.0.3</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <LangVersion>10</LangVersion>
+    <PackageVersion>1.2.1.0</PackageVersion>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net461|AnyCPU'">
