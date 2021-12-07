@@ -48,7 +48,7 @@ namespace Lnk.ShellItems
                 var strSize = BitConverter.ToUInt32(rawBytes, index);
                 index += 4;
 
-                var str = Encoding.GetEncoding(1252).GetString(rawBytes, index, (int) strSize);
+                var str = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, (int) strSize);
 
                 Value = str.Replace("\0", "");
 
@@ -59,7 +59,7 @@ namespace Lnk.ShellItems
 
                 if (strSize > 0)
                 {
-                    str = Encoding.GetEncoding(1252).GetString(rawBytes, index, (int) strSize);
+                    str = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, (int) strSize);
 
                     UserName = str.Replace("\0", "");
                     ;
@@ -72,7 +72,7 @@ namespace Lnk.ShellItems
 
                 if (strSize > 0)
                 {
-                    str = Encoding.GetEncoding(1252).GetString(rawBytes, index, (int) strSize);
+                    str = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, (int) strSize);
                     index += (int) strSize;
                 }
 
@@ -83,7 +83,7 @@ namespace Lnk.ShellItems
                     len1 += 1;
                 }
 
-                Uri = Encoding.GetEncoding(1252).GetString(rawBytes, index, len1);
+                Uri = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, len1);
 
 
                 index += len1 + 1;

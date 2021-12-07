@@ -111,7 +111,7 @@ namespace Lnk
             }
             else
             {
-                NetworkShareName = Encoding.GetEncoding(1252)
+                NetworkShareName = CodePagesEncodingProvider.Instance.GetEncoding(1252)
                     .GetString(rawBytes, NetworkShareNameOffset, rawBytes.Length - NetworkShareNameOffset)
                     .Split('\0')
                     .First();
@@ -119,7 +119,7 @@ namespace Lnk
                 DeviceName = string.Empty;
                 if (DeviceNameOffset > 0)
                 {
-                    DeviceName = Encoding.GetEncoding(1252)
+                    DeviceName = CodePagesEncodingProvider.Instance.GetEncoding(1252)
                         .GetString(rawBytes, DeviceNameOffset, rawBytes.Length - DeviceNameOffset)
                         .Split('\0')
                         .First();

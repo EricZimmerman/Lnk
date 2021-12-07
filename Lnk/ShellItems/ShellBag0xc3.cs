@@ -39,7 +39,7 @@ namespace Lnk.ShellItems
 
             index += len;
 
-            var location = Encoding.GetEncoding(1252).GetString(tempBytes);
+            var location = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(tempBytes);
 
             while (rawBytes[index] == 0x0)
             {

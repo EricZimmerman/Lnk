@@ -40,7 +40,7 @@ namespace Lnk
                 }
                 catch (Exception)
                 {
-                    VolumeLabel = Encoding.GetEncoding(1252)
+                    VolumeLabel = CodePagesEncodingProvider.Instance.GetEncoding(1252)
                         .GetString(rawBytes, VolumeLabelOffset, rawBytes.Length - VolumeLabelOffset)
                         .Split('\0')
                         .First();
@@ -48,7 +48,7 @@ namespace Lnk
             }
             else
             {
-                VolumeLabel = Encoding.GetEncoding(1252)
+                VolumeLabel = CodePagesEncodingProvider.Instance.GetEncoding(1252)
                     .GetString(rawBytes, VolumeLabelOffset, rawBytes.Length - VolumeLabelOffset)
                     .Split('\0')
                     .First();

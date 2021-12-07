@@ -202,7 +202,7 @@ namespace Lnk.ShellItems
                 len1 += 1;
             }
 
-            var s1 = Encoding.GetEncoding(1252).GetString(rawBytes, index, len1);
+            var s1 = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, len1);
 
             ShortName = s1;
 
@@ -420,7 +420,7 @@ namespace Lnk.ShellItems
             {
                 index = 0xc;
 
-                var strs = Encoding.GetEncoding(1252).GetString(rawBytes, index, rawBytes.Length - index).Split('\0');
+                var strs = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, rawBytes.Length - index).Split('\0');
 
                 var p2 = string.Join(",", strs.Skip(1).ToList());
 

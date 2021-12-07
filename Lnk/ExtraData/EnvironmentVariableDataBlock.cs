@@ -12,7 +12,7 @@ namespace Lnk.ExtraData
 
             Size = BitConverter.ToUInt32(rawBytes, 0);
 
-            EnvironmentVariablesAscii = Encoding.GetEncoding(1252).GetString(rawBytes, 8, 260).Split('\0').First();
+            EnvironmentVariablesAscii = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, 8, 260).Split('\0').First();
             EnvironmentVariablesUnicode = Encoding.Unicode.GetString(rawBytes, 268, 520).Split('\0').First();
         }
 

@@ -22,7 +22,7 @@ namespace Lnk.ShellItems
 
             index += 2;
 
-            var sig74 = Encoding.GetEncoding(1252).GetString(rawBytes, index, 4);
+            var sig74 = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, 4);
 
             if (sig74 == "CF\0\0")
             {
@@ -83,7 +83,7 @@ namespace Lnk.ShellItems
 
             index += len;
 
-            var primaryName = Encoding.GetEncoding(1252).GetString(tempBytes);
+            var primaryName = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(tempBytes);
 
 
             while (rawBytes[index] == 0x0)

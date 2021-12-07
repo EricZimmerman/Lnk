@@ -13,7 +13,7 @@ namespace Lnk.ExtraData
 
             Signature = ExtraDataTypes.TrackerDataBlock;
             Version = BitConverter.ToInt32(rawBytes, 8);
-            MachineId = Encoding.GetEncoding(1252).GetString(rawBytes, 16, 16).Split('\0').First();
+            MachineId = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, 16, 16).Split('\0').First();
 
             var guidRaw0 = new byte[16];
             var guidRaw1 = new byte[16];

@@ -223,7 +223,7 @@ namespace Lnk
                     if ((LocationFlags & LocationFlag.VolumeIdAndLocalBasePath) ==
                         LocationFlag.VolumeIdAndLocalBasePath)
                     {
-                        LocalPath = Encoding.GetEncoding(1252)
+                        LocalPath = CodePagesEncodingProvider.Instance.GetEncoding(1252)
                             .GetString(locationBytes, localPathOffset, locationBytes.Length - localPathOffset)
                             .Split('\0')
                             .First();
@@ -240,7 +240,7 @@ namespace Lnk
 
                     var commonPathOffset = BitConverter.ToInt32(locationBytes, 24);
 
-                    CommonPath = Encoding.GetEncoding(1252)
+                    CommonPath = CodePagesEncodingProvider.Instance.GetEncoding(1252)
                         .GetString(locationBytes, commonPathOffset, locationBytes.Length - commonPathOffset)
                         .Split('\0')
                         .First();
@@ -283,7 +283,7 @@ namespace Lnk
                 }
                 else
                 {
-                    Name = Encoding.GetEncoding(1252).GetString(rawBytes, index, nameLen);
+                    Name = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, nameLen);
                 }
                 index += nameLen;
             }
@@ -299,7 +299,7 @@ namespace Lnk
                 }
                 else
                 {
-                    RelativePath = Encoding.GetEncoding(1252).GetString(rawBytes, index, relLen);
+                    RelativePath = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, relLen);
                 }
                 index += relLen;
             }
@@ -315,7 +315,7 @@ namespace Lnk
                 }
                 else
                 {
-                    WorkingDirectory = Encoding.GetEncoding(1252).GetString(rawBytes, index, workLen);
+                    WorkingDirectory = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, workLen);
                 }
                 index += workLen;
             }
@@ -331,7 +331,7 @@ namespace Lnk
                 }
                 else
                 {
-                    Arguments = Encoding.GetEncoding(1252).GetString(rawBytes, index, argLen);
+                    Arguments = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, argLen);
                 }
                 index += argLen;
             }
@@ -347,7 +347,7 @@ namespace Lnk
                 }
                 else
                 {
-                    IconLocation = Encoding.GetEncoding(1252).GetString(rawBytes, index, icoLen);
+                    IconLocation = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, icoLen);
                 }
                 index += icoLen;
             }

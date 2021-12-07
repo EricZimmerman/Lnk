@@ -34,7 +34,7 @@ namespace Lnk.ShellItems
             {
                 index = 13;
 
-                var dl = Encoding.GetEncoding(1252).GetString(rawBytes, index, 3);
+                var dl = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, 3);
 
                 FriendlyName = "Users property view: Drive letter";
 
