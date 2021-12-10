@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.*" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.*" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Net.Http" Version="4.*" />
   </ItemGroup>
   <ItemGroup>
@@ -1034,7 +1034,7 @@
     <ProjectReference Include="..\Lnk\Lnk.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ExtensionBlocks" Version="1.2.0" />
+    <PackageReference Include="ExtensionBlocks" Version="1.2.0.1" />
     <PackageReference Include="FluentAssertions" Version="6.2.0" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
