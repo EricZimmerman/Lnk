@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using ExtensionBlocks;
+using Serilog;
 
 namespace Lnk.ShellItems;
 
@@ -606,7 +607,7 @@ public class ShellBag0X00 : ShellBag
         var propertyStoreSize = BitConverter.ToUInt16(rawBytes, index);
         index += 2;
 
-        Trace.Assert(propertyStoreSize == 0, "propertyStoreSize size > 0!");
+        Log.Warning("propertyStoreSize size > 0!");
 
         var identifierSize = BitConverter.ToUInt16(rawBytes, index);
         index += 2;

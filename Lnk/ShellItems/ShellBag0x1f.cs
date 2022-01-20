@@ -298,7 +298,7 @@ public class ShellBag0X1F : ShellBag
                 ExtensionBlocks.Add(block1);
             }
 
-            Trace.Assert(bin.BaseStream.Position == bin.BaseStream.Length);
+            
         }
 
         Value = name;
