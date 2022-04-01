@@ -84,7 +84,7 @@ public class TestMain
 //                Debug.WriteLine(l);
 //            }
 
-        var ll = Lnk.LoadFile(@"/home/eric/Downloads/XWFIM.lnk");
+        var ll = Lnk.LoadFile(@"/home/eric/Temp/Shortcut to Edited.lnk.notlnk");
         Console.WriteLine(ll);
 
         //    ll = Lnk.LoadFile(@"C:\Temp\1\12dc1ea8e34b5a6.automaticDestinations-ms\AppId_12dc1ea8e34b5a6_DirName_2.lnk");

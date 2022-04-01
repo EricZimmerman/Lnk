@@ -115,6 +115,7 @@ public class LnkFile
                         var two3 = new ShellBag0X23(shellItem);
                         TargetIDs.Add(two3);
                         break;
+                    case 0x2a:
                     case 0x2f:
                         var ff = new ShellBag0X2F(shellItem);
                         TargetIDs.Add(ff);
