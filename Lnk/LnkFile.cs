@@ -359,7 +359,7 @@ public class LnkFile
         while (index < rawBytes.Length)
         {
             var extraSize = BitConverter.ToInt32(rawBytes, index);
-            if (extraSize == 0)
+            if (extraSize == 0 || (uint)extraSize >= rawBytes.Length)
             {
                 break;
             }
