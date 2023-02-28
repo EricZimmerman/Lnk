@@ -127,6 +127,7 @@ public class LnkFile
 
                     case 0xb1:
                     case 0x31:
+                    case 0x3A:
                     case 0x35:
                     case 0x39:
                         var d = new ShellBag0X31(shellItem);

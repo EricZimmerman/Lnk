@@ -74,10 +74,10 @@ public class TestMain
     [Test]
     public void foobar()
     {
-          var ls = Directory.GetFiles(@"C:\Temp\");
+         // var ls = Directory.GetFiles(@"C:\Temp\");
 //           var ls = Directory.GetFiles(@"C:\Temp\llunknown");
 //
-            foreach (var s in ls)
+            /*foreach (var s in ls)
             {
                 if (s.EndsWith("lnk") == false)
                 {
@@ -86,10 +86,10 @@ public class TestMain
                 Console.WriteLine(s);
                 var l = Lnk.LoadFile(s);
                 Console.WriteLine(l);
-            }
+            }*/
 
-        //var ll = Lnk.LoadFile(@"C:\temp\NOTES_ru.txt.lnk.hex");
-        //Console.WriteLine(ll);
+        var ll = Lnk.LoadFile(@"C:\temp\Forest Info.lnk");
+        Console.WriteLine(ll);
 
         //    ll = Lnk.LoadFile(@"C:\Temp\1\12dc1ea8e34b5a6.automaticDestinations-ms\AppId_12dc1ea8e34b5a6_DirName_2.lnk");
         //     Debug.WriteLine(ll);
