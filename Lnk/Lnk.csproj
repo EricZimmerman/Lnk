@@ -9,14 +9,13 @@
     <Copyright>Eric Zimmerman</Copyright>
     <PackageProjectUrl>https://github.com/EricZimmerman/lnk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/EricZimmerman/lnk</RepositoryUrl>
-    <Version>1.3.2.0</Version>
+    <Version>1.3.2.2</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <LangVersion>10</LangVersion>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ExtensionBlocks" Version="1.3.2" />
-    <PackageReference Include="GuidMapping" Version="1.1.0" />
+    <PackageReference Include="ExtensionBlocks" Version="1.3.2.2" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
     <PackageReference Include="Serilog" Version="2.12.0" />
   </ItemGroup>
