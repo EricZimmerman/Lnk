@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using ExtensionBlocks;
 using Serilog;
+using Serilog.Events;
 
 namespace Lnk.ShellItems;
 
@@ -101,8 +102,10 @@ public class ShellBag0X61 : ShellBag
 
         dataSize = BitConverter.ToUInt16(rawBytes, index);
         index += 2;
-
-        Log.Debug("Extra data found in ftp case");
+        if (Log.IsEnabled(LogEventLevel.Debug))
+        {
+            Log.Warning("Extra data found in ftp case");
+        }
     }
 
     public DateTimeOffset? FileTime1 { get; }
