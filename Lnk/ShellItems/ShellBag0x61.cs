@@ -102,7 +102,7 @@ public class ShellBag0X61 : ShellBag
         dataSize = BitConverter.ToUInt16(rawBytes, index);
         index += 2;
 
-        Log.Warning("Extra data found in ftp case");
+        Log.Debug("Extra data found in ftp case");
     }
 
     public DateTimeOffset? FileTime1 { get; }

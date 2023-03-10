@@ -115,6 +115,16 @@ public class TestMain
         Debug.WriteLine(lnk);
            
     }
+    
+    [Test]
+    public void Sps()
+    {
+        var winP =@"C:\temp\sps";
+
+        var po = new PropertyStore(File.ReadAllBytes(winP));
+        Debug.WriteLine(po);
+           
+    }
 
     [Test]
     public void RemoteFileLnk()
