@@ -57,6 +57,29 @@ public class ShellBag0X2E : ShellBag
             {
                 FriendlyName = "Control panel category";
 
+                if (rawBytes.Length < 0x48)
+                {
+                    var guidb1 = new byte[16];
+                    index = 4; //beginning of guids
+
+                    Buffer.BlockCopy(rawBytes, index, guidb1, 0, 16);
+
+                    var g1 = new Guid(guidb1);
+                    var gf1 = GuidMapping.GuidMapping.GetDescriptionFromGuid(g1.ToString());
+
+                    index += 16;
+
+                    var b26 = new Beef0026(rawBytes.Skip(index).ToArray());
+                    
+                    Value = b26.ToString();
+
+                    DevicePath = gf1;
+
+                    Category = gf1;
+                    
+                    return;
+                }
+                
                 index = 0x12;
 
                 var val1 = Encoding.Unicode.GetString(rawBytes, index, 0x48 * 2).Trim('\0');
