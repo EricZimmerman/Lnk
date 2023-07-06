@@ -13,9 +13,10 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <LangVersion>10</LangVersion>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    
     <PackageTags>lnk, link</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
     <None Include="../README.md" Pack="true" PackagePath=""/>
@@ -30,6 +31,7 @@
     </PackageReference>
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
     <PackageReference Include="Serilog" Version="3.0.1" />
+    <None Include="icon.png" Pack="true" PackagePath=""/>
   </ItemGroup>
  
 </Project>
