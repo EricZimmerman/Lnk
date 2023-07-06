@@ -34,7 +34,7 @@
     </PackageReference>
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
     <PackageReference Include="Serilog" Version="3.0.1" />
-    <None Include="icon.png" Pack="true" PackagePath=""/>
+    <None Include="../icon.png" Pack="true" PackagePath=""/>
   </ItemGroup>
  
 </Project>
