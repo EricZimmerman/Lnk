@@ -5,6 +5,12 @@ namespace Lnk;
 
 public static class Lnk
 {
+    /// <summary>
+    /// Helper to load lnk files
+    /// </summary>
+    /// <param name="lnkFile"></param>
+    /// <returns>LnkFile</returns>
+    /// <exception cref="Exception"></exception>
     public static LnkFile LoadFile(string lnkFile)
     {
         var raw = File.ReadAllBytes(lnkFile);
