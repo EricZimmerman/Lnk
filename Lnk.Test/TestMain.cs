@@ -89,12 +89,9 @@ public class TestMain
                 Console.WriteLine(l);
             }*/
 
-            var aaaaa = new ShellBag0X2E(File.ReadAllBytes(@"C:\temp\2e.bin"));
-            Console.WriteLine(aaaaa);
+          
             
-            return;
-            
-        var ll = Lnk.LoadFile(@"C:\temp\bl.bin");
+        var ll = Lnk.LoadFile(@"C:\temp\RuneChanger.download");
         Console.WriteLine(ll);
 
         //    ll = Lnk.LoadFile(@"C:\Temp\1\12dc1ea8e34b5a6.automaticDestinations-ms\AppId_12dc1ea8e34b5a6_DirName_2.lnk");

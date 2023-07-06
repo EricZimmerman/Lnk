@@ -54,7 +54,7 @@ public class ShellBag0X32 : ShellBag
                 
         }
 
-        index += 1;
+            index += 1;
 
         //skip unknown byte
         index += 1;
@@ -72,7 +72,6 @@ public class ShellBag0X32 : ShellBag
 
         LastModificationTime = Utils.ExtractDateTimeOffsetFromBytes(lastmodifiedUtcRaw);
 
-
         index += 4;
 
         index += 2;
@@ -82,7 +81,7 @@ public class ShellBag0X32 : ShellBag
 
         if (beefPos == 0)
         {
-            var hackName = Encoding.GetEncoding(1255).GetString(rawBytes, index, rawBytes.Length - index);
+            var hackName = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, rawBytes.Length - index);
 
             var segs = hackName.Split(new[] {'\0'}, StringSplitOptions.RemoveEmptyEntries);
 
@@ -91,7 +90,6 @@ public class ShellBag0X32 : ShellBag
             Value = ShortName;
             return;
         }
-
 
         beefPos = beefPos - 4; //add header back for beef
 

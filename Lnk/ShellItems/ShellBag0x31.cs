@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using ExtensionBlocks;
@@ -66,11 +67,20 @@ public class ShellBag0X31 : ShellBag
         var len = 0;
 
         var beefPos = BitConverter.ToString(rawBytes).IndexOf("04-00-EF-BE", StringComparison.InvariantCulture) / 3;
+
         beefPos = beefPos - 4; //add header back for beef
 
         var strLen = beefPos - index;
 
-        if (rawBytes[2] == 0x35|| rawBytes[2] == 0x36)
+        if (strLen < 0)
+        {
+            len = 2;
+            while (rawBytes[index + len] != 0x0)
+            {
+                len += 2;
+            }
+        }
+        else if (rawBytes[2] == 0x35|| rawBytes[2] == 0x36)
         {
             len = strLen;
         }
@@ -91,11 +101,11 @@ public class ShellBag0X31 : ShellBag
 
         if (rawBytes[2] == 0x35 || rawBytes[2] == 0x36)
         {
-            shortName = Encoding.Unicode.GetString(tempBytes);
+            shortName = Encoding.Unicode.GetString(tempBytes).Trim('\0');
         }
         else
         {
-            shortName = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(tempBytes);
+            shortName = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(tempBytes).Trim('\0');
         }
 
         ShortName = shortName;
