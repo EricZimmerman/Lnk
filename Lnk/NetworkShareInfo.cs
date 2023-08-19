@@ -84,7 +84,7 @@ public class NetworkShareInfo
         [Description("If set, the network provider type contains data")] ValidNetType = 0x0002
     }
 
-    public NetworkShareInfo(byte[] rawBytes)
+    public NetworkShareInfo(byte[] rawBytes, int codepage=1252)
     {
         Size = BitConverter.ToInt32(rawBytes, 0);
         ShareFlags = (ShareFlag) BitConverter.ToInt32(rawBytes, 4);
@@ -111,7 +111,7 @@ public class NetworkShareInfo
         }
         else
         {
-            NetworkShareName = CodePagesEncodingProvider.Instance.GetEncoding(1252)
+            NetworkShareName = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
                 .GetString(rawBytes, NetworkShareNameOffset, rawBytes.Length - NetworkShareNameOffset)
                 .Split('\0')
                 .First();
@@ -119,7 +119,7 @@ public class NetworkShareInfo
             DeviceName = string.Empty;
             if (DeviceNameOffset > 0)
             {
-                DeviceName = CodePagesEncodingProvider.Instance.GetEncoding(1252)
+                DeviceName = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
                     .GetString(rawBytes, DeviceNameOffset, rawBytes.Length - DeviceNameOffset)
                     .Split('\0')
                     .First();

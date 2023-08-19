@@ -7,7 +7,7 @@ namespace Lnk.ShellItems;
 
 public class ShellBag0Xc3 : ShellBag
 {
-    public ShellBag0Xc3(byte[] rawBytes)
+    public ShellBag0Xc3(byte[] rawBytes, int codepage=1252)
     {
         FriendlyName = "Network location";
 
@@ -39,7 +39,7 @@ public class ShellBag0Xc3 : ShellBag
 
         index += len;
 
-        var location = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(tempBytes);
+        var location = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(tempBytes);
 
         while (rawBytes[index] == 0x0)
         {

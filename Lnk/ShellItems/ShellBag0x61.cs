@@ -14,7 +14,7 @@ public class ShellBag0X61 : ShellBag
     // Fields...
 
 
-    public ShellBag0X61(byte[] rawBytes)
+    public ShellBag0X61(byte[] rawBytes, int codepage=1252)
     {
         FriendlyName = "URI";
 
@@ -50,7 +50,7 @@ public class ShellBag0X61 : ShellBag
             var strSize = BitConverter.ToUInt32(rawBytes, index);
             index += 4;
 
-            var str = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, (int) strSize);
+            var str = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, (int) strSize);
 
             Value = str.Replace("\0", "");
 
@@ -61,7 +61,7 @@ public class ShellBag0X61 : ShellBag
 
             if (strSize > 0)
             {
-                str = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, (int) strSize);
+                str = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, (int) strSize);
 
                 UserName = str.Replace("\0", "");
                 ;
@@ -74,7 +74,7 @@ public class ShellBag0X61 : ShellBag
 
             if (strSize > 0)
             {
-                str = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, (int) strSize);
+                str = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, (int) strSize);
                 index += (int) strSize;
             }
 
@@ -85,7 +85,7 @@ public class ShellBag0X61 : ShellBag
                 len1 += 1;
             }
 
-            Uri = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, len1);
+            Uri = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, len1);
 
 
             index += len1 + 1;

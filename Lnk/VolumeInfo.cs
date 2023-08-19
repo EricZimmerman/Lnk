@@ -24,7 +24,7 @@ public class VolumeInfo
         [Description("RAM drive")] DriveRamdisk = 6
     }
 
-    public VolumeInfo(byte[] rawBytes)
+    public VolumeInfo(byte[] rawBytes, int codepage=1252)
     {
         Size = BitConverter.ToInt32(rawBytes, 0);
         DriveType = (DriveTypes) BitConverter.ToInt32(rawBytes, 4);
@@ -40,7 +40,7 @@ public class VolumeInfo
             }
             catch (Exception)
             {
-                VolumeLabel = CodePagesEncodingProvider.Instance.GetEncoding(1252)
+                VolumeLabel = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
                     ?.GetString(rawBytes, VolumeLabelOffset, rawBytes.Length - VolumeLabelOffset)
                     .Split('\0')
                     .First();
@@ -48,7 +48,7 @@ public class VolumeInfo
         }
         else
         {
-            VolumeLabel = CodePagesEncodingProvider.Instance.GetEncoding(1252)
+            VolumeLabel = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
                 ?.GetString(rawBytes, VolumeLabelOffset, rawBytes.Length - VolumeLabelOffset)
                 .Split('\0')
                 .First();

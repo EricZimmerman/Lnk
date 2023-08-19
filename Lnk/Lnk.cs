@@ -11,7 +11,7 @@ public static class Lnk
     /// <param name="lnkFile"></param>
     /// <returns>LnkFile</returns>
     /// <exception cref="Exception"></exception>
-    public static LnkFile LoadFile(string lnkFile)
+    public static LnkFile LoadFile(string lnkFile, int codepage=1252)
     {
         var raw = File.ReadAllBytes(lnkFile);
 
@@ -20,6 +20,6 @@ public static class Lnk
             throw new Exception($"Invalid signature!");
         }
 
-        return new LnkFile(raw, lnkFile);
+        return new LnkFile(raw, lnkFile, codepage);
     }
 }

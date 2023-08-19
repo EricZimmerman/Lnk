@@ -14,7 +14,7 @@ public class ShellBag0X1F : ShellBag
     private readonly List<PropertySheet> Sheets;
 
 
-    public ShellBag0X1F(byte[] rawBytes)
+    public ShellBag0X1F(byte[] rawBytes, int codepage=1252)
     {
         ExtensionBlocks = new List<IExtensionBlock>();
 
@@ -34,7 +34,7 @@ public class ShellBag0X1F : ShellBag
         {
             index = 13;
 
-            var dl = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, 3);
+            var dl = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, 3);
 
             FriendlyName = "Users property view: Drive letter";
 

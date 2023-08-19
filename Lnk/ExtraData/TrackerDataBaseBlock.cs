@@ -7,13 +7,13 @@ namespace Lnk.ExtraData;
 
 public class TrackerDataBaseBlock : ExtraDataBase
 {
-    public TrackerDataBaseBlock(byte[] rawBytes)
+    public TrackerDataBaseBlock(byte[] rawBytes, int codepage=1252)
     {
         Size = BitConverter.ToUInt32(rawBytes, 0);
 
         Signature = ExtraDataTypes.TrackerDataBlock;
         Version = BitConverter.ToInt32(rawBytes, 8);
-        MachineId = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, 16, 16).Split('\0').First();
+        MachineId = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, 16, 16).Split('\0').First();
 
         var guidRaw0 = new byte[16];
         var guidRaw1 = new byte[16];

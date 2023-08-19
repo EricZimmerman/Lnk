@@ -19,7 +19,7 @@ public class LnkFile
         [Description("The linked file is on a network share")] CommonNetworkRelativeLinkAndPathSuffix = 0x0002
     }
 
-    public LnkFile(byte[] rawBytes, string sourceFile)
+    public LnkFile(byte[] rawBytes, string sourceFile, int codepage=1252)
     {
         RawBytes = rawBytes;
         SourceFile = Path.GetFullPath(sourceFile);
@@ -107,17 +107,17 @@ public class LnkFile
                 switch (shellItem[2])
                 {
                     case 0x1f:
-                        var f = new ShellBag0X1F(shellItem);
+                        var f = new ShellBag0X1F(shellItem, codepage);
                         TargetIDs.Add(f);
                         break;
                     case 0x22:
                     case 0x23:
-                        var two3 = new ShellBag0X23(shellItem);
+                        var two3 = new ShellBag0X23(shellItem, codepage);
                         TargetIDs.Add(two3);
                         break;
                     case 0x2a:
                     case 0x2f:
-                        var ff = new ShellBag0X2F(shellItem);
+                        var ff = new ShellBag0X2F(shellItem, codepage);
                         TargetIDs.Add(ff);
                         break;
                     case 0x2e:
@@ -130,17 +130,17 @@ public class LnkFile
                     case 0x3A:
                     case 0x35:
                     case 0x39:
-                        var d = new ShellBag0X31(shellItem);
+                        var d = new ShellBag0X31(shellItem, codepage);
                         TargetIDs.Add(d);
                         break;
                         
                     case 0x32:
                     case 0x36:
-                        var d2 = new ShellBag0X32(shellItem);
+                        var d2 = new ShellBag0X32(shellItem, codepage);
                         TargetIDs.Add(d2);
                         break;
                     case 0x00:
-                        var v0 = new ShellBag0X00(shellItem);
+                        var v0 = new ShellBag0X00(shellItem, codepage);
                         TargetIDs.Add(v0);
                         break;
                     case 0x01:
@@ -152,18 +152,18 @@ public class LnkFile
                         TargetIDs.Add(sevenone);
                         break;
                     case 0x61:
-                        var sixone = new ShellBag0X61(shellItem);
+                        var sixone = new ShellBag0X61(shellItem, codepage);
                         TargetIDs.Add(sixone);
                         break;
 
                     case 0xC3:
-                        var c3 = new ShellBag0Xc3(shellItem);
+                        var c3 = new ShellBag0Xc3(shellItem, codepage);
                         TargetIDs.Add(c3);
                         break;
 
                     case 0x74:
                     case 0x77:
-                        var sev = new ShellBag0X74(shellItem);
+                        var sev = new ShellBag0X74(shellItem, codepage);
                         TargetIDs.Add(sev);
                         break;
 
@@ -179,7 +179,7 @@ public class LnkFile
                     case 0x43:
                     case 0x46:
                     case 0x47:
-                        var forty = new ShellBag0X40(shellItem);
+                        var forty = new ShellBag0X40(shellItem, codepage);
                         TargetIDs.Add(forty);
                         break;
                     case 0x4C:
@@ -216,7 +216,7 @@ public class LnkFile
 
                 if (volOffset > 0)
                 {
-                    VolumeInfo = new VolumeInfo(volBytes);
+                    VolumeInfo = new VolumeInfo(volBytes, codepage);
                 }
 
                 var localPathOffset = BitConverter.ToInt32(locationBytes, 16);
@@ -225,7 +225,7 @@ public class LnkFile
                 if ((LocationFlags & LocationFlag.VolumeIdAndLocalBasePath) ==
                     LocationFlag.VolumeIdAndLocalBasePath)
                 {
-                    LocalPath = CodePagesEncodingProvider.Instance.GetEncoding(1252)
+                    LocalPath = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
                         .GetString(locationBytes, localPathOffset, locationBytes.Length - localPathOffset)
                         .Split('\0')
                         .First();
@@ -237,12 +237,12 @@ public class LnkFile
                     var networkBytes = new byte[networkShareSize];
                     Buffer.BlockCopy(locationBytes, networkShareOffset, networkBytes, 0, networkShareSize);
 
-                    NetworkShareInfo = new NetworkShareInfo(networkBytes);
+                    NetworkShareInfo = new NetworkShareInfo(networkBytes, codepage);
                 }
 
                 var commonPathOffset = BitConverter.ToInt32(locationBytes, 24);
 
-                CommonPath = CodePagesEncodingProvider.Instance.GetEncoding(1252)
+                CommonPath = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
                     .GetString(locationBytes, commonPathOffset, locationBytes.Length - commonPathOffset)
                     .Split('\0')
                     .First();
@@ -285,7 +285,7 @@ public class LnkFile
             }
             else
             {
-                Name = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, nameLen);
+                Name = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, nameLen);
             }
             index += nameLen;
         }
@@ -301,7 +301,7 @@ public class LnkFile
             }
             else
             {
-                RelativePath = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, relLen);
+                RelativePath = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, relLen);
             }
             index += relLen;
         }
@@ -317,7 +317,7 @@ public class LnkFile
             }
             else
             {
-                WorkingDirectory = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, workLen);
+                WorkingDirectory = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, workLen);
             }
             index += workLen;
         }
@@ -333,7 +333,7 @@ public class LnkFile
             }
             else
             {
-                Arguments = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, argLen);
+                Arguments = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, argLen);
             }
             index += argLen;
         }
@@ -349,7 +349,7 @@ public class LnkFile
             }
             else
             {
-                IconLocation = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, icoLen);
+                IconLocation = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, icoLen);
             }
             index += icoLen;
         }
@@ -389,7 +389,7 @@ public class LnkFile
                 switch (sig)
                 {
                     case ExtraDataTypes.TrackerDataBlock:
-                        var tb = new TrackerDataBaseBlock(extraBlock);
+                        var tb = new TrackerDataBaseBlock(extraBlock, codepage);
                         ExtraBlocks.Add(tb);
                         break;
                     case ExtraDataTypes.ConsoleDataBlock:
@@ -401,15 +401,15 @@ public class LnkFile
                         ExtraBlocks.Add(cfeb);
                         break;
                     case ExtraDataTypes.DarwinDataBlock:
-                        var db = new DarwinDataBlock(extraBlock);
+                        var db = new DarwinDataBlock(extraBlock, codepage);
                         ExtraBlocks.Add(db);
                         break;
                     case ExtraDataTypes.EnvironmentVariableDataBlock:
-                        var eb = new EnvironmentVariableDataBlock(extraBlock);
+                        var eb = new EnvironmentVariableDataBlock(extraBlock, codepage);
                         ExtraBlocks.Add(eb);
                         break;
                     case ExtraDataTypes.IconEnvironmentDataBlock:
-                        var ib = new IconEnvironmentDataBlock(extraBlock);
+                        var ib = new IconEnvironmentDataBlock(extraBlock, codepage);
                         ExtraBlocks.Add(ib);
                         break;
                     case ExtraDataTypes.KnownFolderDataBlock:
@@ -430,7 +430,7 @@ public class LnkFile
                         ExtraBlocks.Add(sf);
                         break;
                     case ExtraDataTypes.VistaAndAboveIdListDataBlock:
-                        var vid = new VistaAndAboveIdListDataBlock(extraBlock);
+                        var vid = new VistaAndAboveIdListDataBlock(extraBlock, codepage);
                         ExtraBlocks.Add(vid);
                         break;
                     default:

@@ -8,7 +8,7 @@ namespace Lnk.ShellItems;
 
 internal class ShellBagCDBurn : ShellBag
 {
-    public ShellBagCDBurn(byte[] rawBytes)
+    public ShellBagCDBurn(byte[] rawBytes, int codepage=1252)
     {
         ShortName = string.Empty;
 
@@ -149,7 +149,7 @@ internal class ShellBagCDBurn : ShellBag
         {
             index = oldIndex + 2;
 
-            _extraBag = new ShellBag0X31(rawBytes.Skip(index).ToArray());
+            _extraBag = new ShellBag0X31(rawBytes.Skip(index).ToArray(), codepage);
 
             foreach (var ex in _extraBag.ExtensionBlocks)
             {

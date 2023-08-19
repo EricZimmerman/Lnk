@@ -6,13 +6,13 @@ namespace Lnk.ExtraData;
 
 public class EnvironmentVariableDataBlock : ExtraDataBase
 {
-    public EnvironmentVariableDataBlock(byte[] rawBytes)
+    public EnvironmentVariableDataBlock(byte[] rawBytes, int codepage=1252)
     {
         Signature = ExtraDataTypes.EnvironmentVariableDataBlock;
 
         Size = BitConverter.ToUInt32(rawBytes, 0);
 
-        EnvironmentVariablesAscii = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, 8, 260).Split('\0').First();
+        EnvironmentVariablesAscii = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, 8, 260).Split('\0').First();
         EnvironmentVariablesUnicode = Encoding.Unicode.GetString(rawBytes, 268, 520).Split('\0').First();
     }
 

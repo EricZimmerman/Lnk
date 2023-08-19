@@ -7,7 +7,7 @@ namespace Lnk.ExtraData;
 
 public class VistaAndAboveIdListDataBlock : ExtraDataBase
 {
-    public VistaAndAboveIdListDataBlock(byte[] rawBytes)
+    public VistaAndAboveIdListDataBlock(byte[] rawBytes, int codepage=1252)
     {
         Signature = ExtraDataTypes.VistaAndAboveIdListDataBlock;
 
@@ -46,12 +46,12 @@ public class VistaAndAboveIdListDataBlock : ExtraDataBase
             switch (bytese[2])
             {
                 case 0x1f:
-                    var f = new ShellBag0X1F(bytese);
+                    var f = new ShellBag0X1F(bytese, codepage);
                     TargetIDs.Add(f);
                     break;
 
                 case 0x2f:
-                    var ff = new ShellBag0X2F(bytese);
+                    var ff = new ShellBag0X2F(bytese, codepage);
                     TargetIDs.Add(ff);
                     break;
                 case 0x2e:
@@ -61,11 +61,11 @@ public class VistaAndAboveIdListDataBlock : ExtraDataBase
                 case 0xb1:
                 case 0x31:
                 case 0x35:
-                    var d = new ShellBag0X31(bytese);
+                    var d = new ShellBag0X31(bytese, codepage);
                     TargetIDs.Add(d);
                     break;
                 case 0x32:
-                    var d2 = new ShellBag0X32(bytese);
+                    var d2 = new ShellBag0X32(bytese, codepage);
                     TargetIDs.Add(d2);
                     break;
                 case 0x00:
@@ -81,18 +81,18 @@ public class VistaAndAboveIdListDataBlock : ExtraDataBase
                     TargetIDs.Add(sevenone);
                     break;
                 case 0x61:
-                    var sixone = new ShellBag0X61(bytese);
+                    var sixone = new ShellBag0X61(bytese, codepage);
                     TargetIDs.Add(sixone);
                     break;
 
                 case 0xC3:
-                    var c3 = new ShellBag0Xc3(bytese);
+                    var c3 = new ShellBag0Xc3(bytese, codepage);
                     TargetIDs.Add(c3);
                     break;
 
                 case 0x74:
                 case 0x77:
-                    var sev = new ShellBag0X74(bytese);
+                    var sev = new ShellBag0X74(bytese, codepage);
                     TargetIDs.Add(sev);
                     break;
 
@@ -101,7 +101,7 @@ public class VistaAndAboveIdListDataBlock : ExtraDataBase
                 case 0x43:
                 case 0x46:
                 case 0x47:
-                    var forty = new ShellBag0X40(bytese);
+                    var forty = new ShellBag0X40(bytese, codepage);
                     TargetIDs.Add(forty);
                     break;
                 default:

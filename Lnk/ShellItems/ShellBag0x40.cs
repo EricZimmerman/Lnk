@@ -8,7 +8,7 @@ public class ShellBag0X40 : ShellBag
 {
     private string _desc;
 
-    public ShellBag0X40(byte[] rawBytes)
+    public ShellBag0X40(byte[] rawBytes, int codepage=1252)
     {
         ExtensionBlocks = new List<IExtensionBlock>();
 
@@ -38,7 +38,7 @@ public class ShellBag0X40 : ShellBag
         }
 
 
-        var temp = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, 5, rawBytes.Length - 5).Split('\0');
+        var temp = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, 5, rawBytes.Length - 5).Split('\0');
 
         _desc = temp[1];
 

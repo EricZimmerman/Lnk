@@ -8,7 +8,7 @@ namespace Lnk.ShellItems;
 
 public class ShellBag0X74 : ShellBag
 {
-    public ShellBag0X74(byte[] rawBytes)
+    public ShellBag0X74(byte[] rawBytes, int codepage=1252)
     {
         FriendlyName = "Users Files Folder";
 
@@ -22,7 +22,7 @@ public class ShellBag0X74 : ShellBag
 
         index += 2;
 
-        var sig74 = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, 4);
+        var sig74 = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, 4);
 
         if (sig74 == "CF\0\0")
         {
@@ -83,7 +83,7 @@ public class ShellBag0X74 : ShellBag
 
         index += len;
 
-        var primaryName = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(tempBytes);
+        var primaryName = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(tempBytes);
 
 
         while (rawBytes[index] == 0x0)
