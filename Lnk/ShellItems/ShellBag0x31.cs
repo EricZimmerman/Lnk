@@ -179,6 +179,11 @@ public class ShellBag0X31 : ShellBag
             if (beef0004 != null)
             {
                 Value = beef0004.LongName;
+                if (beef0004.LongName.Length == 0)
+                {
+                    Value = beef0004.LocalisedName;
+                }
+            
             }
 
             var beef0005 = block as Beef0005;
