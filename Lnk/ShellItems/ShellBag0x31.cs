@@ -9,7 +9,7 @@ namespace Lnk.ShellItems;
 
 public class ShellBag0X31 : ShellBag
 {
-    public ShellBag0X31(byte[] rawBytes)
+    public ShellBag0X31(byte[] rawBytes, int codepage=1252)
     {
         FriendlyName = "Directory";
 
@@ -105,7 +105,7 @@ public class ShellBag0X31 : ShellBag
         }
         else
         {
-            shortName = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(tempBytes).Trim('\0');
+            shortName = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(tempBytes).Trim('\0');
         }
 
         ShortName = shortName;

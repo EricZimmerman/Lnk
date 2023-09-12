@@ -8,13 +8,13 @@ namespace Lnk.ShellItems;
 
 public class ShellBag0X2F : ShellBag
 {
-    public ShellBag0X2F(byte[] rawBytes)
+    public ShellBag0X2F(byte[] rawBytes, int codepage=1252)
     {
         FriendlyName = "Drive letter";
 
         ExtensionBlocks = new List<IExtensionBlock>();
 
-        var driveLetter = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, 3, 2);
+        var driveLetter = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, 3, 2);
 
         Value = driveLetter;
 

@@ -8,7 +8,7 @@ namespace Lnk.ShellItems;
 
 public class ShellBag0X32 : ShellBag
 {
-    public ShellBag0X32(byte[] rawBytes)
+    public ShellBag0X32(byte[] rawBytes, int codepage=1252)
     {
         FriendlyName = "File";
 
@@ -81,7 +81,7 @@ public class ShellBag0X32 : ShellBag
 
         if (beefPos == 0)
         {
-            var hackName = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, rawBytes.Length - index);
+            var hackName = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, rawBytes.Length - index);
 
             var segs = hackName.Split(new[] {'\0'}, StringSplitOptions.RemoveEmptyEntries);
 
@@ -118,7 +118,7 @@ public class ShellBag0X32 : ShellBag
         }
         else
         {
-            shortName = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(tempBytes);
+            shortName = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(tempBytes);
         }
 
         ShortName = shortName;

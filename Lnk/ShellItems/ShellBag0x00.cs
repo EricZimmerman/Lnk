@@ -18,7 +18,7 @@ public class ShellBag0X00 : ShellBag
     private string _storageIdName;
 
 
-    public ShellBag0X00(byte[] rawBytes)
+    public ShellBag0X00(byte[] rawBytes, int codepage=1252)
     {
         _guids = new List<string>();
 
@@ -80,7 +80,7 @@ public class ShellBag0X00 : ShellBag
             case 0x00030005:
             case 0x00000005:
 
-                ProcessFtpSubItem(rawBytes);
+                ProcessFtpSubItem(rawBytes, codepage);
 
                 break;
             case 0x23febbee:
@@ -116,7 +116,7 @@ public class ShellBag0X00 : ShellBag
                 }
                 else
                 {
-                    ProcessPropertyViewDefault(rawBytes);
+                    ProcessPropertyViewDefault(rawBytes, codepage);
                 }
 
                 break;
@@ -177,7 +177,7 @@ public class ShellBag0X00 : ShellBag
         FullUrl = url.Replace("\0", "");
     }
 
-    private void ProcessFtpSubItem(byte[] rawBytes)
+    private void ProcessFtpSubItem(byte[] rawBytes, int codepage=1252)
     {
         FriendlyName = "Variable: FTP URI";
 
@@ -203,7 +203,7 @@ public class ShellBag0X00 : ShellBag
             len1 += 1;
         }
 
-        var s1 = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, len1);
+        var s1 = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, len1);
 
         ShortName = s1;
 
@@ -404,7 +404,7 @@ public class ShellBag0X00 : ShellBag
         }
     }
 
-    private void ProcessPropertyViewDefault(byte[] rawBytes)
+    private void ProcessPropertyViewDefault(byte[] rawBytes, int codepage=1252)
     {
         FriendlyName = "Variable: Users property view";
         var index = 10;
@@ -421,7 +421,7 @@ public class ShellBag0X00 : ShellBag
         {
             index = 0xc;
 
-            var strs = CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(rawBytes, index, rawBytes.Length - index).Split('\0');
+            var strs = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, rawBytes.Length - index).Split('\0');
 
             var p2 = string.Join(",", strs.Skip(1).ToList());
 
@@ -509,7 +509,7 @@ public class ShellBag0X00 : ShellBag
 
             if (rawBytes[4] == 0x41 && rawBytes[5] == 0x75 && rawBytes[6] == 0x67 && rawBytes[7] == 0x4D)
             {
-                var cdb = new ShellBagCDBurn(rawBytes);
+                var cdb = new ShellBagCDBurn(rawBytes, codepage);
 
                 Value = cdb.Value;
                 FriendlyName = cdb.FriendlyName;
