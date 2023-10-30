@@ -14,7 +14,7 @@ namespace Lnk.Test;
 [TestFixture]
 public class TestMain
 {
-    public static string BasePath = @"..\..\..\TestFiles";
+    public static string BasePath = @"..\..\TestFiles";
     public static string Win10Path = Path.Combine(BasePath, "Win10");
     public static string WinXpPath = Path.Combine(BasePath, "WinXP");
     public static string Win2K3Path = Path.Combine(BasePath, "Win2k3");
