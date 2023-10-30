@@ -12,7 +12,8 @@
     
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestFiles\Bad\%24I2GXWHL.lnk" />
+    <None Include="TestFiles\Bad\%24I2GXWHL.test" />
+    <None Include="TestFiles\Bad\ImDisk Virtual Disk Driver.test" />
     <None Include="TestFiles\Misc\local.directory.seven.test" />
     <None Include="TestFiles\Misc\local.directory.xp.test" />
     <None Include="TestFiles\Misc\local.file.darwin.test" />
@@ -1036,5 +1037,6 @@
     <PackageReference Include="ExtensionBlocks" Version="1.3.3" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
     <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
   </ItemGroup>
 </Project>

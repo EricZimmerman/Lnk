@@ -17,7 +17,13 @@ public static class Lnk
 
         if (raw[0] != 0x4c)
         {
-            throw new Exception($"Invalid signature!");
+            throw new Exception($"File ({lnkFile}) has an invalid signature! Is it a valid LNK file?");
+        }
+
+        // validate the source file has at least 76 bytes of header data
+        if (raw.Length < 76)
+        {
+            throw new Exception($"File ({lnkFile}) is less than 76 bytes which is too small to be a valid LNK file!");
         }
 
         return new LnkFile(raw, lnkFile, codepage);
