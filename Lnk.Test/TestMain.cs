@@ -14,7 +14,7 @@ namespace Lnk.Test;
 [TestFixture]
 public class TestMain
 {
-    public static string BasePath = @"..\..\TestFiles";
+    public static string BasePath = @"..\..\..\TestFiles";
     public static string Win10Path = Path.Combine(BasePath, "Win10");
     public static string WinXpPath = Path.Combine(BasePath, "WinXP");
     public static string Win2K3Path = Path.Combine(BasePath, "Win2k3");
@@ -24,7 +24,6 @@ public class TestMain
     public static string Win2012Path = Path.Combine(BasePath, "Win2012");
     public static string Win2012R2Path = Path.Combine(BasePath, "Win2012R2");
     public static string WinVistaPath = Path.Combine(BasePath, "WinVista");
-
     public static string MiscPath = Path.Combine(BasePath, "Misc");
     public static string BadPath = Path.Combine(BasePath, "Bad");
 
@@ -72,41 +71,46 @@ public class TestMain
         d?.FeatureName.Should().Be("ReaderProgramFiles");
     }
 
-    [Test]
-    public void foobar()
-    {
-         // var ls = Directory.GetFiles(@"C:\Temp\");
-//           var ls = Directory.GetFiles(@"C:\Temp\llunknown");
-//
-            /*foreach (var s in ls)
-            {
-                if (s.EndsWith("lnk") == false)
-                {
-                    continue;
-                }
-                Console.WriteLine(s);
-                var l = Lnk.LoadFile(s);
-                Console.WriteLine(l);
-            }*/
+//    [Test]
+//    public void foobar()
+//    {
+//         // var ls = Directory.GetFiles(@"C:\Temp\");
+////           var ls = Directory.GetFiles(@"C:\Temp\llunknown");
+////
+//            /*foreach (var s in ls)
+//            {
+//                if (s.EndsWith("lnk") == false)
+//                {
+//                    continue;
+//                }
+//                Console.WriteLine(s);
+//                var l = Lnk.LoadFile(s);
+//                Console.WriteLine(l);
+//            }*/
 
           
             
-        var ll = Lnk.LoadFile(@"C:\temp\files\lnk\Dropbox.lnk");
-        Console.WriteLine(ll);
+//        var ll = Lnk.LoadFile(@"C:\temp\files\lnk\Dropbox.lnk");
+//        Console.WriteLine(ll);
 
-        //    ll = Lnk.LoadFile(@"C:\Temp\1\12dc1ea8e34b5a6.automaticDestinations-ms\AppId_12dc1ea8e34b5a6_DirName_2.lnk");
-        //     Debug.WriteLine(ll);
+//        //    ll = Lnk.LoadFile(@"C:\Temp\1\12dc1ea8e34b5a6.automaticDestinations-ms\AppId_12dc1ea8e34b5a6_DirName_2.lnk");
+//        //     Debug.WriteLine(ll);
+//    }
+
+    [Test]
+    public void InvalidSignatureShouldThrowException()
+    {
+        var badFile = Path.Combine(BadPath, "$I2GXWHL.test");
+        Action action = () => Lnk.LoadFile(badFile);
+        action.Should().Throw<Exception>().WithMessage("*invalid signature*");
     }
 
     [Test]
-    public void InvalidFileShouldThrowException()
+    public void CorruptFileShouldThrowException()
     {
-        var badFile = Path.Combine(BadPath, "$I2GXWHL.lnk");
+        var badFile = Path.Combine(BadPath, "ImDisk Virtual Disk Driver.test");
         Action action = () => Lnk.LoadFile(badFile);
-
-            
-
-        action.Should().Throw<Exception>().WithMessage("Invalid signature!");
+        action.Should().Throw<Exception>().WithMessage("*corrupt*");
     }
 
     [Test]
@@ -119,15 +123,15 @@ public class TestMain
            
     }
     
-    [Test]
-    public void Sps()
-    {
-        var winP =@"C:\temp\sps";
+    //[Test]
+    //public void Sps()
+    //{
+    //    var winP =@"C:\temp\sps";
 
-        var po = new PropertyStore(File.ReadAllBytes(winP));
-        Debug.WriteLine(po);
+    //    var po = new PropertyStore(File.ReadAllBytes(winP));
+    //    Debug.WriteLine(po);
            
-    }
+    //}
 
     [Test]
     public void RemoteFileLnk()

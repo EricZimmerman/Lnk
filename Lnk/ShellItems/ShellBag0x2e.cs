@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -134,13 +133,31 @@ public class ShellBag0X2E : ShellBag
         FriendlyName = "Users property view";
         var index = 10;
 
+        if (rawBytes.Length < index + 2)
+        {
+            throw new Exception($"Encountered an error attempting to calculate PropertySheetList size - the source array is too small - is this file corrupt?");
+        }
+
         var shellPropertySheetListSize = BitConverter.ToInt16(rawBytes, index);
 
+        if (shellPropertySheetListSize <= 0 || shellPropertySheetListSize > rawBytes.Length - (index + 2)) // if the shellPropertySheetListSize is less than 0 OR larger than the amount of remaining data in the array - throw
+        {
+            throw new Exception($"Encountered an invalid property sheetlist size ({shellPropertySheetListSize}) - is this file corrupt?");
+        }
 
         index += 2;
 
+        if (rawBytes.Length < index + 2)
+        {
+            throw new Exception($"Encountered an error attempting to calculate identifier size - the source array is too small - is this file corrupt?");
+        }
+
         var identifiersize = BitConverter.ToInt16(rawBytes, index);
 
+        if (identifiersize <= 0 || identifiersize > rawBytes.Length - (index + 2)) // if the identifiersize is less than 0 OR larger than the amount of remaining data in the array
+        {
+            throw new Exception($"Encountered an invalid identifier size ({identifiersize}) - is this file corrupt?");
+        }
 
         index += 2;
 
