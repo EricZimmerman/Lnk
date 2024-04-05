@@ -131,9 +131,19 @@ public class Header
         DataFlags = (DataFlag) BitConverter.ToInt32(rawBytes, 20);
         FileAttributes = (FileAttribute) BitConverter.ToInt32(rawBytes, 24);
 
-        TargetCreationDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 28)).ToUniversalTime();
-        TargetLastAccessedDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 36)).ToUniversalTime();
-        TargetModificationDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 44)).ToUniversalTime();
+        try
+        {
+            TargetCreationDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 28)).ToUniversalTime();
+            TargetLastAccessedDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 36)).ToUniversalTime();
+            TargetModificationDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 44)).ToUniversalTime();
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            // Second chance
+            TargetCreationDate = DateTimeOffset.FromFileTime(ConvertLongToDateTime(BitConverter.ToInt64(rawBytes, 28)).ToFileTime());
+            TargetLastAccessedDate = DateTimeOffset.FromFileTime(ConvertLongToDateTime(BitConverter.ToInt64(rawBytes, 36)).ToFileTime());
+            TargetModificationDate = DateTimeOffset.FromFileTime(ConvertLongToDateTime(BitConverter.ToInt64(rawBytes, 44)).ToFileTime());
+        }
 
         FileSize = BitConverter.ToUInt32(rawBytes, 52);
         IconIndex = BitConverter.ToInt32(rawBytes, 56);
@@ -225,4 +235,24 @@ public class Header
 
         return hk;
     }
+
+    private DateTime ConvertLongToDateTime(long value)
+    {
+        // Minimum and maximum ticks for DateTime
+        const long minTicks = 0;
+        const long maxTicks = 3155378975999999999;
+
+        // Check if the value is within the range of DateTime
+        if (value < minTicks || value > maxTicks)
+        {
+            // If the value is out of range, return the minimum or maximum DateTime value
+            return value < minTicks ? DateTime.MinValue : DateTime.MaxValue;
+        }
+        else
+        {
+            // If the value is within range, create a DateTime object with the given ticks
+            return new DateTime(value);
+        }
+    }
+
 }
