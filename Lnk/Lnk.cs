@@ -9,6 +9,7 @@ public static class Lnk
     /// Helper to load lnk files
     /// </summary>
     /// <param name="lnkFile"></param>
+    /// <param name="codepage"></param>
     /// <returns>LnkFile</returns>
     /// <exception cref="Exception"></exception>
     public static LnkFile LoadFile(string lnkFile, int codepage=1252)

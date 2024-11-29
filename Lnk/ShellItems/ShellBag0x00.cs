@@ -479,7 +479,7 @@ public class ShellBag0X00 : ShellBag
                 }
                 catch (ArgumentException ex)
                 {
-                    throw ex;
+                    throw;
                     // Syntax error in the regular expression
                 }
 
