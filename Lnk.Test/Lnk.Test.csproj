@@ -1034,8 +1034,8 @@
     <ProjectReference Include="..\Lnk\Lnk.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ExtensionBlocks" Version="1.4.1" />
-    <PackageReference Include="FluentAssertions" Version="6.12.2" />
-    <PackageReference Include="NUnit" Version="4.2.2" />
+    <PackageReference Include="ExtensionBlocks" Version="1.4.2" />
+    <PackageReference Include="FluentAssertions" Version="7.0.0" />
+    <PackageReference Include="NUnit" Version="4.3.2" />
   </ItemGroup>
 </Project>
