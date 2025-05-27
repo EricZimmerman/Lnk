@@ -75,7 +75,7 @@ public class ShellBag0X31 : ShellBag
         if (strLen < 0)
         {
             len = 2;
-            while (rawBytes[index + len] != 0x0)
+            while ((index + len < rawBytes.Length) && rawBytes[index + len] != 0x0)
             {
                 len += 2;
             }
