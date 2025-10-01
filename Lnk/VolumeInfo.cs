@@ -29,8 +29,9 @@ public class VolumeInfo
         Size = BitConverter.ToInt32(rawBytes, 0);
         DriveType = (DriveTypes) BitConverter.ToInt32(rawBytes, 4);
         VolumeSerialNumber = BitConverter.ToInt32(rawBytes, 8).ToString("X8");
-        VolumeLabelOffset = BitConverter.ToInt32(rawBytes, 12);
-
+        //Sanitize corrupted offset values to prevent out-of-bounds access
+        VolumeLabelOffset = BitConverter.ToInt32(rawBytes, 12) > 0xff ? 0 : BitConverter.ToInt32(rawBytes, 12);
+        
         if (VolumeLabelOffset > 16)
         {
             try
