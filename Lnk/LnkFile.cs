@@ -317,10 +317,17 @@ public class LnkFile
                         throw new Exception($"Invalid common path offset ({commonPathOffset}) - is this file corrupt?");
                     }
 
-                    CommonPath = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
-                        .GetString(locationBytes, commonPathOffset, locationBytes.Length - commonPathOffset)
-                        .Split('\0')
-                        .First();
+                    if (locationBytes.Length < commonPathOffset)
+                    {
+                        CommonPath = String.Empty;
+                    }
+                    else
+                    {
+                         CommonPath = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
+                            .GetString(locationBytes, commonPathOffset, locationBytes.Length - commonPathOffset)
+                            .Split('\0')
+                            .First();
+                    }
 
                     if (locationInfoHeaderSize > 28)
                     {
