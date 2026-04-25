@@ -352,6 +352,10 @@ public class LnkFile
             if ((Header.DataFlags & Header.DataFlag.HasName) == Header.DataFlag.HasName)
             {
                 var nameLen = BitConverter.ToInt16(rawBytes, index);
+                if (nameLen > 260)
+                {
+                    nameLen = 260;
+                }
                 index += 2;
                 if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
                 {
@@ -401,6 +405,10 @@ public class LnkFile
             {
                 var argLen = BitConverter.ToInt16(rawBytes, index);
                 index += 2;
+                if (argLen > 260)
+                {
+                    argLen = 260;
+                }
                 if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
                 {
                     Arguments = Encoding.Unicode.GetString(rawBytes, index, argLen * 2);

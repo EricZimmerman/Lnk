@@ -71,6 +71,18 @@ public class TestMain
         d?.FeatureName.Should().Be("ReaderProgramFiles");
     }
 
+
+    [Test]
+    public void Foobar()
+    {
+        var ls = Lnk.LoadFile(@"C:\Temp\lnk_6e757794.lnk");
+        Console.WriteLine(ls);
+        
+        
+        var ls2 = Lnk.LoadFile(@"C:\Temp\lnk_fixed_blah.lnk");
+        Console.WriteLine(ls2);
+    }
+    
 //    [Test]
 //    public void foobar()
 //    {

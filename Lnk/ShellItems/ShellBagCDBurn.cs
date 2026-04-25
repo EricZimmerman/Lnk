@@ -137,7 +137,11 @@ internal class ShellBagCDBurn : ShellBag
             {
                 CreatedOnTime = beef0004.CreatedOnTime;
                 LastAccessTime = beef0004.LastAccessTime;
-                Value = beef0004.LongName;
+                if (beef0004.LongName.Trim().Length > 0)
+                {
+                    Value = beef0004.LongName;    
+                }
+                
             }
             else
             {

@@ -157,7 +157,10 @@ public class ShellBag0X74 : ShellBag
             var beef0004 = block as Beef0004;
             if (beef0004 != null)
             {
-                Value = beef0004.LongName;
+                if (beef0004.LongName.Trim().Length > 0)
+                {
+                    Value = beef0004.LongName;    
+                }
             }
 
             index += extsize;
