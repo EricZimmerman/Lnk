@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <AssemblyTitle>Lnk.Test</AssemblyTitle>
     <Product>Lnk.Test</Product>
     <Copyright>Eric Zimmerman</Copyright>
@@ -1034,7 +1034,7 @@
     <ProjectReference Include="..\Lnk\Lnk.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ExtensionBlocks" Version="1.4.2" />
+    <PackageReference Include="ExtensionBlocks" Version="2026.5.0" />
     <PackageReference Include="FluentAssertions" Version="[7.0.0,8.0.0)" />
     <PackageReference Include="NUnit" Version="4.5.1" />
   </ItemGroup>
