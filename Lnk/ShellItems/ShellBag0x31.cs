@@ -179,7 +179,7 @@ public class ShellBag0X31 : ShellBag
             {
                 if (beef0004.LongName.Length > 0)
                 {
-                    Value = beef0004.LocalisedName;
+                    Value = beef0004.LongName;
                 }
             
             }
