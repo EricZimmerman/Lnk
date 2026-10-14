@@ -1,7 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 
 namespace Lnk;
 
@@ -24,34 +22,30 @@ public class VolumeInfo
         [Description("RAM drive")] DriveRamdisk = 6
     }
 
-    public VolumeInfo(byte[] rawBytes, int codepage=1252)
+    /// <summary>
+    ///     Parses a VolumeID structure (MS-SHLLINK 2.3.1). <paramref name="rawBytes" /> holds exactly VolumeIDSize bytes.
+    /// </summary>
+    public VolumeInfo(byte[] rawBytes, int codepage = 1252)
     {
+        const string field = "VolumeID";
+
+        // VolumeIDSize MUST be greater than 0x10
+        Helpers.EnsureRange(rawBytes, 0, 0x10, field);
+
         Size = BitConverter.ToInt32(rawBytes, 0);
         DriveType = (DriveTypes) BitConverter.ToInt32(rawBytes, 4);
-        VolumeSerialNumber = BitConverter.ToInt32(rawBytes, 8).ToString("X8");
+        VolumeSerialNumber = BitConverter.ToUInt32(rawBytes, 8).ToString("X8");
         VolumeLabelOffset = BitConverter.ToInt32(rawBytes, 12);
 
-        if (VolumeLabelOffset > 16)
+        if (VolumeLabelOffset == 0x14)
         {
-            try
-            {
-                VolumeLabel = Encoding.Unicode
-                    .GetString(rawBytes, VolumeLabelOffset, (rawBytes.Length - VolumeLabelOffset) * 2);
-            }
-            catch (Exception)
-            {
-                VolumeLabel = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
-                    ?.GetString(rawBytes, VolumeLabelOffset, rawBytes.Length - VolumeLabelOffset)
-                    .Split('\0')
-                    .First();
-            }
+            // The ANSI label offset MUST be ignored; VolumeLabelOffsetUnicode follows at 0x10.
+            VolumeLabelOffsetUnicode = Helpers.ReadInt32(rawBytes, 0x10, field);
+            VolumeLabel = Helpers.ReadUnicodeZ(rawBytes, VolumeLabelOffsetUnicode, field);
         }
         else
         {
-            VolumeLabel = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
-                ?.GetString(rawBytes, VolumeLabelOffset, rawBytes.Length - VolumeLabelOffset)
-                .Split('\0')
-                .First();
+            VolumeLabel = Helpers.ReadAnsiZ(rawBytes, VolumeLabelOffset, Helpers.GetEncoding(codepage), field);
         }
     }
 
@@ -60,6 +54,11 @@ public class VolumeInfo
 
     public string VolumeSerialNumber { get; }
     public int VolumeLabelOffset { get; }
+
+    /// <summary>
+    ///     Offset of the Unicode volume label, or 0 when the label is stored in the system code page.
+    /// </summary>
+    public int VolumeLabelOffsetUnicode { get; }
 
     public string VolumeLabel { get; }
 

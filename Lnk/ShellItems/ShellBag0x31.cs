@@ -58,7 +58,7 @@ public class ShellBag0X31 : ShellBag
 
         index += 4; // skip file size since always 0 for directory
 
-        LastModificationTime = Utils.ExtractDateTimeOffsetFromBytes(rawBytes.Skip(index).Take(4).ToArray());
+        LastModificationTime = Utils.ExtractDateTimeOffsetFromBytes(Helpers.SliceClamped(rawBytes, index, 4));
 
         index += 4;
 
@@ -66,9 +66,11 @@ public class ShellBag0X31 : ShellBag
 
         var len = 0;
 
-        var beefPos = BitConverter.ToString(rawBytes).IndexOf("04-00-EF-BE", StringComparison.InvariantCulture) / 3;
+        // Locate the BEEF0004 extension block that follows the name. The search starts after the name begins
+        // so bytes inside the name or the item header can never be mistaken for the signature.
+        var sigPos = Helpers.IndexOf(rawBytes, Helpers.Beef0004Signature, index + 4);
 
-        beefPos = beefPos - 4; //add header back for beef
+        var beefPos = sigPos < 0 ? -4 : sigPos - 4; //add header back for beef
 
         var strLen = beefPos - index;
 
@@ -86,7 +88,7 @@ public class ShellBag0X31 : ShellBag
         }
         else
         {
-            while (rawBytes[index + len] != 0x0)
+            while (index + len < rawBytes.Length && rawBytes[index + len] != 0x0)
             {
                 len += 1;
             }
@@ -148,7 +150,7 @@ public class ShellBag0X31 : ShellBag
             }
             else
             {
-                chunks.Add(rawBytes.Skip(index).Take(subshellitemdatasize).ToArray());
+                chunks.Add(Helpers.SliceClamped(rawBytes, index, subshellitemdatasize));
                 index += subshellitemdatasize;
             }
         }

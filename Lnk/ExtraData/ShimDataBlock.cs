@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
 
 namespace Lnk.ExtraData;
 
@@ -8,11 +6,13 @@ public class ShimDataBlock : ExtraDataBase
 {
     public ShimDataBlock(byte[] rawBytes)
     {
+        RequireSize(rawBytes, 0x88, "ShimDataBlock");
+
         Signature = ExtraDataTypes.ShimDataBlock;
 
         Size = BitConverter.ToUInt32(rawBytes, 0);
 
-        LayerName = Encoding.Unicode.GetString(rawBytes, 8, rawBytes.Length - 8).Split('\0').First();
+        LayerName = Helpers.ReadUnicodeZ(rawBytes, 8, "LayerName");
     }
 
     public string LayerName { get; }

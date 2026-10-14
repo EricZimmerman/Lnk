@@ -6,6 +6,8 @@ public class ConsoleFeDataBlock : ExtraDataBase
 {
     public ConsoleFeDataBlock(byte[] rawBytes)
     {
+        RequireSize(rawBytes, 0x0C, "ConsoleFEDataBlock");
+
         Signature = ExtraDataTypes.ConsoleFeDataBlock;
 
         Size = BitConverter.ToUInt32(rawBytes, 0);

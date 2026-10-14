@@ -45,7 +45,7 @@ internal class ShellBagCDBurn : ShellBag
             }
             else
             {
-                chunks.Add(rawBytes.Skip(index).Take(subshellitemdatasize).ToArray());
+                chunks.Add(Helpers.SliceClamped(rawBytes, index, subshellitemdatasize));
                 index += subshellitemdatasize;
             }
         }
@@ -71,7 +71,7 @@ internal class ShellBagCDBurn : ShellBag
             FileSize = filesize;
 
             var modDate =
-                Utils.ExtractDateTimeOffsetFromBytes(bytes.Skip(index).Take(4).ToArray());
+                Utils.ExtractDateTimeOffsetFromBytes(Helpers.SliceClamped(bytes, index, 4));
 
             LastModificationTime = modDate;
 
@@ -85,9 +85,8 @@ internal class ShellBagCDBurn : ShellBag
 
             //get position of beef0004
 
-            var beefPos = BitConverter.ToString(bytes).IndexOf("04-00-EF-BE", StringComparison.InvariantCulture) /
-                          3;
-            beefPos = beefPos - 4; //add header back for beef
+            var sigPos = Helpers.IndexOf(bytes, Helpers.Beef0004Signature, index + 4);
+            var beefPos = sigPos < 0 ? -4 : sigPos - 4; //add header back for beef
 
             var strLen = beefPos - index;
 
@@ -103,7 +102,7 @@ internal class ShellBagCDBurn : ShellBag
             {
                 //ascii
 
-                while (bytes[index + len] != 0x0)
+                while (index + len < bytes.Length && bytes[index + len] != 0x0)
                 {
                     len += 1;
                 }
@@ -128,7 +127,7 @@ internal class ShellBagCDBurn : ShellBag
             var signature = BitConverter.ToUInt32(bytes, index + 4);
 
             //TODO does this need to check if its a 0xbeef?? regex?
-            var block = Utils.GetExtensionBlockFromBytes(signature, bytes.Skip(index).ToArray());
+            var block = Utils.GetExtensionBlockFromBytes(signature, Helpers.SliceClamped(bytes, index, int.MaxValue));
 
             ExtensionBlocks.Add(block);
 
@@ -153,7 +152,7 @@ internal class ShellBagCDBurn : ShellBag
         {
             index = oldIndex + 2;
 
-            _extraBag = new ShellBag0X31(rawBytes.Skip(index).ToArray(), codepage);
+            _extraBag = new ShellBag0X31(Helpers.SliceClamped(rawBytes, index, int.MaxValue), codepage);
 
             foreach (var ex in _extraBag.ExtensionBlocks)
             {

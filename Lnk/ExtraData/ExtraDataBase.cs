@@ -20,4 +20,17 @@ public abstract class ExtraDataBase
 {
     protected ExtraDataTypes Signature { get; set; }
     protected uint Size { get; set; }
+
+    /// <summary>
+    ///     Throws <see cref="LnkParseException" /> when a block is smaller than the size MS-SHLLINK requires for it.
+    /// </summary>
+    protected static void RequireSize(byte[] rawBytes, int minimumSize, string blockName)
+    {
+        if (rawBytes == null || rawBytes.Length < minimumSize)
+        {
+            throw new LnkParseException(
+                $"{blockName} must be at least 0x{minimumSize:X} bytes but is 0x{rawBytes?.Length ?? 0:X} - is this file corrupt?",
+                0, blockName);
+        }
+    }
 }

@@ -67,7 +67,7 @@ public class ShellBag0X1F : ShellBag
                 {
                     var signature = BitConverter.ToUInt32(rawBytes, index + 4);
 
-                    var block = Utils.GetExtensionBlockFromBytes(signature, rawBytes.Skip(index).ToArray());
+                    var block = Utils.GetExtensionBlockFromBytes(signature, Helpers.SliceClamped(rawBytes, index, int.MaxValue));
 
                     ExtensionBlocks.Add(block);
                     index += extsize;
@@ -138,7 +138,7 @@ public class ShellBag0X1F : ShellBag
             {
                 var signature = BitConverter.ToUInt32(rawBytes, index + 4);
 
-                var block = Utils.GetExtensionBlockFromBytes(signature, rawBytes.Skip(index).ToArray());
+                var block = Utils.GetExtensionBlockFromBytes(signature, Helpers.SliceClamped(rawBytes, index, int.MaxValue));
 
                 ExtensionBlocks.Add(block);
             }
@@ -250,7 +250,7 @@ public class ShellBag0X1F : ShellBag
 
             var exSize = BitConverter.ToInt16(rawBytes, index);
 
-            var exBytes = rawBytes.Skip(index).Take(exSize).ToArray();
+            var exBytes = Helpers.SliceClamped(rawBytes, index, exSize);
 
             var signature1 = BitConverter.ToUInt32(exBytes, 4);
 
@@ -402,7 +402,7 @@ public class ShellBag0X1F : ShellBag
 
         if (shellPropertySheetListSize > 0)
         {
-            var propBytes = rawBytes.Skip(index).Take(shellPropertySheetListSize).ToArray();
+            var propBytes = Helpers.SliceClamped(rawBytes, index, shellPropertySheetListSize);
             var propStore = new PropertyStore(propBytes);
 
             PropertyStore = propStore;
@@ -417,20 +417,14 @@ public class ShellBag0X1F : ShellBag
                 var extOffsets = new List<int>();
                 try
                 {
-                    var regexObj = new Regex("([0-9A-F]{2})-00-EF-BE", RegexOptions.IgnoreCase);
-                    var matchResult = regexObj.Match(BitConverter.ToString(propBytes));
-                    while (matchResult.Success)
-                    {
-                        extOffsets.Add(matchResult.Index);
-                        matchResult = matchResult.NextMatch();
-                    }
+                    extOffsets.AddRange(Helpers.FindExtensionBlockSignatures(propBytes));
 
                     foreach (var extOffset in extOffsets)
                     {
-                        var binaryOffset = extOffset / 3 - 4;
+                        var binaryOffset = extOffset - 4;
                         var exSize = BitConverter.ToInt16(propBytes, binaryOffset);
 
-                        var exBytes = propBytes.Skip(binaryOffset).Take(exSize).ToArray();
+                        var exBytes = Helpers.SliceClamped(propBytes, binaryOffset, exSize);
 
                         var signature1 = BitConverter.ToUInt32(exBytes, 4);
 
@@ -459,7 +453,7 @@ public class ShellBag0X1F : ShellBag
 
             while (extBlockSize > 0)
             {
-                var extBytes = rawBytes.Skip(index).Take(extBlockSize).ToArray();
+                var extBytes = Helpers.SliceClamped(rawBytes, index, extBlockSize);
 
                 index += extBlockSize;
 

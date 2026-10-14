@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using ExtensionBlocks;
 
 namespace Lnk.ShellItems;
@@ -31,13 +30,13 @@ public class ShellBag0X2E : ShellBag
 
                 var la =
                     Utils.ExtractDateTimeOffsetFromBytes(
-                        rawBytes.Skip(rawBytes.Length - 14).Take(4).ToArray());
+                        Helpers.SliceClamped(rawBytes, rawBytes.Length - 14, 4));
 
                 LastAccessTime = la;
 
                 index = 10;
 
-                var tempString = Encoding.Unicode.GetString(rawBytes.Skip(index).ToArray()).Split('\0')[0];
+                var tempString = Encoding.Unicode.GetString(Helpers.SliceClamped(rawBytes, index, int.MaxValue)).Split('\0')[0];
 
                 if (tempString == "")
                 {
@@ -68,7 +67,7 @@ public class ShellBag0X2E : ShellBag
 
                     index += 16;
 
-                    var b26 = new Beef0026(rawBytes.Skip(index).ToArray());
+                    var b26 = new Beef0026(Helpers.SliceClamped(rawBytes, index, int.MaxValue));
                     
                     Value = b26.ToString();
 
@@ -169,7 +168,7 @@ public class ShellBag0X2E : ShellBag
 
         if (shellPropertySheetListSize > 0)
         {
-            var propBytes = rawBytes.Skip(index).Take(shellPropertySheetListSize).ToArray();
+            var propBytes = Helpers.SliceClamped(rawBytes, index, shellPropertySheetListSize);
             var propStore = new PropertyStore(propBytes);
 
             PropertyStore = propStore;
@@ -184,20 +183,14 @@ public class ShellBag0X2E : ShellBag
                 var extOffsets = new List<int>();
                 try
                 {
-                    var regexObj = new Regex("([0-9A-F]{2})-00-EF-BE", RegexOptions.IgnoreCase);
-                    var matchResult = regexObj.Match(BitConverter.ToString(propBytes));
-                    while (matchResult.Success)
-                    {
-                        extOffsets.Add(matchResult.Index);
-                        matchResult = matchResult.NextMatch();
-                    }
+                    extOffsets.AddRange(Helpers.FindExtensionBlockSignatures(propBytes));
 
                     foreach (var extOffset in extOffsets)
                     {
-                        var binaryOffset = extOffset / 3 - 4;
+                        var binaryOffset = extOffset - 4;
                         var exSize = BitConverter.ToInt16(propBytes, binaryOffset);
 
-                        var exBytes = propBytes.Skip(binaryOffset).Take(exSize).ToArray();
+                        var exBytes = Helpers.SliceClamped(propBytes, binaryOffset, exSize);
 
                         var signature1 = BitConverter.ToUInt32(exBytes, 4);
 
@@ -222,10 +215,10 @@ public class ShellBag0X2E : ShellBag
 
         index += 2; //move past end of property sheet terminator
 
-        var rawguid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
+        var rawguid = Utils.ExtractGuidFromShellItem(Helpers.SliceClamped(rawBytes, index, 16));
         index += 16;
 
-        rawguid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
+        rawguid = Utils.ExtractGuidFromShellItem(Helpers.SliceClamped(rawBytes, index, 16));
         index += 16;
 
         var name = GuidMapping.GuidMapping.GetDescriptionFromGuid(rawguid);
@@ -240,7 +233,7 @@ public class ShellBag0X2E : ShellBag
 
             while (extBlockSize > 0)
             {
-                var extBytes = rawBytes.Skip(index).Take(extBlockSize).ToArray();
+                var extBytes = Helpers.SliceClamped(rawBytes, index, extBlockSize);
 
                 index += extBlockSize;
 
@@ -308,7 +301,7 @@ public class ShellBag0X2E : ShellBag
             var signature = BitConverter.ToUInt32(rawBytes, index + 4);
 
             //TODO does this need to check if its a 0xbeef?? regex?
-            var block = Utils.GetExtensionBlockFromBytes(signature, rawBytes.Skip(index).ToArray());
+            var block = Utils.GetExtensionBlockFromBytes(signature, Helpers.SliceClamped(rawBytes, index, int.MaxValue));
 
             ExtensionBlocks.Add(block);
 
@@ -322,9 +315,9 @@ public class ShellBag0X2E : ShellBag
     {
         FriendlyName = "Root folder: GUID";
 
-        var delegateGuid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(20).Take(16).ToArray());
+        var delegateGuid = Utils.ExtractGuidFromShellItem(Helpers.SliceClamped(rawBytes, 20, 16));
 
-        var folderGuid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(36).Take(16).ToArray());
+        var folderGuid = Utils.ExtractGuidFromShellItem(Helpers.SliceClamped(rawBytes, 36, 16));
 
         var foldername = Utils.GetFolderNameFromGuid(folderGuid);
 

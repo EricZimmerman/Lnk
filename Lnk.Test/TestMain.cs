@@ -14,7 +14,31 @@ namespace Lnk.Test;
 [TestFixture]
 public class TestMain
 {
-    public static string BasePath = @"..\..\TestFiles";
+    // Walk up from the test output directory until TestFiles is found, so the tests run the same
+    // way on Windows and on the Linux CI runner (a hard-coded "..\..\TestFiles" only works on Windows).
+    public static string BasePath = FindUp("TestFiles") ??
+                                    throw new DirectoryNotFoundException("Could not locate the TestFiles directory above " +
+                                                                         TestContext.CurrentContext.TestDirectory);
+
+    // Optional extra corpus (ITA_LNKs at the repository root). Tests that use it are skipped when it is absent.
+    public static string ItaPath = FindUp("ITA_LNKs");
+
+    private static string FindUp(string name)
+    {
+        var dir = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
+        while (dir != null)
+        {
+            var candidate = Path.Combine(dir.FullName, name);
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            dir = dir.Parent;
+        }
+
+        return null;
+    }
     public static string Win10Path = Path.Combine(BasePath, "Win10");
     public static string WinXpPath = Path.Combine(BasePath, "WinXP");
     public static string Win2K3Path = Path.Combine(BasePath, "Win2k3");
@@ -73,6 +97,7 @@ public class TestMain
 
 
     [Test]
+    [Explicit("Scratch test that reads files from C:\\Temp on a developer machine")]
     public void Foobar()
     {
         var ls = Lnk.LoadFile(@"C:\Temp\lnk_6e757794.lnk");
@@ -120,9 +145,15 @@ public class TestMain
     [Test]
     public void CorruptFileShouldThrowException()
     {
-        var badFile = Path.Combine(BadPath, "ImDisk Virtual Disk Driver.test");
-        Action action = () => Lnk.LoadFile(badFile);
-        action.Should().Throw<Exception>().WithMessage("*corrupt*");
+        // A file cut off in the middle of its LinkTargetIDList cannot be parsed.
+        // (A malformed individual shell item, as in "ImDisk Virtual Disk Driver.test", no longer aborts the
+        // whole file - see SpecComplianceTests.MalformedShellItemBecomesPlaceholderAndRestOfFileParses.)
+        var good = File.ReadAllBytes(Path.Combine(MiscPath, "local.file.xp.test"));
+        var truncated = new byte[100];
+        Buffer.BlockCopy(good, 0, truncated, 0, truncated.Length);
+
+        Action action = () => _ = new LnkFile(truncated, "truncated.lnk");
+        action.Should().Throw<LnkParseException>().WithMessage("*corrupt*");
     }
 
     [Test]

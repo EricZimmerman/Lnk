@@ -77,9 +77,10 @@ public class ShellBag0X32 : ShellBag
         index += 2;
 
         var len = 0;
-        var beefPos = BitConverter.ToString(rawBytes).IndexOf("04-00-EF-BE", StringComparison.InvariantCulture) / 3;
+        // Locate the BEEF0004 extension block that follows the name (searching only past the start of the name)
+        var beefPos = Helpers.IndexOf(rawBytes, Helpers.Beef0004Signature, index + 4);
 
-        if (beefPos == 0)
+        if (beefPos < 0)
         {
             var hackName = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, rawBytes.Length - index);
 
@@ -101,7 +102,7 @@ public class ShellBag0X32 : ShellBag
         }
         else
         {
-            while (rawBytes[index + len] != 0x0)
+            while (index + len < rawBytes.Length && rawBytes[index + len] != 0x0)
             {
                 len += 1;
             }
@@ -147,7 +148,7 @@ public class ShellBag0X32 : ShellBag
             }
             else
             {
-                chunks.Add(rawBytes.Skip(index).Take(subshellitemdatasize).ToArray());
+                chunks.Add(Helpers.SliceClamped(rawBytes, index, subshellitemdatasize));
                 index += subshellitemdatasize;
             }
         }

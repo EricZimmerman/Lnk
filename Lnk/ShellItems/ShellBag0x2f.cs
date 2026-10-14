@@ -24,7 +24,7 @@ public class ShellBag0X2F : ShellBag
 
             var signature1 = BitConverter.ToUInt32(rawBytes, index + 4);
 
-            var block1 = Utils.GetExtensionBlockFromBytes(signature1, rawBytes.Skip(index).ToArray());
+            var block1 = Utils.GetExtensionBlockFromBytes(signature1, Helpers.SliceClamped(rawBytes, index, int.MaxValue));
 
             ExtensionBlocks.Add(block1);
         }
