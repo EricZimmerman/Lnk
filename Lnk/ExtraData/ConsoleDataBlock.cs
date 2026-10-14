@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Lnk.ExtraData;
 
@@ -10,12 +8,12 @@ public enum FillAttribute
 {
     ForegroundBlue = 0x0001,
     ForegroundGreen = 0x0002,
-    ForegroundRed = 0x0003,
-    ForegroundIntensity = 0x0004,
-    BackgroundBlue = 0x00010,
-    BackgroundGreen = 0x00020,
-    BackgroundRed = 0x00040,
-    BackgroundIntensity = 0x00080
+    ForegroundRed = 0x0004,
+    ForegroundIntensity = 0x0008,
+    BackgroundBlue = 0x0010,
+    BackgroundGreen = 0x0020,
+    BackgroundRed = 0x0040,
+    BackgroundIntensity = 0x0080
 }
 
 public enum FontFamily
@@ -39,6 +37,8 @@ public class ConsoleDataBlock : ExtraDataBase
 {
     public ConsoleDataBlock(byte[] rawBytes)
     {
+        RequireSize(rawBytes, 0xCC, "ConsoleDataBlock");
+
         Signature = ExtraDataTypes.ConsoleDataBlock;
 
         Size = BitConverter.ToUInt32(rawBytes, 0);
@@ -55,29 +55,28 @@ public class ConsoleDataBlock : ExtraDataBase
         Reserved0 = BitConverter.ToInt32(rawBytes, 24);
         Reserved1 = BitConverter.ToInt32(rawBytes, 28);
 
+        // FontSize: the high word is the font height and the low word the font width
+        FontWidth = BitConverter.ToUInt16(rawBytes, 32);
         FontSize = BitConverter.ToUInt16(rawBytes, 34);
 
-        FontFamily = (FontFamily) BitConverter.ToUInt32(rawBytes, 36);
+        // FontFamily: high nibble is the family (FF_*), low nibble the pitch (TMPF_*)
+        var fontFamily = BitConverter.ToUInt32(rawBytes, 36);
+        FontFamily = (FontFamily) (fontFamily & 0xF0);
+        FontPitch = fontFamily & 0x0F;
 
-        var fontWeight = BitConverter.ToUInt16(rawBytes, 40);
-        IsBold = fontWeight >= 700;
+        FontWeight = BitConverter.ToUInt32(rawBytes, 40);
+        IsBold = FontWeight >= 700;
 
-        FaceName = Encoding.Unicode.GetString(rawBytes, 44, 64).Split('\0').First();
+        FaceName = Helpers.ReadUnicodeZ(rawBytes, 44, "FaceName", 44 + 64);
 
-        var curSize = BitConverter.ToUInt32(rawBytes, 108);
-
-        if (curSize <= 25)
+        // CursorSize: <= 25 small, 26-50 medium, 51-100 large
+        CursorSizeRaw = BitConverter.ToUInt32(rawBytes, 108);
+        CursorSize = CursorSizeRaw switch
         {
-            CursorSize = CursorWeight.Small;
-        }
-        else if (curSize is > 26 and <= 50)
-        {
-            CursorSize = CursorWeight.Normal;
-        }
-        else if (curSize is > 50 and <= 100)
-        {
-            CursorSize = CursorWeight.Large;
-        }
+            <= 25 => CursorWeight.Small,
+            <= 50 => CursorWeight.Normal,
+            _ => CursorWeight.Large
+        };
 
         IsFullScreen = BitConverter.ToUInt32(rawBytes, 112) > 0;
         IsQuickEdit = BitConverter.ToUInt32(rawBytes, 116) > 0;
@@ -85,13 +84,15 @@ public class ConsoleDataBlock : ExtraDataBase
         IsAutoPositioned = BitConverter.ToUInt32(rawBytes, 124) > 0;
         HistoryBufferSize = BitConverter.ToUInt32(rawBytes, 128);
         HistoryBufferCount = BitConverter.ToUInt32(rawBytes, 132);
-        HistoryDuplicatesAllowed = BitConverter.ToUInt32(rawBytes, 136) > 0;
+        // HistoryNoDup: non-zero means duplicates are NOT allowed in the history buffer
+        HistoryDuplicatesAllowed = BitConverter.ToUInt32(rawBytes, 136) == 0;
 
-        ColorTable = new List<uint>();
+        // ColorTable: 16 COLORREF (4 byte) entries
+        ColorTable = new List<uint>(16);
 
-        for (var i = 0; i < 8; i++)
+        for (var i = 0; i < 16; i++)
         {
-            ColorTable.Add(BitConverter.ToUInt32(rawBytes, 140 + i * 8));
+            ColorTable.Add(BitConverter.ToUInt32(rawBytes, 140 + i * 4));
         }
     }
 
@@ -107,8 +108,24 @@ public class ConsoleDataBlock : ExtraDataBase
 
     public int Reserved0 { get; }
     public int Reserved1 { get; }
+    /// <summary>
+    ///     Font height in pixels
+    /// </summary>
     public uint FontSize { get; }
+
+    /// <summary>
+    ///     Font width in pixels
+    /// </summary>
+    public uint FontWidth { get; }
+
     public FontFamily FontFamily { get; }
+
+    /// <summary>
+    ///     Low nibble of the FontFamily field (TMPF_* pitch flags)
+    /// </summary>
+    public uint FontPitch { get; }
+
+    public uint FontWeight { get; }
 
     /// <summary>
     ///     If false, font is regular weight
@@ -118,6 +135,11 @@ public class ConsoleDataBlock : ExtraDataBase
     public string FaceName { get; }
 
     public CursorWeight CursorSize { get; }
+
+    /// <summary>
+    ///     Cursor size as stored (percentage of the character cell)
+    /// </summary>
+    public uint CursorSizeRaw { get; }
 
     public bool IsFullScreen { get; }
     public bool IsQuickEdit { get; }

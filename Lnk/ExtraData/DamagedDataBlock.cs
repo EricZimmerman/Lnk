@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lnk.ExtraData;
 
@@ -15,13 +11,13 @@ public class DamagedDataBlock : ExtraDataBase
         Size = (uint)rawBytes.Length;
         ErrorMessage = errMsg;
 
-        if (rawBytes.Length < 4)
-        {
-            return;
-        }
-
-        OriginalSignature  = (ExtraDataTypes)BitConverter.ToInt32(rawBytes, 4);
         OriginalData = rawBytes;
+
+        // The signature lives at offset 4; blocks shorter than 8 bytes do not have one.
+        if (rawBytes.Length >= 8)
+        {
+            OriginalSignature = (ExtraDataTypes)BitConverter.ToUInt32(rawBytes, 4);
+        }
     }
 
     public ExtraDataTypes OriginalSignature { get;  }

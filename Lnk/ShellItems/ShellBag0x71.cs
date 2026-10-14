@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using ExtensionBlocks;
 
 namespace Lnk.ShellItems;
@@ -62,7 +61,7 @@ public class ShellBag0X71 : ShellBag
 
             var signature1 = BitConverter.ToUInt32(rawBytes, index + 4);
 
-            var block1 = Utils.GetExtensionBlockFromBytes(signature1, rawBytes.Skip(index).ToArray());
+            var block1 = Utils.GetExtensionBlockFromBytes(signature1, Helpers.SliceClamped(rawBytes, index, int.MaxValue));
 
             ExtensionBlocks.Add(block1);
         }
@@ -94,7 +93,7 @@ public class ShellBag0X71 : ShellBag
 
         if (shellPropertySheetListSize > 0)
         {
-            var propBytes = rawBytes.Skip(index).Take(shellPropertySheetListSize).ToArray();
+            var propBytes = Helpers.SliceClamped(rawBytes, index, shellPropertySheetListSize);
             var propStore = new PropertyStore(propBytes);
 
             PropertyStore = propStore;
@@ -109,20 +108,14 @@ public class ShellBag0X71 : ShellBag
                 var extOffsets = new List<int>();
                 try
                 {
-                    var regexObj = new Regex("([0-9A-F]{2})-00-EF-BE", RegexOptions.IgnoreCase);
-                    var matchResult = regexObj.Match(BitConverter.ToString(propBytes));
-                    while (matchResult.Success)
-                    {
-                        extOffsets.Add(matchResult.Index);
-                        matchResult = matchResult.NextMatch();
-                    }
+                    extOffsets.AddRange(Helpers.FindExtensionBlockSignatures(propBytes));
 
                     foreach (var extOffset in extOffsets)
                     {
-                        var binaryOffset = extOffset / 3 - 4;
+                        var binaryOffset = extOffset - 4;
                         var exSize = BitConverter.ToInt16(propBytes, binaryOffset);
 
-                        var exBytes = propBytes.Skip(binaryOffset).Take(exSize).ToArray();
+                        var exBytes = Helpers.SliceClamped(propBytes, binaryOffset, exSize);
 
                         var signature1 = BitConverter.ToUInt32(exBytes, 4);
 
@@ -161,10 +154,10 @@ public class ShellBag0X71 : ShellBag
         index += 2; //move past end of property sheet terminator
 
 
-        var rawguid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
+        var rawguid = Utils.ExtractGuidFromShellItem(Helpers.SliceClamped(rawBytes, index, 16));
         index += 16;
 
-        rawguid = Utils.ExtractGuidFromShellItem(rawBytes.Skip(index).Take(16).ToArray());
+        rawguid = Utils.ExtractGuidFromShellItem(Helpers.SliceClamped(rawBytes, index, 16));
         index += 16;
 
         var name = Utils.GetFolderNameFromGuid(rawguid);
@@ -179,7 +172,7 @@ public class ShellBag0X71 : ShellBag
 
             while (extBlockSize > 0)
             {
-                var extBytes = rawBytes.Skip(index).Take(extBlockSize).ToArray();
+                var extBytes = Helpers.SliceClamped(rawBytes, index, extBlockSize);
 
                 index += extBlockSize;
 

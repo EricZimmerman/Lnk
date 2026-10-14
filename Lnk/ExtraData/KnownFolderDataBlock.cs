@@ -7,6 +7,8 @@ public class KnownFolderDataBlock : ExtraDataBase
 {
     public KnownFolderDataBlock(byte[] rawBytes)
     {
+        RequireSize(rawBytes, 0x1C, "KnownFolderDataBlock");
+
         Signature = ExtraDataTypes.KnownFolderDataBlock;
 
         Size = BitConverter.ToUInt32(rawBytes, 0);

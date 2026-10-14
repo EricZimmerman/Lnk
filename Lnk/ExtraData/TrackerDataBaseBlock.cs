@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Lnk.ExtraData;
 
@@ -9,11 +8,16 @@ public class TrackerDataBaseBlock : ExtraDataBase
 {
     public TrackerDataBaseBlock(byte[] rawBytes, int codepage=1252)
     {
+        RequireSize(rawBytes, 0x60, "TrackerDataBlock");
+
         Size = BitConverter.ToUInt32(rawBytes, 0);
 
         Signature = ExtraDataTypes.TrackerDataBlock;
-        Version = BitConverter.ToInt32(rawBytes, 8);
-        MachineId = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, 16, 16).Split('\0').First();
+
+        // Length (0x58) at offset 8, Version (0) at offset 12, MachineID (16 bytes, NUL terminated) at offset 16
+        Length = BitConverter.ToUInt32(rawBytes, 8);
+        Version = BitConverter.ToInt32(rawBytes, 12);
+        MachineId = Helpers.ReadAnsiZ(rawBytes, 16, Helpers.GetEncoding(codepage), "MachineID", 16 + 16);
 
         var guidRaw0 = new byte[16];
         var guidRaw1 = new byte[16];
@@ -29,16 +33,23 @@ public class TrackerDataBaseBlock : ExtraDataBase
         VolumeDroidBirth = new Guid(guidRaw2);
         FileDroidBirth = new Guid(guidRaw3);
 
-        var tempMac = FileDroid.ToString().Split('-').Last();
-
-        MacAddress = Regex.Replace(tempMac, ".{2}", "$0:");
-        MacAddress = MacAddress.Substring(0, MacAddress.Length - 1);
+        // For version 1 UUIDs the node field (last 6 bytes) is the MAC address of the machine that created it
+        var node = FileDroid.ToByteArray();
+        MacAddress = string.Join(":", node.Skip(10).Select(b => b.ToString("x2")));
 
         CreationTime = GetDateTimeOffsetFromGuid(FileDroid);
     }
 
     public DateTimeOffset CreationTime { get; }
 
+    /// <summary>
+    ///     Size of the tracker data that follows the block header (MUST be 0x58)
+    /// </summary>
+    public uint Length { get; }
+
+    /// <summary>
+    ///     Tracker data version (MUST be 0)
+    /// </summary>
     public int Version { get; }
     public string MachineId { get; }
     public Guid VolumeDroid { get; }

@@ -36,7 +36,7 @@ public class ShellBagZipContents : ShellBag
         //
 
 
-        var rawdate = rawBytes.Skip(0x24).Take(40).ToArray();
+        var rawdate = Helpers.SliceClamped(rawBytes, 0x24, 40);
 
         var rawdatestring = Encoding.Unicode.GetString(rawdate).Split('\0').First();
         LastAccessTimeString = rawdatestring;
@@ -49,7 +49,7 @@ public class ShellBagZipContents : ShellBag
         }
         else
         {
-            rawdate = rawBytes.Skip(0x18).Take(40).ToArray();
+            rawdate = Helpers.SliceClamped(rawBytes, 0x18, 40);
             rawdatestring = Encoding.Unicode.GetString(rawdate).Split('\0').First();
 
             LastAccessTimeString = rawdatestring;

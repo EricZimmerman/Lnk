@@ -136,7 +136,7 @@ public class ShellBag0X74 : ShellBag
             }
             else
             {
-                chunks.Add(rawBytes.Skip(index).Take(subshellitemdatasize).ToArray());
+                chunks.Add(Helpers.SliceClamped(rawBytes, index, subshellitemdatasize));
                 index += subshellitemdatasize;
             }
         }

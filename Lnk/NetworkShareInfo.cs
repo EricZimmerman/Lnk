@@ -1,7 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 
 namespace Lnk;
 
@@ -78,51 +76,59 @@ public class NetworkShareInfo
         WnncNetZenworks = 0x3D0000
     }
 
+    [Flags]
     public enum ShareFlag
     {
         [Description("If set, the device name contains data")] ValidDevice = 0x0001,
         [Description("If set, the network provider type contains data")] ValidNetType = 0x0002
     }
 
-    public NetworkShareInfo(byte[] rawBytes, int codepage=1252)
+    /// <summary>
+    ///     Parses a CommonNetworkRelativeLink structure (MS-SHLLINK 2.3.2).
+    ///     <paramref name="rawBytes" /> holds exactly CommonNetworkRelativeLinkSize bytes.
+    /// </summary>
+    public NetworkShareInfo(byte[] rawBytes, int codepage = 1252)
     {
+        const string field = "CommonNetworkRelativeLink";
+
+        // CommonNetworkRelativeLinkSize MUST be greater than or equal to 0x14
+        Helpers.EnsureRange(rawBytes, 0, 0x14, field);
+
+        var encoding = Helpers.GetEncoding(codepage);
+
         Size = BitConverter.ToInt32(rawBytes, 0);
         ShareFlags = (ShareFlag) BitConverter.ToInt32(rawBytes, 4);
 
         NetworkShareNameOffset = BitConverter.ToInt32(rawBytes, 8);
         DeviceNameOffset = BitConverter.ToInt32(rawBytes, 12);
 
+        // NetworkProviderType MUST be ignored unless ValidNetType is set; the raw value is kept for reference.
         NetworkProviderType = (ProviderType) BitConverter.ToInt32(rawBytes, 16);
 
-        if (NetworkShareNameOffset > 20)
+        NetworkShareName = Helpers.ReadAnsiZ(rawBytes, NetworkShareNameOffset, encoding, field);
+
+        var validDevice = (ShareFlags & ShareFlag.ValidDevice) == ShareFlag.ValidDevice;
+
+        DeviceName = string.Empty;
+        if (validDevice && DeviceNameOffset > 0)
         {
-            var uniNetworkNameOffset = BitConverter.ToInt32(rawBytes, 20);
-            var uniDeviceNameOffset = BitConverter.ToInt32(rawBytes, 24);
-
-            NetworkShareName = Encoding.Unicode
-                .GetString(rawBytes, uniNetworkNameOffset, (rawBytes.Length - uniNetworkNameOffset) );
-
-            DeviceName = string.Empty;
-            if (uniDeviceNameOffset > 0)
-            {
-                DeviceName = Encoding.Unicode
-                    .GetString(rawBytes, DeviceNameOffset, (rawBytes.Length - uniDeviceNameOffset));
-            }
+            DeviceName = Helpers.ReadAnsiZ(rawBytes, DeviceNameOffset, encoding, field);
         }
-        else
-        {
-            NetworkShareName = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
-                .GetString(rawBytes, NetworkShareNameOffset, rawBytes.Length - NetworkShareNameOffset)
-                .Split('\0')
-                .First();
 
-            DeviceName = string.Empty;
-            if (DeviceNameOffset > 0)
+        // NetNameOffsetUnicode and DeviceNameOffsetUnicode are present only when NetNameOffset > 0x14
+        if (NetworkShareNameOffset > 0x14)
+        {
+            NetworkShareNameOffsetUnicode = Helpers.ReadInt32(rawBytes, 0x14, field);
+            DeviceNameOffsetUnicode = Helpers.ReadInt32(rawBytes, 0x18, field);
+
+            if (NetworkShareNameOffsetUnicode > 0)
             {
-                DeviceName = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
-                    .GetString(rawBytes, DeviceNameOffset, rawBytes.Length - DeviceNameOffset)
-                    .Split('\0')
-                    .First();
+                NetworkShareName = Helpers.ReadUnicodeZ(rawBytes, NetworkShareNameOffsetUnicode, field);
+            }
+
+            if (validDevice && DeviceNameOffsetUnicode > 0)
+            {
+                DeviceName = Helpers.ReadUnicodeZ(rawBytes, DeviceNameOffsetUnicode, field);
             }
         }
     }
@@ -132,6 +138,13 @@ public class NetworkShareInfo
 
     public int NetworkShareNameOffset { get; }
     public int DeviceNameOffset { get; }
+    public int NetworkShareNameOffsetUnicode { get; }
+    public int DeviceNameOffsetUnicode { get; }
+
+    /// <summary>
+    ///     True when <see cref="NetworkProviderType" /> is valid (ValidNetType flag set).
+    /// </summary>
+    public bool HasValidProviderType => (ShareFlags & ShareFlag.ValidNetType) == ShareFlag.ValidNetType;
     public ProviderType NetworkProviderType { get; }
 
     public string NetworkShareName { get; }

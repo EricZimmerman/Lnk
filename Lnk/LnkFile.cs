@@ -19,527 +19,354 @@ public class LnkFile
         [Description("The linked file is on a network share")] CommonNetworkRelativeLinkAndPathSuffix = 0x0002
     }
 
+    /// <summary>
+    ///     Parses LNK data that does not come from a file on disk (carved data, jump list entries, etc.).
+    ///     <see cref="SourceFile" /> and the Source* timestamps are null.
+    /// </summary>
+    public LnkFile(byte[] rawBytes, int codepage = 1252) : this(rawBytes, null, codepage)
+    {
+    }
+
+    /// <summary>
+    ///     Parses LNK data read from <paramref name="sourceFile" />. The file's own timestamps are recorded in
+    ///     <see cref="SourceCreated" />, <see cref="SourceModified" /> and <see cref="SourceAccessed" /> when it exists.
+    /// </summary>
     public LnkFile(byte[] rawBytes, string sourceFile, int codepage = 1252)
     {
+        if (rawBytes == null)
+        {
+            throw new ArgumentNullException(nameof(rawBytes));
+        }
+
+        var errors = new List<string>();
+        ParseErrors = errors;
+        TargetIDs = new List<ShellBag>();
+        ExtraBlocks = new List<ExtraDataBase>();
+
         try
         {
             RawBytes = rawBytes;
-            SourceFile = Path.GetFullPath(sourceFile);
 
-            var headerBytes = new byte[76];
-            Buffer.BlockCopy(rawBytes, 0, headerBytes, 0, 76);
+            Header = new Header(rawBytes);
 
-            Header = new Header(headerBytes);
-
-            var fi = new FileInfo(sourceFile);
-            SourceCreated = new DateTimeOffset(fi.CreationTimeUtc);
-            SourceModified = new DateTimeOffset(fi.LastWriteTimeUtc);
-            SourceAccessed = new DateTimeOffset(fi.LastAccessTimeUtc);
-
-            if (SourceCreated.Value.Year == 1601)
+            if (!string.IsNullOrEmpty(sourceFile))
             {
-                SourceCreated = null;
+                SourceFile = Path.GetFullPath(sourceFile);
+
+                var fi = new FileInfo(sourceFile);
+                if (fi.Exists)
+                {
+                    SourceCreated = NullIf1601(fi.CreationTimeUtc);
+                    SourceModified = NullIf1601(fi.LastWriteTimeUtc);
+                    SourceAccessed = NullIf1601(fi.LastAccessTimeUtc);
+                }
             }
 
-            if (SourceModified.Value.Year == 1601)
+            if (Header.TargetCreationDate == DateTimeOffset.MinValue)
             {
-                SourceModified = null;
+                errors.Add($"Target creation time is out of range (raw 0x{Header.TargetCreationDateRaw:X16})");
             }
 
-            if (SourceAccessed.Value.Year == 1601)
+            if (Header.TargetModificationDate == DateTimeOffset.MinValue)
             {
-                SourceAccessed = null;
+                errors.Add($"Target modification time is out of range (raw 0x{Header.TargetModificationDateRaw:X16})");
             }
 
-            var index = 76;
-
-            TargetIDs = new List<ShellBag>();
-
-            if ((Header.DataFlags & Header.DataFlag.HasTargetIdList) == Header.DataFlag.HasTargetIdList)
+            if (Header.TargetLastAccessedDate == DateTimeOffset.MinValue)
             {
-                //process shell items
-                var shellItemSize = BitConverter.ToInt16(rawBytes, index);
+                errors.Add($"Target last access time is out of range (raw 0x{Header.TargetLastAccessedDateRaw:X16})");
+            }
+
+            var index = Header.HeaderSize;
+            var flags = Header.DataFlags;
+            var isUnicode = (flags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode;
+            var encoding = Helpers.GetEncoding(codepage);
+
+            // 2.2 LinkTargetIDList
+            if ((flags & Header.DataFlag.HasTargetIdList) == Header.DataFlag.HasTargetIdList)
+            {
+                var idListSize = Helpers.ReadUInt16(rawBytes, index, "LinkTargetIDList size");
                 index += 2;
+                Helpers.EnsureRange(rawBytes, index, idListSize, "LinkTargetIDList");
 
-                var shellItemBytes = new byte[shellItemSize];
-
-                // validate the BlockCopy - validate the source offset + count is less <= source length and validate the dest offset + count is <= dest length
-                if (index + shellItemSize > rawBytes.Length || shellItemSize > shellItemBytes.Length)
-                {
-                    throw new Exception($"Invalid shell item data - is this file corrupt?");
-                }
-
-                Buffer.BlockCopy(rawBytes, index, shellItemBytes, 0, shellItemSize);
-
-                var shellItemsRaw = new List<byte[]>();
-                var shellItemIndex = 0;
-
-                while (shellItemIndex < shellItemBytes.Length)
-                {
-                    if (shellItemBytes.Length < shellItemIndex + 2)
-                    {
-                        throw new Exception($"Invalid shell item data - is this file corrupt?");
-                    }
-
-                    var shellSize = BitConverter.ToUInt16(shellItemBytes, shellItemIndex);
-
-                    if (shellSize <= 0)
-                    {
-                        break;
-                    }
-
-                    var itemBytes = new byte[shellSize];
-                    // validate the BlockCopy - validate the source offset + count is less <= source length and validate the dest offset + count is <= dest length
-                    if (shellItemIndex + shellSize > shellItemBytes.Length || shellSize > itemBytes.Length)
-                    {
-                        throw new Exception($"Invalid shell item data - is this file corrupt?");
-                    }
-
-                    Buffer.BlockCopy(shellItemBytes, shellItemIndex, itemBytes, 0, shellSize);
-
-                    shellItemsRaw.Add(itemBytes);
-                    shellItemIndex += shellSize;
-                }
-
-                //TODO try catch and add placeholder for shellitem when exeption happens? or ?
-                foreach (var shellItem in shellItemsRaw)
-                {
-                    if (shellItem.Length >= 0x28)
-                    {
-                        var sig1 = BitConverter.ToInt64(shellItem, 0x8);
-                        var sig2 = BitConverter.ToInt64(shellItem, 0x18);
-
-                        if (sig1 == 0 && sig2 == 0
-                           ) // if ((sig1 == zip1_0 && sig2 == zip2_0) || sig2 == zip2_1 || (sig1 == zip1_1 && sig2 == zip2_0))
-                        {
-                            //double check
-                            if (shellItem[0x28] == 0x2f || shellItem[0x26] == 0x2f || shellItem[0x1a] == 0x2f ||
-                                shellItem[0x1c] == 0x2f)
-                            // forward slash in date or N / A
-                            {
-                                //zip?
-                                var zz = new ShellBagZipContents(shellItem);
-
-                                TargetIDs.Add(zz);
-                                continue;
-                            }
-                        }
-                    }
-
-                    switch (shellItem[2])
-                    {
-                        case 0x1f:
-                            var f = new ShellBag0X1F(shellItem, codepage);
-                            TargetIDs.Add(f);
-                            break;
-                        case 0x22:
-                        case 0x23:
-                            var two3 = new ShellBag0X23(shellItem, codepage);
-                            TargetIDs.Add(two3);
-                            break;
-                        case 0x2a:
-                        case 0x2f:
-                            var ff = new ShellBag0X2F(shellItem, codepage);
-                            TargetIDs.Add(ff);
-                            break;
-                        case 0x2e:
-                                var ee = new ShellBag0X2E(shellItem);
-                                TargetIDs.Add(ee);
-                                break;
-                        case 0xb1:
-                        case 0x31:
-                        case 0x3A:
-                        case 0x35:
-                        case 0x39:
-                            var d = new ShellBag0X31(shellItem, codepage);
-                            TargetIDs.Add(d);
-                            break;
-                        case 0x32:
-                        case 0x36:
-                            var d2 = new ShellBag0X32(shellItem, codepage);
-                            TargetIDs.Add(d2);
-                            break;
-                        case 0x00:
-                            var v0 = new ShellBag0X00(shellItem, codepage);
-                            TargetIDs.Add(v0);
-                            break;
-                        case 0x01:
-                            var one = new ShellBag0X01(shellItem);
-                            TargetIDs.Add(one);
-                            break;
-                        case 0x71:
-                            var sevenone = new ShellBag0X71(shellItem);
-                            TargetIDs.Add(sevenone);
-                            break;
-                        case 0x61:
-                            var sixone = new ShellBag0X61(shellItem, codepage);
-                            TargetIDs.Add(sixone);
-                            break;
-
-                        case 0xC3:
-                            var c3 = new ShellBag0Xc3(shellItem, codepage);
-                            TargetIDs.Add(c3);
-                            break;
-
-                        case 0x74:
-                        case 0x77:
-                            var sev = new ShellBag0X74(shellItem, codepage);
-                            TargetIDs.Add(sev);
-                            break;
-
-                        case 0xae:
-                        case 0xaa:
-                        case 0x79:
-                            var ae = new ShellBagZipContents(shellItem);
-                            TargetIDs.Add(ae);
-                            break;
-
-                        case 0x41:
-                        case 0x42:
-                        case 0x43:
-                        case 0x46:
-                        case 0x47:
-                            var forty = new ShellBag0X40(shellItem, codepage);
-                            TargetIDs.Add(forty);
-                            break;
-                        case 0x4C:
-                            var fc = new ShellBag0X4C(shellItem);
-                            TargetIDs.Add(fc);
-                            break;
-                        default:
-                            throw new Exception(
-                                $"Unknown shell item ID: 0x{shellItem[2]:X}. Please send to saericzimmerman@gmail.com so support can be added.");
-                    }
-                }
+                TargetIDs.AddRange(ShellItemFactory.ParseIdList(rawBytes, index, index + idListSize, codepage, errors));
 
                 //TODO tie back extra block for SpecialFolderDataBlock and KnownFolderDataBlock??
 
-                index += shellItemSize;
+                index += idListSize;
             }
 
-            if ((Header.DataFlags & Header.DataFlag.HasLinkInfo) == Header.DataFlag.HasLinkInfo)
+            // 2.3 LinkInfo
+            if ((flags & Header.DataFlag.HasLinkInfo) == Header.DataFlag.HasLinkInfo)
             {
-                var locationItemSize = BitConverter.ToInt32(rawBytes, index);
-
-                if (locationItemSize <= 0)
+                var linkInfoSize = Helpers.ReadUInt32(rawBytes, index, "LinkInfo size");
+                if (linkInfoSize < 0x1C)
                 {
-                    throw new Exception($"Invalid location item data size ({locationItemSize}) - is this file corrupt?");
-
+                    throw new LnkParseException($"Invalid location item data size ({linkInfoSize}) - is this file corrupt?", index, "LinkInfoSize");
                 }
 
-                var locationBytes = new byte[locationItemSize];
+                Helpers.EnsureRange(rawBytes, index, linkInfoSize, "LinkInfo");
 
-                // validate the BlockCopy - validate the source offset + count is less <= source length and validate the dest offset + count is <= dest length
-                if (index + locationItemSize > rawBytes.Length || locationItemSize > locationBytes.Length)
-                {
-                    throw new Exception($"Invalid location item data - is this file corrupt?");
-                }
+                ParseLinkInfo(rawBytes, index, (int) linkInfoSize, codepage, encoding, errors, out var locationFlags,
+                    out var volumeInfo, out var localPath, out var networkShareInfo, out var commonPath);
 
-                Buffer.BlockCopy(rawBytes, index, locationBytes, 0, locationItemSize);
+                LocationFlags = locationFlags;
+                VolumeInfo = volumeInfo;
+                LocalPath = localPath;
+                NetworkShareInfo = networkShareInfo;
+                CommonPath = commonPath;
 
-                if (locationBytes.Length > 20)
-                {
-                    var locationInfoHeaderSize = BitConverter.ToInt32(locationBytes, 4);
-
-                    LocationFlags = (LocationFlag)BitConverter.ToInt32(locationBytes, 8);
-
-                    var volOffset = BitConverter.ToInt32(locationBytes, 12);
-                    if (volOffset < 0)
-                    {
-                        throw new Exception($"Invalid volume offset ({volOffset}) - is this file corrupt?");
-                    }
-
-                    var vbyteSize = BitConverter.ToInt32(locationBytes, volOffset);
-                    if (vbyteSize <= 0)
-                    {
-                        throw new Exception($"Invalid volume data size ({vbyteSize}) - is this file corrupt?");
-                    }
-
-                    var volBytes = new byte[vbyteSize];
-
-                    // validate the BlockCopy - validate the source offset + count is less <= source length and validate the dest offset + count is <= dest length
-                    if (volOffset + vbyteSize > locationBytes.Length || vbyteSize > volBytes.Length)
-                    {
-                        throw new Exception($"Invalid volume data - is this file corrupt?");
-                    }
-
-                    Buffer.BlockCopy(locationBytes, volOffset, volBytes, 0, vbyteSize);
-
-                    if (volOffset > 0)
-                    {
-                        VolumeInfo = new VolumeInfo(volBytes, codepage);
-                    }
-
-                    var localPathOffset = BitConverter.ToInt32(locationBytes, 16);
-                    var networkShareOffset = BitConverter.ToInt32(locationBytes, 20);
-                    if (networkShareOffset < 0)
-                    {
-                        throw new Exception($"Invalid network share offset ({networkShareOffset}) - is this file corrupt?");
-                    }
-
-                    if ((LocationFlags & LocationFlag.VolumeIdAndLocalBasePath) ==
-                        LocationFlag.VolumeIdAndLocalBasePath)
-                    {
-                        LocalPath = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
-                            .GetString(locationBytes, localPathOffset, locationBytes.Length - localPathOffset)
-                            .Split('\0')
-                            .First();
-                    }
-                    if ((LocationFlags & LocationFlag.CommonNetworkRelativeLinkAndPathSuffix) ==
-                        LocationFlag.CommonNetworkRelativeLinkAndPathSuffix)
-                    {
-                        var networkShareSize = BitConverter.ToInt32(locationBytes, networkShareOffset);
-                        if (networkShareSize <= 0)
-                        {
-                            throw new Exception($"Invalid network share data size ({networkShareSize}) - is this file corrupt?");
-                        }
-
-                        var networkBytes = new byte[networkShareSize];
-                        // validate the BlockCopy - validate the source offset + count is less <= source length and validate the dest offset + count is <= dest length
-                        if (networkShareOffset + networkShareSize > locationBytes.Length || networkShareSize > networkBytes.Length)
-                        {
-                            throw new Exception($"Invalid network share data - is this file corrupt?");
-                        }
-
-                        Buffer.BlockCopy(locationBytes, networkShareOffset, networkBytes, 0, networkShareSize);
-
-                        NetworkShareInfo = new NetworkShareInfo(networkBytes, codepage);
-                    }
-
-                    if (locationBytes.Length < 28)
-                    {
-                        throw new Exception($"Unable to calculate common path offset - the locationBytes array is too small - is this file corrupt?");
-                    }
-
-                    var commonPathOffset = BitConverter.ToInt32(locationBytes, 24);
-                    if (commonPathOffset < 0)
-                    {
-                        throw new Exception($"Invalid common path offset ({commonPathOffset}) - is this file corrupt?");
-                    }
-
-                    CommonPath = CodePagesEncodingProvider.Instance.GetEncoding(codepage)
-                        .GetString(locationBytes, commonPathOffset, locationBytes.Length - commonPathOffset)
-                        .Split('\0')
-                        .First();
-
-                    if (locationInfoHeaderSize > 28)
-                    {
-                        var uniLocalOffset = BitConverter.ToInt32(locationBytes, 28);
-
-                        var unicodeLocalPath = Encoding.Unicode
-                            .GetString(locationBytes, uniLocalOffset, locationBytes.Length - uniLocalOffset)
-                            .Split('\0')
-                            .First();
-                        LocalPath = unicodeLocalPath;
-                    }
-
-                    if (locationInfoHeaderSize > 32)
-                    {
-                        var uniCommonOffset = BitConverter.ToInt32(locationBytes, 32);
-
-                        var unicodeCommonPath = Encoding.Unicode
-                            .GetString(locationBytes, uniCommonOffset, locationBytes.Length - uniCommonOffset)
-                            .Split('\0')
-                            .First();
-                        CommonPath = unicodeCommonPath;
-                    }
-                }
-
-
-                index += locationItemSize;
+                index += (int) linkInfoSize;
             }
 
-            if ((Header.DataFlags & Header.DataFlag.HasName) == Header.DataFlag.HasName)
+            // 2.4 StringData. CountCharacters is an unsigned 16 bit count of characters (not bytes) and the
+            // strings are not NUL terminated. Values are never truncated: padding a field such as Arguments
+            // past 260 characters is a known way of hiding a payload from tools that do.
+            if ((flags & Header.DataFlag.HasName) == Header.DataFlag.HasName)
             {
-                var nameLen = BitConverter.ToInt16(rawBytes, index);
-                if (nameLen > 260)
-                {
-                    nameLen = 260;
-                }
-                index += 2;
-                if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
-                {
-                    Name = Encoding.Unicode.GetString(rawBytes, index, nameLen * 2);
-                    index += nameLen;
-                }
-                else
-                {
-                    Name = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, nameLen);
-                }
-                index += nameLen;
+                Name = ReadStringData(rawBytes, ref index, isUnicode, encoding, "NAME_STRING");
             }
 
-            if ((Header.DataFlags & Header.DataFlag.HasRelativePath) == Header.DataFlag.HasRelativePath)
+            if ((flags & Header.DataFlag.HasRelativePath) == Header.DataFlag.HasRelativePath)
             {
-                var relLen = BitConverter.ToInt16(rawBytes, index);
-                index += 2;
-                if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
-                {
-                    RelativePath = Encoding.Unicode.GetString(rawBytes, index, relLen * 2);
-                    index += relLen;
-                }
-                else
-                {
-                    RelativePath = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, relLen);
-                }
-                index += relLen;
+                RelativePath = ReadStringData(rawBytes, ref index, isUnicode, encoding, "RELATIVE_PATH");
             }
 
-            if ((Header.DataFlags & Header.DataFlag.HasWorkingDir) == Header.DataFlag.HasWorkingDir)
+            if ((flags & Header.DataFlag.HasWorkingDir) == Header.DataFlag.HasWorkingDir)
             {
-                var workLen = BitConverter.ToInt16(rawBytes, index);
-                index += 2;
-                if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
-                {
-                    WorkingDirectory = Encoding.Unicode.GetString(rawBytes, index, workLen * 2);
-                    index += workLen;
-                }
-                else
-                {
-                    WorkingDirectory = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, workLen);
-                }
-                index += workLen;
+                WorkingDirectory = ReadStringData(rawBytes, ref index, isUnicode, encoding, "WORKING_DIR");
             }
 
-            if ((Header.DataFlags & Header.DataFlag.HasArguments) == Header.DataFlag.HasArguments)
+            if ((flags & Header.DataFlag.HasArguments) == Header.DataFlag.HasArguments)
             {
-                var argLen = BitConverter.ToInt16(rawBytes, index);
-                index += 2;
-                if (argLen > 260)
-                {
-                    argLen = 260;
-                }
-                if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
-                {
-                    Arguments = Encoding.Unicode.GetString(rawBytes, index, argLen * 2);
-                    index += argLen;
-                }
-                else
-                {
-                    Arguments = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, argLen);
-                }
-                index += argLen;
+                Arguments = ReadStringData(rawBytes, ref index, isUnicode, encoding, "COMMAND_LINE_ARGUMENTS");
             }
 
-            if ((Header.DataFlags & Header.DataFlag.HasIconLocation) == Header.DataFlag.HasIconLocation)
+            if ((flags & Header.DataFlag.HasIconLocation) == Header.DataFlag.HasIconLocation)
             {
-                var icoLen = BitConverter.ToInt16(rawBytes, index);
-                index += 2;
-                if ((Header.DataFlags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode)
-                {
-                    IconLocation = Encoding.Unicode.GetString(rawBytes, index, icoLen * 2);
-                    index += icoLen;
-                }
-                else
-                {
-                    IconLocation = CodePagesEncodingProvider.Instance.GetEncoding(codepage).GetString(rawBytes, index, icoLen);
-                }
-                index += icoLen;
+                IconLocation = ReadStringData(rawBytes, ref index, isUnicode, encoding, "ICON_LOCATION");
             }
 
-
-            var extraByteBlocks = new List<byte[]>();
-            //extra blocks
-            while (index < rawBytes.Length)
+            // 2.5 ExtraData: blocks until a TerminalBlock (BlockSize < 4)
+            while (index + 4 <= rawBytes.Length)
             {
-                var extraSize = BitConverter.ToInt32(rawBytes, index);
-                if (extraSize <= 0 || (uint)extraSize >= rawBytes.Length)
+                var blockSize = BitConverter.ToUInt32(rawBytes, index);
+
+                if (blockSize < 4)
                 {
+                    ExtraDataTerminated = true;
+                    index += 4;
                     break;
                 }
 
-                if (extraSize > rawBytes.Length - index)
+                var available = rawBytes.Length - index;
+                byte[] blockBytes;
+
+                if (blockSize < 8 || blockSize > available)
                 {
-                    extraSize = rawBytes.Length - index;
+                    // Malformed or truncated block: parse what is there if possible, report it, and stop.
+                    blockBytes = Helpers.Slice(rawBytes, index, available, "ExtraData block");
+                    errors.Add($"Extra data block at offset {index} declares {blockSize} bytes but {available} remain");
+                    ExtraBlocks.Add(ParseExtraBlock(blockBytes, codepage));
+                    index = rawBytes.Length;
+                    break;
                 }
 
-                var extraBytes = new byte[extraSize];
-
-                // validate the BlockCopy - validate the source offset + count is less <= source length and validate the dest offset + count is <= dest length
-                if (index + extraSize > rawBytes.Length || extraSize > extraBytes.Length)
-                {
-                    throw new Exception($"Invalid extra block data - is this file corrupt?");
-                }
-
-                Buffer.BlockCopy(rawBytes, index, extraBytes, 0, extraSize);
-
-                extraByteBlocks.Add(extraBytes);
-
-                index += extraSize;
+                blockBytes = Helpers.Slice(rawBytes, index, blockSize, "ExtraData block");
+                ExtraBlocks.Add(ParseExtraBlock(blockBytes, codepage));
+                index += (int) blockSize;
             }
 
-            ExtraBlocks = new List<ExtraDataBase>();
-
-            foreach (var extraBlock in extraByteBlocks)
+            // Anything after the TerminalBlock is not part of the format (and is sometimes used to smuggle a payload).
+            TrailingDataSize = rawBytes.Length - index;
+            if (!ExtraDataTerminated && TrailingDataSize == 0)
             {
-                try
-                {
-                    var sig = (ExtraDataTypes)BitConverter.ToInt32(extraBlock, 4);
+                errors.Add("ExtraData has no terminal block");
+            }
+            else if (TrailingDataSize > 0)
+            {
+                errors.Add(ExtraDataTerminated
+                    ? $"{TrailingDataSize:N0} bytes of data follow the ExtraData terminal block (offset {index})"
+                    : $"ExtraData has no terminal block; {TrailingDataSize:N0} unparsed bytes at offset {index}");
+            }
 
-                    switch (sig)
-                    {
-                        case ExtraDataTypes.TrackerDataBlock:
-                            var tb = new TrackerDataBaseBlock(extraBlock, codepage);
-                            ExtraBlocks.Add(tb);
-                            break;
-                        case ExtraDataTypes.ConsoleDataBlock:
-                            var cdb = new ConsoleDataBlock(extraBlock);
-                            ExtraBlocks.Add(cdb);
-                            break;
-                        case ExtraDataTypes.ConsoleFeDataBlock:
-                            var cfeb = new ConsoleFeDataBlock(extraBlock);
-                            ExtraBlocks.Add(cfeb);
-                            break;
-                        case ExtraDataTypes.DarwinDataBlock:
-                            var db = new DarwinDataBlock(extraBlock, codepage);
-                            ExtraBlocks.Add(db);
-                            break;
-                        case ExtraDataTypes.EnvironmentVariableDataBlock:
-                            var eb = new EnvironmentVariableDataBlock(extraBlock, codepage);
-                            ExtraBlocks.Add(eb);
-                            break;
-                        case ExtraDataTypes.IconEnvironmentDataBlock:
-                            var ib = new IconEnvironmentDataBlock(extraBlock, codepage);
-                            ExtraBlocks.Add(ib);
-                            break;
-                        case ExtraDataTypes.KnownFolderDataBlock:
-                            var kf = new KnownFolderDataBlock(extraBlock);
-                            ExtraBlocks.Add(kf);
-                            break;
-                        case ExtraDataTypes.PropertyStoreDataBlock:
-                            var ps = new PropertyStoreDataBlock(extraBlock);
+            foreach (var damaged in ExtraBlocks.OfType<DamagedDataBlock>())
+            {
+                errors.Add($"Extra data block {damaged.OriginalSignature}: {damaged.ErrorMessage}");
+            }
 
-                            ExtraBlocks.Add(ps);
-                            break;
-                        case ExtraDataTypes.ShimDataBlock:
-                            var sd = new KnownFolderDataBlock(extraBlock);
-                            ExtraBlocks.Add(sd);
-                            break;
-                        case ExtraDataTypes.SpecialFolderDataBlock:
-                            var sf = new SpecialFolderDataBlock(extraBlock);
-                            ExtraBlocks.Add(sf);
-                            break;
-                        case ExtraDataTypes.VistaAndAboveIdListDataBlock:
-                            var vid = new VistaAndAboveIdListDataBlock(extraBlock, codepage);
-                            ExtraBlocks.Add(vid);
-                            break;
-                        default:
-                            throw new Exception(
-                                $"Unknown extra data block signature: 0x{sig:X}. Please send lnk file to saericzimmerman@gmail.com so support can be added");
-                    }
-                }
-                catch (Exception e)
-                {
-                    var dmg = new DamagedDataBlock(extraBlock, e.Message);
-                    ExtraBlocks.Add(dmg);
-
-                }
-
+            foreach (var vista in ExtraBlocks.OfType<VistaAndAboveIdListDataBlock>())
+            {
+                errors.AddRange(vista.ParseErrors.Select(e => $"VistaAndAboveIDListDataBlock: {e}"));
             }
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error processing file ({sourceFile}) - the error was ({ex.Message})", ex);
+            throw new LnkParseException($"Error processing file ({sourceFile ?? "(raw data)"}) - the error was ({ex.Message})",
+                (ex as LnkParseException)?.Offset ?? -1, (ex as LnkParseException)?.Field, ex);
+        }
+    }
+
+    private static DateTimeOffset? NullIf1601(DateTime utc)
+    {
+        return utc.Year == 1601 ? null : new DateTimeOffset(utc, TimeSpan.Zero);
+    }
+
+    private static string ReadStringData(byte[] rawBytes, ref int index, bool isUnicode, Encoding encoding, string field)
+    {
+        var count = Helpers.ReadUInt16(rawBytes, index, field + " size");
+        index += 2;
+
+        var byteCount = isUnicode ? count * 2 : count;
+        Helpers.EnsureRange(rawBytes, index, byteCount, field);
+
+        var value = isUnicode
+            ? Encoding.Unicode.GetString(rawBytes, index, byteCount)
+            : encoding.GetString(rawBytes, index, byteCount);
+
+        index += byteCount;
+        return value;
+    }
+
+    // 2.3 LinkInfo. All offsets are relative to the start of the LinkInfo structure and must stay inside it.
+    private static void ParseLinkInfo(byte[] rawBytes, int start, int size, int codepage, Encoding encoding,
+        List<string> errors, out LocationFlag locationFlags, out VolumeInfo volumeInfo, out string localPath,
+        out NetworkShareInfo networkShareInfo, out string commonPath)
+    {
+        var end = start + size;
+
+        var headerSize = Helpers.ReadUInt32(rawBytes, start + 4, "LinkInfoHeaderSize", end);
+        locationFlags = (LocationFlag) Helpers.ReadUInt32(rawBytes, start + 8, "LinkInfoFlags", end);
+        var volumeIdOffset = Helpers.ReadUInt32(rawBytes, start + 12, "VolumeIDOffset", end);
+        var localBasePathOffset = Helpers.ReadUInt32(rawBytes, start + 16, "LocalBasePathOffset", end);
+        var networkOffset = Helpers.ReadUInt32(rawBytes, start + 20, "CommonNetworkRelativeLinkOffset", end);
+        var commonPathSuffixOffset = Helpers.ReadUInt32(rawBytes, start + 24, "CommonPathSuffixOffset", end);
+
+        // LocalBasePathOffsetUnicode / CommonPathSuffixOffsetUnicode exist only when LinkInfoHeaderSize >= 0x24
+        uint localBasePathOffsetUnicode = 0;
+        uint commonPathSuffixOffsetUnicode = 0;
+        if (headerSize >= 0x24)
+        {
+            localBasePathOffsetUnicode = Helpers.ReadUInt32(rawBytes, start + 28, "LocalBasePathOffsetUnicode", end);
+            commonPathSuffixOffsetUnicode = Helpers.ReadUInt32(rawBytes, start + 32, "CommonPathSuffixOffsetUnicode", end);
+        }
+
+        volumeInfo = null;
+        localPath = null;
+        networkShareInfo = null;
+        commonPath = string.Empty;
+
+        if ((locationFlags & LocationFlag.VolumeIdAndLocalBasePath) == LocationFlag.VolumeIdAndLocalBasePath)
+        {
+            try
+            {
+                if (volumeIdOffset > 0)
+                {
+                    var volumeIdSize = Helpers.ReadUInt32(rawBytes, start + volumeIdOffset, "VolumeIDSize", end);
+                    if (volumeIdSize <= 0x10)
+                    {
+                        throw new LnkParseException($"Invalid volume data size ({volumeIdSize}) - is this file corrupt?",
+                            (int) (start + volumeIdOffset), "VolumeIDSize");
+                    }
+
+                    volumeInfo = new VolumeInfo(
+                        Helpers.Slice(rawBytes, start + volumeIdOffset, volumeIdSize, "VolumeID", end), codepage);
+                }
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"VolumeID: {ex.Message}");
+            }
+
+            try
+            {
+                if (localBasePathOffset > 0)
+                {
+                    localPath = Helpers.ReadAnsiZ(rawBytes, start + localBasePathOffset, encoding, "LocalBasePath", end);
+                }
+
+                if (localBasePathOffsetUnicode > 0)
+                {
+                    localPath = Helpers.ReadUnicodeZ(rawBytes, start + localBasePathOffsetUnicode, "LocalBasePathUnicode", end);
+                }
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"LocalBasePath: {ex.Message}");
+            }
+        }
+
+        if ((locationFlags & LocationFlag.CommonNetworkRelativeLinkAndPathSuffix) ==
+            LocationFlag.CommonNetworkRelativeLinkAndPathSuffix)
+        {
+            try
+            {
+                var networkSize = Helpers.ReadUInt32(rawBytes, start + networkOffset, "CommonNetworkRelativeLinkSize", end);
+                if (networkOffset == 0 || networkSize < 0x14)
+                {
+                    throw new LnkParseException($"Invalid network share data size ({networkSize}) - is this file corrupt?",
+                        (int) (start + networkOffset), "CommonNetworkRelativeLinkSize");
+                }
+
+                networkShareInfo = new NetworkShareInfo(
+                    Helpers.Slice(rawBytes, start + networkOffset, networkSize, "CommonNetworkRelativeLink", end), codepage);
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"CommonNetworkRelativeLink: {ex.Message}");
+            }
+        }
+
+        try
+        {
+            if (commonPathSuffixOffset > 0)
+            {
+                commonPath = Helpers.ReadAnsiZ(rawBytes, start + commonPathSuffixOffset, encoding, "CommonPathSuffix", end);
+            }
+
+            if (commonPathSuffixOffsetUnicode > 0)
+            {
+                commonPath = Helpers.ReadUnicodeZ(rawBytes, start + commonPathSuffixOffsetUnicode, "CommonPathSuffixUnicode", end);
+            }
+        }
+        catch (Exception ex)
+        {
+            errors.Add($"CommonPathSuffix: {ex.Message}");
+        }
+    }
+
+    private static ExtraDataBase ParseExtraBlock(byte[] block, int codepage)
+    {
+        try
+        {
+            if (block.Length < 8)
+            {
+                throw new LnkParseException($"Extra data block is only {block.Length} bytes", 0, "ExtraData block");
+            }
+
+            var sig = (ExtraDataTypes) BitConverter.ToUInt32(block, 4);
+
+            return sig switch
+            {
+                ExtraDataTypes.TrackerDataBlock => new TrackerDataBaseBlock(block, codepage),
+                ExtraDataTypes.ConsoleDataBlock => new ConsoleDataBlock(block),
+                ExtraDataTypes.ConsoleFeDataBlock => new ConsoleFeDataBlock(block),
+                ExtraDataTypes.DarwinDataBlock => new DarwinDataBlock(block, codepage),
+                ExtraDataTypes.EnvironmentVariableDataBlock => new EnvironmentVariableDataBlock(block, codepage),
+                ExtraDataTypes.IconEnvironmentDataBlock => new IconEnvironmentDataBlock(block, codepage),
+                ExtraDataTypes.KnownFolderDataBlock => new KnownFolderDataBlock(block),
+                ExtraDataTypes.PropertyStoreDataBlock => new PropertyStoreDataBlock(block),
+                ExtraDataTypes.ShimDataBlock => new ShimDataBlock(block),
+                ExtraDataTypes.SpecialFolderDataBlock => new SpecialFolderDataBlock(block),
+                ExtraDataTypes.VistaAndAboveIdListDataBlock => new VistaAndAboveIdListDataBlock(block, codepage),
+                _ => throw new LnkParseException(
+                    $"Unknown extra data block signature: 0x{(uint) sig:X}. Please send lnk file to saericzimmerman@gmail.com so support can be added",
+                    4, "BlockSignature")
+            };
+        }
+        catch (Exception e)
+        {
+            return new DamagedDataBlock(block, e.Message);
         }
     }
 
@@ -568,6 +395,23 @@ public class LnkFile
 
     public LocationFlag LocationFlags { get; }
 
+    /// <summary>
+    ///     Problems found while parsing. The file was still parsed, but the affected structures are null,
+    ///     <see cref="ShellBagDamaged" /> or <see cref="DamagedDataBlock" />.
+    /// </summary>
+    public IReadOnlyList<string> ParseErrors { get; }
+
+    /// <summary>
+    ///     True when the ExtraData section ended with a TerminalBlock, as the format requires.
+    /// </summary>
+    public bool ExtraDataTerminated { get; }
+
+    /// <summary>
+    ///     Number of bytes after the end of the LNK structure (after the ExtraData terminal block).
+    ///     Legitimate shortcuts have none; a non-zero value can indicate appended content.
+    /// </summary>
+    public int TrailingDataSize { get; }
+
     public override string ToString()
     {
         var sb = new StringBuilder();
@@ -591,8 +435,8 @@ public class LnkFile
         sb.AppendLine(
             $"  Show window: {Header.ShowWindow} ({Helpers.GetDescriptionFromEnumValue(Header.ShowWindow)})");
         sb.AppendLine($"  Target created: {Header.TargetCreationDate}");
-        sb.AppendLine($"  Target modified: {Header.TargetLastAccessedDate}");
-        sb.AppendLine($"  Target accessed: {Header.TargetModificationDate}");
+        sb.AppendLine($"  Target modified: {Header.TargetModificationDate}");
+        sb.AppendLine($"  Target accessed: {Header.TargetLastAccessedDate}");
 
 
         if (TargetIDs.Count > 0)
@@ -618,7 +462,7 @@ public class LnkFile
                 sb.AppendLine($"Drive type: {VolumeInfo.DriveType}");
                 sb.AppendLine($"Serial number: {VolumeInfo.VolumeSerialNumber}");
 
-                var label = VolumeInfo.VolumeLabel.Length > 0 ? VolumeInfo.VolumeLabel : "(No label)";
+                var label = VolumeInfo.VolumeLabel?.Length > 0 ? VolumeInfo.VolumeLabel : "(No label)";
 
                 sb.AppendLine($"Label: {label}");
             }
@@ -633,18 +477,20 @@ public class LnkFile
                 sb.AppendLine();
                 sb.AppendLine("Network share information");
 
-                if (NetworkShareInfo.DeviceName.Length > 0)
+                if (NetworkShareInfo.DeviceName?.Length > 0)
                 {
                     sb.AppendLine($"Device name: {NetworkShareInfo.DeviceName}");
                 }
 
                 sb.AppendLine($"Share name: {NetworkShareInfo.NetworkShareName}");
 
-                sb.AppendLine($"Provider type: {NetworkShareInfo.NetworkProviderType}");
+                sb.AppendLine(NetworkShareInfo.HasValidProviderType
+                    ? $"Provider type: {NetworkShareInfo.NetworkProviderType}"
+                    : "Provider type: (not set)");
                 sb.AppendLine($"Share flags: {NetworkShareInfo.ShareFlags}");
             }
 
-            if (CommonPath.Length > 0)
+            if (CommonPath?.Length > 0)
             {
                 sb.AppendLine($"Common path: {CommonPath}");
             }
@@ -686,6 +532,15 @@ public class LnkFile
             }
         }
 
+
+        if (ParseErrors.Count > 0)
+        {
+            sb.AppendLine("--- Parse errors ---");
+            foreach (var error in ParseErrors)
+            {
+                sb.AppendLine($"  {error}");
+            }
+        }
 
         return sb.ToString();
     }

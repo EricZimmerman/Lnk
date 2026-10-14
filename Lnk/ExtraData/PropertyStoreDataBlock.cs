@@ -8,12 +8,14 @@ public class PropertyStoreDataBlock : ExtraDataBase
 {
     public PropertyStoreDataBlock(byte[] rawBytes)
     {
+        RequireSize(rawBytes, 0x0C, "PropertyStoreDataBlock");
+
         Signature = ExtraDataTypes.PropertyStoreDataBlock;
 
         Size = BitConverter.ToUInt32(rawBytes, 0);
 
-        var propBytes = new byte[Size - 8];
-        Buffer.BlockCopy(rawBytes, 8, propBytes, 0, (int) Size - 8);
+        var propBytes = new byte[rawBytes.Length - 8];
+        Buffer.BlockCopy(rawBytes, 8, propBytes, 0, propBytes.Length);
 
         PropertyStore = new PropertyStore(propBytes);
     }

@@ -38,7 +38,7 @@ public class Header
             "The target application is run with the shim layer. The LNK file contains shim layer properties data block."
         )] RunWithShimLayer = 0x00020000,
 
-        [Description("The LNK does not contain a distributed link tracking data block")] ForceNoLinkTrack =
+        [Description("The TrackerDataBlock is ignored")] ForceNoLinkTrack =
             0x00040000,
 
         [Description("The LNK file contains a metadata property store data block")] EnableTargetMetadata =
@@ -115,35 +115,40 @@ public class Header
         [Description("Undocumented according to wine project.")] SwNormalna = 0xcc
     }
 
-    private readonly Guid _goodSignature = new Guid("{00021401-0000-0000-c000-000000000046}");
+    public const int HeaderSize = 0x4C;
 
+    private static readonly Guid GoodSignature = new("{00021401-0000-0000-c000-000000000046}");
+
+    /// <summary>
+    ///     Parses the 76 byte ShellLinkHeader (MS-SHLLINK 2.1). <paramref name="rawBytes" /> may be the whole file;
+    ///     only the first 76 bytes are read.
+    /// </summary>
     public Header(byte[] rawBytes)
     {
-        var sigBytes = new byte[16];
-        Buffer.BlockCopy(rawBytes, 4, sigBytes, 0, 16);
-        Signature = new Guid(sigBytes);
-
-        if (Signature != _goodSignature)
+        if (rawBytes == null || rawBytes.Length < HeaderSize)
         {
-            throw new Exception("Invalid Signature!");
+            throw new LnkParseException($"Header is smaller than {HeaderSize} bytes - is this file corrupt?", 0, "ShellLinkHeader");
+        }
+
+        var headerSize = BitConverter.ToUInt32(rawBytes, 0);
+        Signature = Helpers.ReadGuid(rawBytes, 4, "LinkCLSID");
+
+        if (headerSize != HeaderSize || Signature != GoodSignature)
+        {
+            throw new LnkParseException("Invalid Signature!", 0, "HeaderSize/LinkCLSID");
         }
 
         DataFlags = (DataFlag) BitConverter.ToInt32(rawBytes, 20);
         FileAttributes = (FileAttribute) BitConverter.ToInt32(rawBytes, 24);
 
-        try
-        {
-            TargetCreationDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 28)).ToUniversalTime();
-            TargetLastAccessedDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 36)).ToUniversalTime();
-            TargetModificationDate = DateTimeOffset.FromFileTime(BitConverter.ToInt64(rawBytes, 44)).ToUniversalTime();
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            // Second chance
-            TargetCreationDate = DateTimeOffset.FromFileTime(ConvertLongToDateTime(BitConverter.ToInt64(rawBytes, 28)).ToFileTime());
-            TargetLastAccessedDate = DateTimeOffset.FromFileTime(ConvertLongToDateTime(BitConverter.ToInt64(rawBytes, 36)).ToFileTime());
-            TargetModificationDate = DateTimeOffset.FromFileTime(ConvertLongToDateTime(BitConverter.ToInt64(rawBytes, 44)).ToFileTime());
-        }
+        // Each FILETIME is converted on its own so one corrupt value cannot affect the others.
+        TargetCreationDateRaw = BitConverter.ToInt64(rawBytes, 28);
+        TargetLastAccessedDateRaw = BitConverter.ToInt64(rawBytes, 36);
+        TargetModificationDateRaw = BitConverter.ToInt64(rawBytes, 44);
+
+        TargetCreationDate = Helpers.FromFileTime(TargetCreationDateRaw) ?? DateTimeOffset.MinValue;
+        TargetLastAccessedDate = Helpers.FromFileTime(TargetLastAccessedDateRaw) ?? DateTimeOffset.MinValue;
+        TargetModificationDate = Helpers.FromFileTime(TargetModificationDateRaw) ?? DateTimeOffset.MinValue;
 
         FileSize = BitConverter.ToUInt32(rawBytes, 52);
         IconIndex = BitConverter.ToInt32(rawBytes, 56);
@@ -161,14 +166,35 @@ public class Header
     public DataFlag DataFlags { get; }
     public FileAttribute FileAttributes { get; }
 
+    /// <summary>
+    ///     Target creation time (UTC). <see cref="DateTimeOffset.MinValue" /> if the stored FILETIME is out of range;
+    ///     see <see cref="TargetCreationDateRaw" /> for the stored value.
+    /// </summary>
     public DateTimeOffset TargetCreationDate { get; }
+
+    /// <summary>
+    ///     Target last write (modification) time (UTC).
+    /// </summary>
     public DateTimeOffset TargetModificationDate { get; }
+
+    /// <summary>
+    ///     Target last access time (UTC).
+    /// </summary>
     public DateTimeOffset TargetLastAccessedDate { get; }
+
+    public long TargetCreationDateRaw { get; }
+    public long TargetModificationDateRaw { get; }
+    public long TargetLastAccessedDateRaw { get; }
 
     public uint FileSize { get; }
     public int IconIndex { get; }
 
     public string HotKey { get; }
+
+    /// <summary>
+    ///     Raw ShowCommand value. Per MS-SHLLINK only SW_SHOWNORMAL, SW_SHOWMAXIMIZED and SW_SHOWMINNOACTIVE are
+    ///     meaningful; Windows treats every other value as SW_SHOWNORMAL.
+    /// </summary>
     public ShowWindowOption ShowWindow { get; }
     public short Reserved0 { get; }
     public int Reserved1 { get; }
@@ -180,79 +206,52 @@ public class Header
             $"C:{TargetCreationDate} M:{TargetModificationDate} L:{TargetLastAccessedDate}, DataFlags: {DataFlags}, FileAttr:{FileAttributes}, Size: {FileSize:N0}, IconIndex: {IconIndex}, Hotkey: {HotKey}, ShowWindow: {ShowWindow}, Res0: {Reserved0}, Res1: {Reserved1}, Res2: {Reserved2}";
     }
 
-    private string GetHotkey(byte low, byte high)
+    // HotKeyFlags (MS-SHLLINK 2.1.3): low byte is the virtual key, high byte a bitmask of
+    // HOTKEYF_SHIFT (1), HOTKEYF_CONTROL (2) and HOTKEYF_ALT (4); modifiers may be combined.
+    private static string GetHotkey(byte low, byte high)
     {
-        var hk = string.Empty;
-
         if (low == 0 && high == 0)
         {
-            return hk;
+            return string.Empty;
         }
 
-        int highNum = high;
+        var hk = string.Empty;
 
-        switch (highNum)
+        if ((high & 0x01) != 0)
         {
-            case 1:
-                hk = "SHIFT+";
-                break;
-            case 2:
-                hk = "CONTROL+";
-                break;
-            case 4:
-                hk = "ALT+";
-                break;
-            case 6:
-                hk = "CONTROL+ALT+";
-                break;
+            hk += "SHIFT+";
         }
 
-        int lowNum = low;
-
-
-        if (0x30 <= lowNum && lowNum <= 0x39 || 0x41 <= lowNum && lowNum <= 0x5a)
+        if ((high & 0x02) != 0)
         {
-            hk += Convert.ToChar(lowNum);
-            return hk;
+            hk += "CONTROL+";
         }
 
-        if (0x70 <= lowNum && lowNum <= 0x87)
+        if ((high & 0x04) != 0)
         {
-            var keyVal = lowNum - 111;
-            hk += $"F{keyVal}";
-            return hk;
+            hk += "ALT+";
         }
 
-        if (lowNum == 0x90)
+        if (low is >= 0x30 and <= 0x39 or >= 0x41 and <= 0x5a)
         {
-            hk += "NUMLOCK";
+            return hk + Convert.ToChar(low);
         }
 
-        if (lowNum == 0x91)
+        if (low is >= 0x70 and <= 0x87)
         {
-            hk += "SCROLLLOCK";
+            return hk + $"F{low - 0x6F}";
         }
 
-        return hk;
-    }
-
-    private DateTime ConvertLongToDateTime(long value)
-    {
-        // Minimum and maximum ticks for DateTime
-        const long minTicks = 0;
-        const long maxTicks = 3155378975999999999;
-
-        // Check if the value is within the range of DateTime
-        if (value < minTicks || value > maxTicks)
+        switch (low)
         {
-            // If the value is out of range, return the minimum or maximum DateTime value
-            return value < minTicks ? DateTime.MinValue : DateTime.MaxValue;
-        }
-        else
-        {
-            // If the value is within range, create a DateTime object with the given ticks
-            return new DateTime(value);
+            case 0x90:
+                return hk + "NUMLOCK";
+            case 0x91:
+                return hk + "SCROLLLOCK";
+            case 0:
+                return hk.TrimEnd('+');
+            default:
+                return hk + $"0x{low:X2}";
         }
     }
-
 }

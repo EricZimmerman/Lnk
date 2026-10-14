@@ -12,41 +12,43 @@ public class DarwinDataBlock : ExtraDataBase
 
     public DarwinDataBlock(byte[] rawBytes, int codepage=1252)
     {
+        RequireSize(rawBytes, 0x314, "DarwinDataBlock");
+
         Signature = ExtraDataTypes.DarwinDataBlock;
 
         Size = BitConverter.ToUInt32(rawBytes, 0);
 
-        //TODO can these be decoded further?
-        ApplicationIdentifierAscii = CodePagesEncodingProvider.Instance.GetEncoding(codepage)?.GetString(rawBytes, 8, 260).Split('\0').First();
-        ApplicationIdentifierUnicode = Encoding.Unicode.GetString(rawBytes, 268, 520).Split('\0').First();
+        // DarwinDataAnsi (260 bytes) at offset 8, DarwinDataUnicode (520 bytes) at offset 268
+        ApplicationIdentifierAscii = Helpers.ReadAnsiZ(rawBytes, 8, Helpers.GetEncoding(codepage), "DarwinDataAnsi", 8 + 260);
+        ApplicationIdentifierUnicode = Helpers.ReadUnicodeZ(rawBytes, 268, "DarwinDataUnicode", 268 + 520);
 
-        var sepChar = '>';
+        ProductCode = "(None)";
+        FeatureName = "(None)";
+        ComponentId = "(None)";
 
-        if (ApplicationIdentifierAscii.Contains("<"))
-        {
-            sepChar = '<';
-        }
+        // The descriptor is normally identical in both fields; fall back to the Unicode copy if the ANSI one is empty.
+        var descriptor = ApplicationIdentifierAscii.Length > 0 ? ApplicationIdentifierAscii : ApplicationIdentifierUnicode;
 
-        var segs = ApplicationIdentifierAscii.Split(sepChar);
+        // Compressed MSI descriptor: 20 char product code, feature name, '>' or '<', 20 char component id
+        var sepChar = descriptor.Contains("<") ? '<' : '>';
+
+        var segs = descriptor.Split(sepChar);
 
         var left = segs[0];
 
-        var rawDarwin = left.Substring(0, 20);
-
-        ProductCode = DecodeDarwinToGuid(rawDarwin);
-
-        FeatureName = "(None)";
-        if (left.Length > 20)
+        if (left.Length >= 20)
         {
-            FeatureName = left.Substring(20);
+            ProductCode = DecodeDarwinToGuid(left.Substring(0, 20));
+
+            if (left.Length > 20)
+            {
+                FeatureName = left.Substring(20);
+            }
         }
 
-        ComponentId = "(None)";
-        if (segs.Length > 1)
+        if (segs.Length > 1 && segs[1].Length >= 20)
         {
-            rawDarwin = segs[1];
-
-            ComponentId = DecodeDarwinToGuid(rawDarwin);
+            ComponentId = DecodeDarwinToGuid(segs[1].Substring(0, 20));
         }
     }
 
@@ -125,6 +127,10 @@ public class DarwinDataBlock : ExtraDataBase
         for (var i = 4; i > -1; i--)
         {
             var foo = Base85.IndexOf(quad[i]);
+            if (foo < 0)
+            {
+                throw new LnkParseException($"Invalid character '{quad[i]}' in Darwin descriptor", -1, "DarwinData");
+            }
 
             dd += foo;
 
