@@ -92,6 +92,9 @@ jobs:
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
     needs: [ validate_nuget, run_test ]
+    permissions:
+      contents: read
+      id-token: write  # Lets the job request a GitHub OIDC token for NuGet trusted publishing
     steps:
       # Download the NuGet package created in the previous job
       - uses: actions/download-artifact@v8
@@ -103,11 +106,19 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v6
 
+      # Exchange the GitHub OIDC token for a short-lived (1 hour) NuGet API key.
+      # Requires a Trusted Publishing policy on nuget.org for this repo and publish.yml.
+      - name: NuGet login (OIDC)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}  # nuget.org profile name, not email
+
       # Publish all NuGet packages to NuGet.org
       # Use --skip-duplicate to prevent errors if a package with the same version already exists.
       # If you retry a failed workflow, already published packages will be skipped without error.
       - name: Publish NuGet package
         run: |
           foreach($file in (Get-ChildItem "${{ env.NuGetDirectory }}" -Recurse -Include *.nupkg)) {
-              dotnet nuget push $file --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+              dotnet nuget push $file --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
           }
