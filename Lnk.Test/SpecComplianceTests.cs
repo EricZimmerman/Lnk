@@ -364,14 +364,15 @@ public class SpecComplianceTests
     }
 
     [Test]
-    public void MalformedShellItemBecomesPlaceholderAndRestOfFileParses()
+    public void ControlPanelItemUnderThisPcParses()
     {
+        // This file is in Bad because its 20 byte 0x2E item (the Control Panel GUID) used to be reported as corrupt.
+        // Damaged items are covered by the placeholder tests below
         var lnk = Lnk.LoadFile(Path.Combine(TestMain.BadPath, "ImDisk Virtual Disk Driver.test"));
 
-        var damaged = lnk.TargetIDs.OfType<ShellBagDamaged>().Single();
-        damaged.ErrorMessage.Should().Contain("corrupt");
-        lnk.ParseErrors.Count.Should().Be(1);
-        lnk.Header.Should().NotBeNull();
+        lnk.ParseErrors.Should().BeEmpty();
+        lnk.TargetIDs.Select(t => t.Value).Should().Equal("This PC", "All Control Panel Items",
+            @"C:\WINDOWS\System32\imdisk.cpl (ImDisk Virtual Disk Driver,ImDisk Virtual Disk Driver,)");
     }
 
     [Test]
@@ -444,6 +445,54 @@ public class SpecComplianceTests
     }
 
     [Test]
+    public void TwentyByteRootFolderGuidItemIsParsed()
+    {
+        // 0x2E item: size, type, a byte and the "Web Folders" GUID, with no extension blocks (from "target 2._lnk").
+        // It used to be read as a control panel category and reported as truncated
+        var item = new byte[] { 0x14, 0x00, 0x2E, 0x00 }
+            .Concat(new Guid("bdeadf00-c265-11d0-bced-00a0c90ab50f").ToByteArray()).ToArray();
+
+        var lnk = new LnkFile(new LnkBytes(0x1) // HasLinkTargetIDList
+            .U16((ushort) (item.Length + 2)).Add(item).U16(0)
+            .Terminal().ToArray());
+
+        lnk.ParseErrors.Should().BeEmpty();
+        var bag = lnk.TargetIDs.Should().ContainSingle().Which.Should().BeOfType<ShellBag0X2E>().Subject;
+        bag.FriendlyName.Should().Be("Root folder: GUID");
+        bag.Value.Should().Contain("Web Folders");
+    }
+
+    [Test]
+    public void JumpListCorpusLnksParseWithoutErrors()
+    {
+        // The local "Jump lists and lnks" collection (not in the repository; some files are private)
+        var corpus = Environment.GetEnvironmentVariable("JUMPLIST_CORPUS");
+        if (string.IsNullOrEmpty(corpus) || !Directory.Exists(corpus))
+        {
+            corpus = TestMain.FindUp("Jump lists and lnks");
+        }
+
+        if (corpus == null)
+        {
+            Assert.Ignore("Jump list corpus not present");
+        }
+
+        var files = Directory.GetFiles(corpus, "*", SearchOption.AllDirectories)
+            .Where(t => (t.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase) ||
+                         t.EndsWith("_lnk", StringComparison.OrdinalIgnoreCase)) &&
+                        !t.Contains("jumplist tools"))
+            .ToList();
+        files.Count.Should().BeGreaterThan(1000);
+
+        var withErrors = files.Select(t => (File: t, Lnk: Lnk.LoadFile(t)))
+            .Where(t => t.Lnk.ParseErrors.Count > 0)
+            .Select(t => $"{t.File}: {string.Join("; ", t.Lnk.ParseErrors)}")
+            .ToList();
+
+        withErrors.Should().BeEmpty(string.Join(Environment.NewLine, withErrors));
+    }
+
+    [Test]
     public void ItaCorpusParsesWithoutErrors()
     {
         if (TestMain.ItaPath == null)
@@ -464,8 +513,8 @@ public class SpecComplianceTests
             }
         }
 
-        // "target 2._lnk" contains a malformed 0x2E shell item; everything else must parse cleanly.
-        withErrors.Count.Should().Be(1, string.Join(Environment.NewLine, withErrors));
-        withErrors.Single().Should().StartWith("target 2._lnk");
+        // Everything must parse cleanly. "target 2._lnk" has a 20 byte 0x2E item (size, type, a byte and the
+        // "Web Folders" GUID) that used to be read as a control panel category and reported as truncated.
+        withErrors.Should().BeEmpty(string.Join(Environment.NewLine, withErrors));
     }
 }

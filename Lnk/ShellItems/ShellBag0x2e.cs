@@ -16,7 +16,8 @@ public class ShellBag0X2E : ShellBag
 
         var index = 0;
 
-        if (rawBytes[3] == 0x80 || rawBytes.Length == 0x16)
+        // Size, type, a byte and a GUID (0x14 bytes), optionally followed by an empty extension block list (0x16)
+        if (rawBytes[3] == 0x80 || rawBytes.Length == 0x16 || rawBytes.Length == 0x14)
         {
             ProcessGuid(rawBytes);
         }

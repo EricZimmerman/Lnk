@@ -1,4 +1,4 @@
-# CLAUDE.md
+﻿# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -20,7 +20,7 @@ dotnet pack --configuration Release            # build NuGet package
 
 Tests use NUnit 4 + FluentAssertions 7 (pinned to `[7.0.0,8.0.0)`).
 
-Versioning: tags like `2026.5.3` drive the package version (MinVer); `<Version>` in `Lnk/Lnk.csproj` is also bumped manually per release. CI (`.github/workflows/publish.yml`) packs, validates, tests, and pushes to NuGet on GitHub release.
+Versioning: tags like `2026.5.3` drive the package version (MinVer); `<Version>` in `Lnk/Lnk.csproj` is also bumped manually per release. CI (`.github/workflows/publish.yml`, identical to GuidMapping's) packs, validates, tests, and pushes to NuGet on GitHub release using trusted publishing (`NuGet/login` with the `NUGET_USER` repo variable).
 
 ## Architecture
 
@@ -49,3 +49,4 @@ Entry points: `Lnk.LoadFile(path, codepage)` (validates size/header signature, r
 - `Lnk.Test/TestMain.cs`: corpus tests over `Lnk.Test/TestFiles/<OS version>/*.test` (real LNK files, renamed `.test`), plus targeted assertions on specific samples. `TestFiles` is located by walking up from the test output dir, so tests work on Linux and Windows.
 - `Lnk.Test/SpecComplianceTests.cs`: builds LNK bytes in memory with the `LnkBytes` helper to exercise individual spec rules and malformed-input handling. Prefer adding new spec/robustness tests here.
 - `ITA_LNKs/` at the repo root is an optional extra corpus; tests using it are skipped when it is absent.
+- `JumpListCorpusLnksParseWithoutErrors` runs every `.lnk`/`_lnk` in the local `Jump lists and lnks` collection (next to the repo, or `JUMPLIST_CORPUS`; about 1,500 files, some private, never copy them into the repo) and expects no `ParseErrors`; skipped when absent. Those files were cross-checked field by field against LnkParse3.

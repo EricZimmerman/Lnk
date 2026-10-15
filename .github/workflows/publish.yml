@@ -5,17 +5,19 @@ on:
   workflow_dispatch: # Allow running the workflow manually from the GitHub UI
   push:
     branches:
-      - 'master'     # Run the workflow when pushing to the master branch
-  pull_request:      # Run the workflow for all pull requests
+      - 'master'     # Run the workflow when pushing to the default branch
+  pull_request:
+    branches:
+      - '*'          # Run the workflow for all pull requests
   release:
     types:
       - published    # Run the workflow when a new GitHub release is published
 
-# The jobs only need to read the repository; the NuGet push uses its own API key
+# Least privilege by default; jobs opt in to anything more
 permissions:
   contents: read
 
-# Cancel superseded runs for the same branch/PR, but never cancel a release run
+# Cancel superseded runs for the same branch/PR, but never cancel a release publish
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name != 'release' }}
@@ -23,7 +25,8 @@ concurrency:
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   DOTNET_NOLOGO: true
-  NuGetDirectory: ${{ github.workspace}}/nuget
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NuGetDirectory: ${{ github.workspace }}/nuget
 
 defaults:
   run:
@@ -32,19 +35,20 @@ defaults:
 jobs:
   create_nuget:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
     - uses: actions/checkout@v7
       with:
         fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
+        persist-credentials: false
 
-    # Install the .NET SDK indicated in the global.json file
     - name: Setup .NET
-      uses: actions/setup-dotnet@v6
+      uses: actions/setup-dotnet@v6  # SDK version from global.json
 
     # Create the NuGet package in the folder from the environment variable NuGetDirectory
     - run: dotnet pack --configuration Release --output ${{ env.NuGetDirectory }}
 
-    # Publish the NuGet package as an artifact,so they can be used in the following jobs
+    # Publish the NuGet package as an artifact, so they can be used in the following jobs
     - uses: actions/upload-artifact@v7
       with:
         name: nuget
@@ -54,11 +58,11 @@ jobs:
 
   validate_nuget:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [ create_nuget ]
     steps:
-      # Install the .NET SDK indicated in the global.json file
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@v6  # SDK version from global.json
 
       # Download the NuGet package created in the previous job
       - uses: actions/download-artifact@v8
@@ -78,23 +82,26 @@ jobs:
 
   run_test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
     - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
     - name: Setup .NET
-      uses: actions/setup-dotnet@v6
+      uses: actions/setup-dotnet@v6  # SDK version from global.json
     - name: Run tests
       run: dotnet test --configuration Release
 
   deploy:
     # Publish only when creating a GitHub Release
     # https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
-    # You can update this logic if you want to manage releases differently
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [ validate_nuget, run_test ]
     permissions:
       contents: read
-      id-token: write  # Lets the job request a GitHub OIDC token for NuGet trusted publishing
+      id-token: write   # Required for NuGet trusted publishing (OIDC)
     steps:
       # Download the NuGet package created in the previous job
       - uses: actions/download-artifact@v8
@@ -102,23 +109,24 @@ jobs:
           name: nuget
           path: ${{ env.NuGetDirectory }}
 
-      # Install the .NET SDK indicated in the global.json file
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6  # SDK version from global.json
 
-      # Exchange the GitHub OIDC token for a short-lived (1 hour) NuGet API key.
+      # Trusted publishing: exchanges the GitHub OIDC token for a short-lived NuGet API key.
       # Requires a Trusted Publishing policy on nuget.org for this repo and publish.yml.
       - name: NuGet login (OIDC)
-        uses: NuGet/login@v1
         id: login
+        uses: NuGet/login@v1
         with:
-          user: ${{ secrets.NUGET_USER }}  # nuget.org profile name, not email
+          user: ${{ vars.NUGET_USER }}
 
       # Publish all NuGet packages to NuGet.org
       # Use --skip-duplicate to prevent errors if a package with the same version already exists.
       # If you retry a failed workflow, already published packages will be skipped without error.
       - name: Publish NuGet package
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: |
           foreach($file in (Get-ChildItem "${{ env.NuGetDirectory }}" -Recurse -Include *.nupkg)) {
-              dotnet nuget push $file --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+              dotnet nuget push $file --api-key "$env:NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
           }

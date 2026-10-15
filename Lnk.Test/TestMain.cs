@@ -23,7 +23,7 @@ public class TestMain
     // Optional extra corpus (ITA_LNKs at the repository root). Tests that use it are skipped when it is absent.
     public static string ItaPath = FindUp("ITA_LNKs");
 
-    private static string FindUp(string name)
+    internal static string FindUp(string name)
     {
         var dir = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
         while (dir != null)
