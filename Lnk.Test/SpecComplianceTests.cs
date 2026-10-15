@@ -177,6 +177,18 @@ public class SpecComplianceTests
     }
 
     [Test]
+    public void UndefinedShowCommandIsKeptAndReported()
+    {
+        // LECmd#12: BITTER APT shortcuts use ShowCommand 0x0D
+        var data = new LnkBytes(0).Terminal().Poke(60, BitConverter.GetBytes(0x0D)).ToArray();
+
+        var lnk = new LnkFile(data);
+
+        ((int) lnk.Header.ShowWindow).Should().Be(0x0D);
+        lnk.ParseErrors.Single().Should().Contain("ShowCommand 0xD is not a defined SW_* value");
+    }
+
+    [Test]
     public void HotKeyWithCombinedModifiers()
     {
         var data = new LnkBytes(0).Terminal().Poke(64, new byte[] { 0x47, 0x03 }).ToArray(); // SHIFT|CONTROL + G
@@ -375,6 +387,24 @@ public class SpecComplianceTests
         damaged.Should().NotBeNull();
         damaged.ItemType.Should().Be((byte) 0xEE);
         damaged.ErrorMessage.Should().Contain("Unknown shell item ID");
+    }
+
+    [Test]
+    public void TruncatedRootFolderItemGetsReadableDamageReason()
+    {
+        // LECmd#8 (0614ed9d...): a 0x1F item with the My Computer CLSID followed by junk
+        var item = Convert.FromHexString(
+            "61001f07e04fd020ea3a6910a2d808002b30309d329304314e666a755095f87b1a925c9fd66623ed1d18e596347f26736d1b" +
+            "9b3dfd6340cbddb53d7b03126900c1aa8122c58ca64e2367c5e032d5280cd6dfafa37d39e28a98853d0d68f81fdd75");
+        var data = new LnkBytes(HasTargetIdList).U16((ushort) (item.Length + 2)).Add(item).U16(0).Terminal().ToArray();
+
+        var lnk = new LnkFile(data);
+
+        var damaged = lnk.TargetIDs.Single() as ShellBagDamaged;
+        damaged.Should().NotBeNull();
+        damaged.ItemType.Should().Be((byte) 0x1F);
+        damaged.ErrorMessage.Should().Contain("ends before the parser expected");
+        lnk.ParseErrors.Single().Should().StartWith("Shell item at offset 78 (type 0x1F)");
     }
 
     [Test]

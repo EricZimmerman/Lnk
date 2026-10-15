@@ -47,8 +47,12 @@ internal static class ShellItemFactory
             }
             catch (Exception ex)
             {
-                var msg = $"Shell item at offset {pos} (type 0x{itemBytes[2]:X2}): {ex.Message}";
-                items.Add(new ShellBagDamaged(itemBytes, ex.Message));
+                // Older parsers read with BitConverter directly; turn their range errors into something readable
+                var reason = ex is ArgumentException or IndexOutOfRangeException
+                    ? "item data ends before the parser expected (truncated or corrupt item)"
+                    : ex.Message;
+                var msg = $"Shell item at offset {pos} (type 0x{itemBytes[2]:X2}): {reason}";
+                items.Add(new ShellBagDamaged(itemBytes, reason));
                 errors?.Add(msg);
             }
 

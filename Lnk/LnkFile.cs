@@ -77,6 +77,12 @@ public class LnkFile
                 errors.Add($"Target last access time is out of range (raw 0x{Header.TargetLastAccessedDateRaw:X16})");
             }
 
+            if (!Enum.IsDefined(typeof(Header.ShowWindowOption), Header.ShowWindow))
+            {
+                // Windows treats this as SW_SHOWNORMAL, but no legitimate shortcut writer produces it
+                errors.Add($"ShowCommand 0x{(int) Header.ShowWindow:X} is not a defined SW_* value (treated as SW_SHOWNORMAL)");
+            }
+
             var index = Header.HeaderSize;
             var flags = Header.DataFlags;
             var isUnicode = (flags & Header.DataFlag.IsUnicode) == Header.DataFlag.IsUnicode;
