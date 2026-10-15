@@ -1034,7 +1034,7 @@
     <ProjectReference Include="..\Lnk\Lnk.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ExtensionBlocks" Version="2026.5.0" />
+    <PackageReference Include="ExtensionBlocks" Version="2026.10.0" />
     <PackageReference Include="FluentAssertions" Version="[7.0.0,8.0.0)" />
     <PackageReference Include="NUnit" Version="4.6.0" />
     <!-- Required for dotnet test / VSTest to discover NUnit tests -->
