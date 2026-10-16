@@ -29,7 +29,7 @@
     </PackageReference>
     <PackageReference Include="ExtensionBlocks" Version="2026.10.0" />
     <PackageReference Include="GuidMapping" Version="2026.10.1" />
-    <PackageReference Include="MinVer" Version="7.0.0">
+    <PackageReference Include="MinVer" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
