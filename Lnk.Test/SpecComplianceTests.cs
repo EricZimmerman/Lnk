@@ -469,7 +469,7 @@ public class SpecComplianceTests
         var corpus = Environment.GetEnvironmentVariable("JUMPLIST_CORPUS");
         if (string.IsNullOrEmpty(corpus) || !Directory.Exists(corpus))
         {
-            corpus = TestMain.FindUp("Jump lists and lnks");
+            corpus = TestMain.FindUp(Path.Combine("Corpus", "Jump lists and lnks")) ?? TestMain.FindUp("Jump lists and lnks");
         }
 
         if (corpus == null)
