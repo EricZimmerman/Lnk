@@ -9,7 +9,7 @@
     <Copyright>Eric Zimmerman</Copyright>
     <PackageProjectUrl>https://github.com/EricZimmerman/lnk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/EricZimmerman/lnk</RepositoryUrl>
-    <Version>2026.10.4</Version>
+    <Version>2026.10.5</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <LangVersion>10</LangVersion>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -27,7 +27,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="ExtensionBlocks" Version="2026.10.0" />
+    <PackageReference Include="ExtensionBlocks" Version="2026.10.1" />
     <PackageReference Include="GuidMapping" Version="2026.10.1" />
     <PackageReference Include="MinVer" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
