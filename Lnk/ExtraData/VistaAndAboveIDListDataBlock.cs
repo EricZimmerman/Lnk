@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ExtensionBlocks;
 using Lnk.ShellItems;
 
 namespace Lnk.ExtraData;
@@ -18,7 +19,7 @@ public class VistaAndAboveIdListDataBlock : ExtraDataBase
         // The IDList starts directly at offset 8 (there is no IDListSize field in this block) and runs to the
         // end of the block, terminated by a 2 byte TerminalID.
         ParseErrors = new List<string>();
-        TargetIDs = ShellItemFactory.ParseIdList(rawBytes, 8, rawBytes.Length, codepage, ParseErrors);
+        TargetIDs = IdList.Parse(rawBytes, 8, rawBytes.Length, codepage, ParseErrors);
     }
 
     /// <summary>
@@ -27,7 +28,7 @@ public class VistaAndAboveIdListDataBlock : ExtraDataBase
     /// </summary>
     public List<string> ParseErrors { get; }
 
-    public List<ShellBag> TargetIDs { get; }
+    public List<IShellBag> TargetIDs { get; }
 
     public override string ToString()
     {

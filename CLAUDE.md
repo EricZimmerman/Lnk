@@ -1,4 +1,4 @@
-﻿# CLAUDE.md
+# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -11,16 +11,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The SDK is pinned in `global.json` (.NET 10). The library targets `netstandard2.0`; tests target `net10.0`. Both use `LangVersion 10` — avoid newer C# syntax.
 
 ```bash
-dotnet build                                   # build solution (Lnk.sln)
+dotnet build                                   # build solution (Lnk.slnx)
 dotnet test                                    # run all tests (CI runs: dotnet test --configuration Release)
 dotnet test --filter "FullyQualifiedName~SpecComplianceTests"          # one fixture
 dotnet test --filter "Name=ShimDataBlockIsParsedAsShimDataBlock"       # one test
 dotnet pack --configuration Release            # build NuGet package
 ```
 
-Tests use NUnit 4 + FluentAssertions 7 (pinned to `[7.0.0,8.0.0)`).
+Tests use NUnit 5 + FluentAssertions 7 (pinned to `[7.2.2,8.0.0)`, since 8.x needs a commercial license; Dependabot ignores it).
 
-Versioning: tags like `2026.5.3` drive the package version (MinVer); `<Version>` in `Lnk/Lnk.csproj` is also bumped manually per release. CI (`.github/workflows/publish.yml`, identical to GuidMapping's) packs, validates, tests, and pushes to NuGet on GitHub release using trusted publishing (`NuGet/login` with the `NUGET_USER` repo variable).
+Versioning: bare CalVer tags like `2026.10.6` drive the package version (MinVer); there is no `<Version>` in `Lnk/Lnk.csproj`. To release: push to `master`, then `git tag <ver> && git push origin <ver> && gh release create <ver> --verify-tag --generate-notes`. CI (`.github/workflows/publish.yml`, identical to GuidMapping's) packs, validates, tests, and pushes to NuGet on GitHub release using trusted publishing (`NuGet/login` with the `NUGET_USER` repo variable).
 
 ## Architecture
 
@@ -28,14 +28,13 @@ Entry points: `Lnk.LoadFile(path, codepage)` (validates size/header signature, r
 
 `LnkFile` constructor parses the MS-SHLLINK sections sequentially, each gated by a `Header.DataFlag`:
 1. `Header` (76 bytes)
-2. LinkTargetIDList → `ShellItems/ShellItemFactory.ParseIdList` → list of `ShellBag` subclasses
+2. LinkTargetIDList → `ShellItems/IdList.Parse` → `List<ExtensionBlocks.IShellBag>`
 3. LinkInfo → `VolumeInfo` / `NetworkShareInfo`
 4. StringData (Name, RelativePath, WorkingDirectory, Arguments, IconLocation)
 5. ExtraData blocks → `LnkFile.ParseExtraBlock` switches on signature → `ExtraData/*` classes (all derive from `ExtraDataBase`)
 
 ### Shell items
-`ShellItemFactory.Create` dispatches on the item type byte (offset 2) to `ShellBag0x??` classes (several type bytes map to one class; zip-contents items are detected heuristically before the switch). Shell item extension blocks (`BEEF0004` etc.) are parsed by the external `ExtensionBlocks` NuGet package, not this repo; GUID → name mapping comes from the `GuidMapping` package. `VistaAndAboveIDListDataBlock` reuses the same factory. Since ExtensionBlocks 2026.10.1, that package also has the shell item classes (moved from ShellBags); Lnk still uses its own `ShellItems/`, whose fixes (bounds-checked reads, `ShellBagDamaged`) the shared ones don't all have yet. The blocks' and property sheets' `ToString()` (shown by LECmd and JLECmd) come from ExtensionBlocks: 2026.10.1 fills in `Beef0004.LongName` when a localized name follows it (so shell items show `Users`, not `@shell32.dll,-21813`), parses Beef000b (drive letter kept), and shows the shell items in VT_VECTOR/VT_STREAM/VT_BLOB property values.
-
+Since 2026.10.6 the shell item classes are ExtensionBlocks' (shared with SBECmd, ShellBags Explorer and the RECmd plugins; Lnk's own copies were removed, after their fixes were brought there). `IdList.Parse` splits an ID list (MS-SHLLINK 2.2.1) and creates each item with `ExtensionBlocks.ShellItemFactory.Create(bytes, -1, -1, "", codepage)`; an item it doesn't know (`ShellBagUnknown`) or that throws becomes `ShellBagDamaged` (still in `Lnk.ShellItems`, now derived from `ExtensionBlocks.ShellBag`) with a readable reason in `ParseErrors`. `LnkFile.TargetIDs` and `VistaAndAboveIDListDataBlock.TargetIDs` are `List<ExtensionBlocks.IShellBag>`: a breaking change for code that used Lnk's classes (LECmd, JLECmd and JumpListExplorer switch on the shared types; ezTriage too). Before the move, the shared classes were checked to give the same `Value` and `FriendlyName` as Lnk's for every item of the corpus' LNK files (9,410) and, but for MTP and CD burning items that Lnk read as garbage, of the jump lists' LNKs (90,098); LECmd's and JLECmd's CSVs over them were the same. Item types now differ from Lnk's old ones where the shared factory has its own class (0x35, 0x36, 0x39, 0x3A, 0xB1, 0x41-0x47, CFSF items, MTP items), so consumers switch on those types, not on the old ones. Extension blocks (`BEEF0004` etc.) and GUID names come from ExtensionBlocks and GuidMapping.
 ### Error-handling model (important)
 - Fatal structural problems throw `LnkParseException` (carries `Offset` and `Field`). The `LnkFile` constructor wraps any exception into one.
 - Non-fatal problems do **not** throw: an unparseable shell item becomes `ShellBagDamaged`, an unparseable/unknown extra block becomes `DamagedDataBlock`, and a human-readable message is appended to `LnkFile.ParseErrors`. The rest of the file keeps parsing.

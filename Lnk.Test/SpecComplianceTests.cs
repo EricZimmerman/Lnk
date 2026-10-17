@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using FluentAssertions;
 using Lnk.ExtraData;
+using ExtensionBlocks;
 using Lnk.ShellItems;
 using NUnit.Framework;
 

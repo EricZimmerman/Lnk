@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Lnk.ExtraData;
+using ExtensionBlocks;
 using Lnk.ShellItems;
 
 namespace Lnk;
@@ -44,7 +45,7 @@ public class LnkFile
 
         var errors = new List<string>();
         ParseErrors = errors;
-        TargetIDs = new List<ShellBag>();
+        TargetIDs = new List<IShellBag>();
         ExtraBlocks = new List<ExtraDataBase>();
 
         try
@@ -99,7 +100,7 @@ public class LnkFile
                 index += 2;
                 Helpers.EnsureRange(rawBytes, index, idListSize, "LinkTargetIDList");
 
-                TargetIDs.AddRange(ShellItemFactory.ParseIdList(rawBytes, index, index + idListSize, codepage, errors));
+                TargetIDs.AddRange(IdList.Parse(rawBytes, index, index + idListSize, codepage, errors));
 
                 //TODO tie back extra block for SpecialFolderDataBlock and KnownFolderDataBlock??
 
@@ -444,7 +445,7 @@ public class LnkFile
         }
     }
 
-    public List<ShellBag> TargetIDs { get; }
+    public List<IShellBag> TargetIDs { get; }
     public List<ExtraDataBase> ExtraBlocks { get; }
 
 

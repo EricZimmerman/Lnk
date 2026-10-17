@@ -12,10 +12,17 @@ public class ShellBagDamaged : ShellBag
     public ShellBagDamaged(byte[] rawBytes, string errorMessage)
     {
         ExtensionBlocks = new List<IExtensionBlock>();
+        ChildShellBags = new List<IShellBag>();
+        BagPath = string.Empty;
+        Slot = -1;
+        MruPosition = -1;
+        InternalId = System.Guid.NewGuid().ToString();
+        HexValue = rawBytes;
         RawBytes = rawBytes;
         ErrorMessage = errorMessage;
         ItemType = rawBytes != null && rawBytes.Length > 2 ? rawBytes[2] : (byte)0;
         FriendlyName = "Damaged or unsupported shell item";
+        ShellBagType = Utils.ShellBagTypes.ParseError;
         Value = $"Type 0x{ItemType:X2}, {rawBytes?.Length ?? 0} bytes: {errorMessage}";
     }
 
