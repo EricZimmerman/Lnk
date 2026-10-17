@@ -517,4 +517,64 @@ public class SpecComplianceTests
         // "Web Folders" GUID) that used to be read as a control panel category and reported as truncated.
         withErrors.Should().BeEmpty(string.Join(Environment.NewLine, withErrors));
     }
+
+    [Test]
+    public void TextModeCopiesAreReportedAsSuch()
+    {
+        // Issues #43: files copied in text mode have a CR before every LF byte, which moves everything after it
+        static byte[] TextMode(byte[] b) => b.SelectMany(t => t == 0x0A ? new byte[] { 0x0D, 0x0A } : new[] { t }).ToArray();
+
+        var files = Directory.GetFiles(TestMain.BasePath, "*", SearchOption.AllDirectories)
+            .Where(t => !t.Contains($"{Path.DirectorySeparatorChar}Bad{Path.DirectorySeparatorChar}"))
+            .Select(t => File.ReadAllBytes(t))
+            .Where(t => t.Length > 0x4C && t.Contains((byte) 0x0A) && t[0] == 0x4C)
+            .Where(t =>
+            {
+                try
+                {
+                    return new LnkFile(t).ParseErrors.Count == 0;
+                }
+                catch (LnkParseException)
+                {
+                    return false;
+                }
+            })
+            .ToList();
+        files.Count.Should().BeGreaterThan(50);
+
+        var reported = 0;
+        foreach (var damaged in files.Select(TextMode))
+        {
+            string note;
+            try
+            {
+                note = new LnkFile(damaged).ParseErrors.SingleOrDefault(t => t.Contains("converted to text mode"));
+            }
+            catch (LnkParseException e)
+            {
+                note = e.Message.Contains("converted to text mode") ? e.Message : null;
+            }
+
+            if (note != null)
+            {
+                reported += 1;
+                note.Should().Contain("CR (0x0D) before it");
+            }
+        }
+
+        // a CR in a place where it changes nothing (a name, a time) gives no error to explain
+        reported.Should().BeGreaterThan(files.Count * 3 / 4);
+
+        // a CR LF in a file that parses is not reported, nor is damage the CRs don't explain
+        new LnkFile(files[0]).ParseErrors.Should().BeEmpty();
+        var both = TextMode(files[0]).Concat(new byte[] { 0x0A }).ToArray();
+        try
+        {
+            new LnkFile(both).ParseErrors.Should().NotContain(t => t.Contains("text mode"));
+        }
+        catch (LnkParseException e)
+        {
+            e.Message.Should().NotContain("text mode");
+        }
+    }
 }

@@ -31,7 +31,11 @@ public class LnkFile
     ///     Parses LNK data read from <paramref name="sourceFile" />. The file's own timestamps are recorded in
     ///     <see cref="SourceCreated" />, <see cref="SourceModified" /> and <see cref="SourceAccessed" /> when it exists.
     /// </summary>
-    public LnkFile(byte[] rawBytes, string sourceFile, int codepage = 1252)
+    public LnkFile(byte[] rawBytes, string sourceFile, int codepage = 1252) : this(rawBytes, sourceFile, codepage, true)
+    {
+    }
+
+    private LnkFile(byte[] rawBytes, string sourceFile, int codepage, bool checkTextMode)
     {
         if (rawBytes == null)
         {
@@ -205,12 +209,76 @@ public class LnkFile
             {
                 errors.AddRange(vista.ParseErrors.Select(e => $"VistaAndAboveIDListDataBlock: {e}"));
             }
+
+            var textMode = errors.Count > 0 && checkTextMode ? DescribeTextModeDamage(rawBytes, codepage) : null;
+            if (textMode != null)
+            {
+                errors.Add(textMode);
+            }
         }
         catch (Exception ex)
         {
-            throw new LnkParseException($"Error processing file ({sourceFile ?? "(raw data)"}) - the error was ({ex.Message})",
+            var textMode = checkTextMode ? DescribeTextModeDamage(rawBytes, codepage) : null;
+            throw new LnkParseException($"Error processing file ({sourceFile ?? "(raw data)"}) - the error was ({ex.Message})" +
+                                        (textMode == null ? "" : $". {textMode}"),
                 (ex as LnkParseException)?.Offset ?? -1, (ex as LnkParseException)?.Field, ex);
         }
+    }
+
+    /// <summary>
+    ///     A file copied in text mode (an ASCII mode FTP transfer, some download and mail tools) gets a CR (0x0D) put
+    ///     before every LF (0x0A) byte, which moves everything after the first one (Issues #43). Returns a note saying so
+    ///     when that explains the problems: there are CR LF pairs, no LF without a CR, and the data parses without errors
+    ///     once those CRs are removed. Otherwise null. The data itself is still reported as it is.
+    /// </summary>
+    private static string DescribeTextModeDamage(byte[] rawBytes, int codepage)
+    {
+        var pairs = 0;
+        for (var i = 0; i < rawBytes.Length; i++)
+        {
+            if (rawBytes[i] != 0x0A)
+            {
+                continue;
+            }
+
+            if (i == 0 || rawBytes[i - 1] != 0x0D)
+            {
+                return null;
+            }
+
+            pairs += 1;
+        }
+
+        if (pairs == 0)
+        {
+            return null;
+        }
+
+        var repaired = new List<byte>(rawBytes.Length - pairs);
+        for (var i = 0; i < rawBytes.Length; i++)
+        {
+            if (rawBytes[i] == 0x0D && i + 1 < rawBytes.Length && rawBytes[i + 1] == 0x0A)
+            {
+                continue;
+            }
+
+            repaired.Add(rawBytes[i]);
+        }
+
+        try
+        {
+            if (new LnkFile(repaired.ToArray(), null, codepage, false).ParseErrors.Count > 0)
+            {
+                return null;
+            }
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+
+        var lf = pairs == 1 ? "its LF (0x0A) byte has a CR (0x0D) before it, and with that CR byte" : $"each of its {pairs:N0} LF (0x0A) bytes has a CR (0x0D) before it, and with those CR bytes";
+        return $"The file appears to have been converted to text mode (for example by an ASCII mode FTP transfer): {lf} removed it parses without errors. The file was damaged before it was parsed";
     }
 
     private static DateTimeOffset? NullIf1601(DateTime utc)

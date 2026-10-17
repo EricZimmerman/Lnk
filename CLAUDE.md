@@ -42,6 +42,7 @@ Entry points: `Lnk.LoadFile(path, codepage)` (validates size/header signature, r
 - Trailing data after the ExtraData terminal block is recorded (`TrailingDataSize`, `ExtraDataTerminated`) and reported in `ParseErrors` — attackers use it to smuggle payloads.
 - StringData is never truncated (long padded `Arguments` is a known evasion technique); counts are unsigned 16-bit character counts.
 - Use the bounds-checked readers in `Helpers` (`ReadUInt16/32`, `ReadGuid`, `Slice`, `EnsureRange`, `ReadAnsiZ/ReadUnicodeZ`, optional `limit` to keep reads inside a sub-structure) instead of raw `BitConverter` on untrusted offsets, so failures produce `LnkParseException` with a field name and oversized length fields can't trigger huge allocations.
+- Text mode copies (a CR put before every LF byte, Issues #43): when the file throws or has `ParseErrors`, has CR LF pairs and no lone LF, and parses without errors once those CRs are removed, a note saying the file was converted to text mode is added to the exception message or `ParseErrors`. The data is still parsed as it is, never repaired.
 - Header timestamps that are out of range become `DateTimeOffset.MinValue` and are reported, without affecting the other timestamps.
 
 ## Tests
