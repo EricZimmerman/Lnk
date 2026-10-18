@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using ExtensionBlocks;
 
@@ -41,7 +41,8 @@ public class PropertyStoreDataBlock : ExtraDataBase
                     var prefix = $"{prop.GUID}\\{propertyName.Key}".PadRight(43);
 
                     var suffix =
-                        $"{Utils.GetDescriptionFromGuidAndKey(prop.GUID, int.Parse(propertyName.Key))}"
+                        //named sheets have the name as the key (int.Parse threw, and ToString with it)
+                        $"{(int.TryParse(propertyName.Key, out var key) ? Utils.GetDescriptionFromGuidAndKey(prop.GUID, key) : propertyName.Key)}"
                             .PadRight(35);
 
                     sb.AppendLine($"{prefix} {suffix} ==> {propertyName.Value}");
