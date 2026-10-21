@@ -22,6 +22,8 @@ Tests use NUnit 5 + FluentAssertions 7 (pinned to `[7.2.2,8.0.0)`, since 8.x nee
 
 Versioning: bare CalVer tags like `2026.10.6` drive the package version (MinVer); there is no `<Version>` in `Lnk/Lnk.csproj`. To release: push to `master`, then `git tag <ver> && git push origin <ver> && gh release create <ver> --verify-tag --generate-notes`. CI (`.github/workflows/publish.yml`, identical to GuidMapping's) packs, validates, tests, and pushes to NuGet on GitHub release using trusted publishing (`NuGet/login` with the `NUGET_USER` repo variable).
 
+`Directory.Build.props`: pdbs are embedded in the assemblies (`DebugType` embedded, `EmbedUntrackedSources`) and Release builds set `ContinuousIntegrationBuild` (source paths `/_/...`, not this machine's), so stack traces (Exceptionless) have file and line numbers and no .pdb file ships; the nupkg's dll carries the pdb, so there is no .snupkg. Don't add `DebugType`, `IncludeSymbols` or `SymbolPackageFormat` to project files.
+
 ## Architecture
 
 Entry points: `Lnk.LoadFile(path, codepage)` (validates size/header signature, reads bytes) and the `LnkFile(byte[] ...)` constructors (used directly for carved data / jump list entries; `SourceFile` and `Source*` timestamps are null then).
