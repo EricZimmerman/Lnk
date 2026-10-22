@@ -3,7 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyTitle>Lnk.Test</AssemblyTitle>
     <Product>Lnk.Test</Product>
-    <Copyright>Eric Zimmerman</Copyright>
+    <Copyright>Eric R. Zimmerman 2027</Copyright>
     <LangVersion>10</LangVersion>
   </PropertyGroup>
   <ItemGroup>
