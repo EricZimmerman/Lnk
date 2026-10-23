@@ -26,7 +26,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="ExtensionBlocks" Version="2026.10.7" />
+    <PackageReference Include="ExtensionBlocks" Version="2026.10.8" />
     <PackageReference Include="GuidMapping" Version="2026.10.2" />
     <PackageReference Include="MinVer" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
